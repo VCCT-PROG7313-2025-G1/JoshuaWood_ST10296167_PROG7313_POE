@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/welcomeFragment">
+
+    <fragment
+        android:id="@+id/welcomeFragment"
+        android:name="com.dreamteam.rand.ui.auth.WelcomeFragment"
+        android:label="WelcomeFragment">
+        <action
+            android:id="@+id/action_welcome_to_signIn"
+            app:destination="@id/signInFragment" />
+        <action
+            android:id="@+id/action_welcome_to_signUp"
+            app:destination="@id/signUpFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/signInFragment"
+        android:name="com.dreamteam.rand.ui.auth.SignInFragment"
+        android:label="SignInFragment">
+        <action
+            android:id="@+id/action_signIn_to_dashboard"
+            app:destination="@id/dashboardFragment"
+            app:popUpTo="@id/welcomeFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_signIn_to_forgotPassword"
+            app:destination="@id/forgotPasswordFragment" />
+        <action
+            android:id="@+id/action_signIn_to_signUp"
+            app:destination="@id/signUpFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/signUpFragment"
+        android:name="com.dreamteam.rand.ui.auth.SignUpFragment"
+        android:label="SignUpFragment">
+        <action
+            android:id="@+id/action_signUp_to_dashboard"
+            app:destination="@id/dashboardFragment"
+            app:popUpTo="@id/welcomeFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/forgotPasswordFragment"
+        android:name="com.dreamteam.rand.ui.auth.ForgotPasswordFragment"
+        android:label="ForgotPasswordFragment" />
+
+    <fragment
+        android:id="@+id/dashboardFragment"
+        android:name="com.dreamteam.rand.ui.dashboard.DashboardFragment"
+        android:label="DashboardFragment">
+        <action
+            android:id="@+id/action_dashboard_to_transactions"
+            app:destination="@id/transactionsFragment" />
+        <action
+            android:id="@+id/action_dashboard_to_budget"
+            app:destination="@id/budgetFragment" />
+        <action
+            android:id="@+id/action_dashboard_to_savings"
+            app:destination="@id/savingsFragment" />
+        <action
+            android:id="@+id/action_dashboard_to_profile"
+            app:destination="@id/profileFragment" />
+        <action
+            android:id="@+id/action_dashboard_to_settings"
+            app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_dashboard_to_welcome"
+            app:destination="@id/welcomeFragment"
+            app:popUpTo="@id/welcomeFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_dashboard_to_addTransaction"
+            app:destination="@id/addTransactionFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/transactionsFragment"
+        android:name="com.dreamteam.rand.ui.transactions.TransactionsFragment"
+        android:label="TransactionsFragment" />
+
+    <fragment
+        android:id="@+id/budgetFragment"
+        android:name="com.dreamteam.rand.ui.budget.BudgetFragment"
+        android:label="BudgetFragment" />
+
+    <fragment
+        android:id="@+id/savingsFragment"
+        android:name="com.dreamteam.rand.ui.savings.SavingsFragment"
+        android:label="SavingsFragment" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.dreamteam.rand.ui.profile.ProfileFragment"
+        android:label="ProfileFragment">
+        <action
+            android:id="@+id/action_profile_to_welcome"
+            app:destination="@id/welcomeFragment"
+            app:popUpTo="@id/welcomeFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.dreamteam.rand.ui.settings.SettingsFragment"
+        android:label="SettingsFragment">
+        <action
+            android:id="@+id/action_settings_to_welcome"
+            app:destination="@id/welcomeFragment"
+            app:popUpTo="@id/welcomeFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addTransactionFragment"
+        android:name="com.dreamteam.rand.ui.transactions.AddTransactionFragment"
+        android:label="AddTransactionFragment" />
+
+</navigation> 
