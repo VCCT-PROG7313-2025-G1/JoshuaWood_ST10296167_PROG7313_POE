@@ -1,6 +1,7 @@
 package com.dreamteam.rand.ui.auth
 
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -17,10 +18,37 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _error = MutableLiveData<String>()
     val error: LiveData<String> = _error
+    
+    private val sharedPreferences = application.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
 
     init {
         val userDao = RandDatabase.getDatabase(application).userDao()
         userRepository = UserRepository(userDao)
+        
+        // Check if user is already logged in
+        checkForSavedUser()
+    }
+    
+    private fun checkForSavedUser() {
+        val savedUserId = sharedPreferences.getString("user_id", null)
+        val savedEmail = sharedPreferences.getString("user_email", null)
+        
+        if (savedUserId != null && savedEmail != null) {
+            viewModelScope.launch {
+                try {
+                    val result = userRepository.getUserByUid(savedUserId)
+                    result.onSuccess { user ->
+                        _currentUser.value = user
+                    }.onFailure { exception ->
+                        // If there's an issue loading the user, log the error but don't clear preferences
+                        _error.value = "Failed to load user data: ${exception.message}"
+                    }
+                } catch (e: Exception) {
+                    // Only clear preferences if there's a serious issue like database corruption
+                    _error.value = "Error: ${e.message}"
+                }
+            }
+        }
     }
 
     fun registerUser(name: String, email: String, password: String) {
@@ -28,6 +56,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             val result = userRepository.registerUser(name, email, password)
             result.onSuccess { user ->
                 _currentUser.value = user
+                saveUserToPreferences(user)
             }.onFailure { exception ->
                 _error.value = exception.message
             }
@@ -39,9 +68,26 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             val result = userRepository.loginUser(email, password)
             result.onSuccess { user ->
                 _currentUser.value = user
+                saveUserToPreferences(user)
             }.onFailure { exception ->
                 _error.value = exception.message
             }
+        }
+    }
+    
+    private fun saveUserToPreferences(user: User) {
+        sharedPreferences.edit().apply {
+            putString("user_id", user.uid)
+            putString("user_email", user.email)
+            apply()
+        }
+    }
+    
+    private fun clearUserPreferences() {
+        sharedPreferences.edit().apply {
+            remove("user_id")
+            remove("user_email")
+            apply()
         }
     }
 
@@ -104,5 +150,6 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     fun logoutUser() {
         _currentUser.value = null
+        clearUserPreferences()
     }
 } 
