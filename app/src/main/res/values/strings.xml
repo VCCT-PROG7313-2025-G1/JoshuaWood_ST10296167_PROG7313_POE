@@ -38,9 +38,9 @@
     <!-- Dashboard -->
     <string name="welcome_message">Welcome back, %s!</string>
     <string name="budget_progress">%s of %s</string>
-    <string name="no_transactions">No transactions yet</string>
-    <string name="recent_transactions">Recent Transactions</string>
-    <string name="add_transaction">Add Transaction</string>
+    <string name="no_expenses">No expenses yet</string>
+    <string name="recent_transactions">Recent Expenses</string>
+    <string name="add_expense">Add Expense</string>
     <string name="total_balance">Total Balance</string>
     <string name="monthly_budget">Monthly Budget</string>
 </resources>

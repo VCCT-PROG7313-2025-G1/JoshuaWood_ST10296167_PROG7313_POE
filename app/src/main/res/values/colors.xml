@@ -14,6 +14,7 @@
     <color name="background">#FFFFFF</color>
     <color name="surface">#FFFFFF</color>
     <color name="error">#B00020</color>
+    <color name="grey">#757575</color>
     
     <!-- Text colors -->
     <color name="on_primary">#FFFFFF</color>
