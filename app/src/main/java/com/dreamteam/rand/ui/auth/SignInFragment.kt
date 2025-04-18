@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.dreamteam.rand.R
 import com.dreamteam.rand.databinding.FragmentSignInBinding
@@ -14,7 +15,8 @@ import com.google.android.material.snackbar.Snackbar
 class SignInFragment : Fragment() {
     private var _binding: FragmentSignInBinding? = null
     private val binding get() = _binding!!
-    private val userViewModel: UserViewModel by viewModels()
+    private val userViewModel: UserViewModel by activityViewModels()
+    private var isLoginInProgress = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -36,6 +38,10 @@ class SignInFragment : Fragment() {
             if (validateInput()) {
                 val email = binding.emailInput.text.toString().trim()
                 val password = binding.passwordInput.text.toString().trim()
+                
+                // Mark login as in progress
+                isLoginInProgress = true
+                
                 userViewModel.loginUser(email, password)
                 
                 // Show loading state
@@ -55,13 +61,21 @@ class SignInFragment : Fragment() {
 
     private fun observeViewModel() {
         userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
-            if (user != null) {
-                findNavController().navigate(R.id.action_signIn_to_dashboard)
+            if (user != null && isLoginInProgress) {
+                // Reset flag first to prevent navigation loops
+                isLoginInProgress = false
+                
+                try {
+                    findNavController().navigate(R.id.action_signIn_to_dashboard)
+                } catch (e: Exception) {
+                    Snackbar.make(binding.root, "Login successful but navigation failed", Snackbar.LENGTH_LONG).show()
+                }
             }
         }
 
         userViewModel.error.observe(viewLifecycleOwner) { errorMessage ->
             errorMessage?.let {
+                isLoginInProgress = false
                 Snackbar.make(binding.root, it, Snackbar.LENGTH_LONG).show()
                 // Reset loading state
                 binding.signInButton.isEnabled = true

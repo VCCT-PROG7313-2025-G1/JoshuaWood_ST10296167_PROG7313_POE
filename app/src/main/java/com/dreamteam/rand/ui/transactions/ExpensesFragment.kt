@@ -5,10 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.dreamteam.rand.databinding.FragmentTransactionsBinding
+import com.dreamteam.rand.databinding.FragmentExpensesBinding
 
-class TransactionsFragment : Fragment() {
-    private var _binding: FragmentTransactionsBinding? = null
+class ExpensesFragment : Fragment() {
+    private var _binding: FragmentExpensesBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -16,7 +16,7 @@ class TransactionsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentTransactionsBinding.inflate(inflater, container, false)
+        _binding = FragmentExpensesBinding.inflate(inflater, container, false)
         return binding.root
     }
 

@@ -152,7 +152,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:gravity="center"
-                            android:text="@string/no_transactions"
+                            android:text="@string/no_expenses"
                             android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
                             android:textColor="?android:textColorSecondary" />
 
@@ -164,7 +164,7 @@
                             android:nestedScrollingEnabled="false"
                             android:visibility="gone"
                             tools:itemCount="3"
-                            tools:listitem="@layout/item_transaction"
+                            tools:listitem="@layout/item_expense"
                             tools:visibility="visible" />
 
                     </LinearLayout>
@@ -176,12 +176,12 @@
         </androidx.core.widget.NestedScrollView>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/addTransactionFab"
+            android:id="@+id/addExpenseFab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
-            android:contentDescription="@string/add_transaction"
+            android:contentDescription="@string/add_expense"
             app:srcCompat="@drawable/ic_add"
             app:tint="@color/white" />
 

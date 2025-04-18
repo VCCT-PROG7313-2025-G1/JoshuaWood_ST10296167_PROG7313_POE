@@ -5,6 +5,7 @@ import android.view.*
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dreamteam.rand.R
@@ -20,7 +21,7 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
 
     private var _binding: FragmentDashboardBinding? = null
     private val binding get() = _binding!!
-    private val userViewModel: UserViewModel by viewModels()
+    private val userViewModel: UserViewModel by activityViewModels()
     private val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.getDefault())
 
     override fun onCreateView(
@@ -60,6 +61,9 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
             R.id.nav_transactions -> {
                 findNavController().navigate(R.id.action_dashboard_to_transactions)
             }
+            R.id.nav_categories -> {
+                findNavController().navigate(R.id.action_dashboard_to_categories)
+            }
             R.id.nav_budget -> {
                 findNavController().navigate(R.id.action_dashboard_to_budget)
             }
@@ -73,8 +77,8 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
                 findNavController().navigate(R.id.action_dashboard_to_settings)
             }
             R.id.nav_logout -> {
+                // Just log out, MainActivity will handle the navigation
                 userViewModel.logoutUser()
-                findNavController().navigate(R.id.action_dashboard_to_welcome)
             }
         }
         binding.drawerLayout.closeDrawer(GravityCompat.START)
@@ -82,7 +86,7 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
     }
 
     private fun setupClickListeners() {
-        binding.addTransactionFab.setOnClickListener {
+        binding.addExpenseFab.setOnClickListener {
             findNavController().navigate(R.id.action_dashboard_to_addTransaction)
         }
     }
@@ -90,7 +94,7 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
     private fun observeUserData() {
         userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
             if (user == null) {
-                findNavController().navigate(R.id.action_dashboard_to_welcome)
+                // Navigation will be handled by the MainActivity observer
                 return@observe
             }
 

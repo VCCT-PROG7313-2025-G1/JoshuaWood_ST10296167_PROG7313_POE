@@ -76,12 +76,15 @@
         <action
             android:id="@+id/action_dashboard_to_addTransaction"
             app:destination="@id/addTransactionFragment" />
+        <action
+            android:id="@+id/action_dashboard_to_categories"
+            app:destination="@id/categoriesFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/transactionsFragment"
-        android:name="com.dreamteam.rand.ui.transactions.TransactionsFragment"
-        android:label="TransactionsFragment" />
+        android:name="com.dreamteam.rand.ui.transactions.ExpensesFragment"
+        android:label="ExpensesFragment" />
 
     <fragment
         android:id="@+id/budgetFragment"
@@ -119,5 +122,19 @@
         android:id="@+id/addTransactionFragment"
         android:name="com.dreamteam.rand.ui.transactions.AddTransactionFragment"
         android:label="AddTransactionFragment" />
+
+    <fragment
+        android:id="@+id/categoriesFragment"
+        android:name="com.dreamteam.rand.ui.categories.CategoriesFragment"
+        android:label="CategoriesFragment">
+        <action
+            android:id="@+id/action_categories_to_addCategory"
+            app:destination="@id/addCategoryFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addCategoryFragment"
+        android:name="com.dreamteam.rand.ui.categories.AddCategoryFragment"
+        android:label="AddCategoryFragment" />
 
 </navigation> 

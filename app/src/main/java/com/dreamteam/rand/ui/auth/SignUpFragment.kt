@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.util.Patterns
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.dreamteam.rand.R
 import com.dreamteam.rand.databinding.FragmentSignUpBinding
@@ -16,7 +17,8 @@ class SignUpFragment : Fragment() {
 
     private var _binding: FragmentSignUpBinding? = null
     private val binding get() = _binding!!
-    private val userViewModel: UserViewModel by viewModels()
+    private val userViewModel: UserViewModel by activityViewModels()
+    private var isRegistrationInProgress = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,6 +42,9 @@ class SignUpFragment : Fragment() {
                 val email = binding.emailInput.text.toString().trim()
                 val password = binding.passwordInput.text.toString().trim()
                 
+                // Mark registration as in progress
+                isRegistrationInProgress = true
+                
                 userViewModel.registerUser(name, email, password)
                 
                 // Show loading state
@@ -55,13 +60,21 @@ class SignUpFragment : Fragment() {
 
     private fun observeViewModel() {
         userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
-            if (user != null) {
-                findNavController().navigate(R.id.action_signUp_to_dashboard)
+            if (user != null && isRegistrationInProgress) {
+                // Reset flag first to prevent navigation loops
+                isRegistrationInProgress = false
+                
+                try {
+                    findNavController().navigate(R.id.action_signUp_to_dashboard)
+                } catch (e: Exception) {
+                    Snackbar.make(binding.root, "Registration successful but navigation failed", Snackbar.LENGTH_LONG).show()
+                }
             }
         }
 
         userViewModel.error.observe(viewLifecycleOwner) { errorMessage ->
             errorMessage?.let {
+                isRegistrationInProgress = false
                 Snackbar.make(binding.root, it, Snackbar.LENGTH_LONG).show()
                 // Reset loading state
                 binding.signUpButton.isEnabled = true
