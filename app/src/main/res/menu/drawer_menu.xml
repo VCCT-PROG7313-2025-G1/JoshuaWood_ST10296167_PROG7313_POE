@@ -12,7 +12,12 @@
         <item
             android:id="@+id/nav_transactions"
             android:icon="@drawable/ic_transactions"
-            android:title="Transactions" />
+            android:title="Expenses" />
+
+        <item
+            android:id="@+id/nav_categories"
+            android:icon="@drawable/ic_category"
+            android:title="Categories" />
 
         <item
             android:id="@+id/nav_budget"
