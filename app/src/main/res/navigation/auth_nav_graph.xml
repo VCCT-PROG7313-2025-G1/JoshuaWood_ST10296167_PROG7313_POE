@@ -22,6 +22,18 @@
     </fragment>
 
     <fragment
+        android:id="@+id/welcomeFragment"
+        android:name="com.dreamteam.rand.ui.auth.WelcomeFragment"
+        android:label="WelcomeFragment">
+        <action
+            android:id="@+id/action_welcome_to_signIn"
+            app:destination="@id/signInFragment" />
+        <action
+            android:id="@+id/action_welcome_to_signUp"
+            app:destination="@id/signUpFragment" />
+    </fragment>
+
+    <fragment
         android:id="@+id/signUpFragment"
         android:name="com.dreamteam.rand.ui.auth.SignUpFragment"
         android:label="SignUpFragment">
@@ -40,6 +52,12 @@
     <fragment
         android:id="@+id/dashboardFragment"
         android:name="com.dreamteam.rand.ui.dashboard.DashboardFragment"
-        android:label="DashboardFragment" />
+        android:label="DashboardFragment">
+        <action
+            android:id="@+id/action_dashboard_to_welcome"
+            app:destination="@id/welcomeFragment"
+            app:popUpTo="@id/dashboardFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
 
 </navigation> 
