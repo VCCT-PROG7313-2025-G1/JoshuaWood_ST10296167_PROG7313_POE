@@ -128,8 +128,8 @@
     </fragment>
 
     <fragment
-        android:id="@+id/addTransactionFragment"
-        android:name="com.dreamteam.rand.ui.transactions.AddTransactionFragment"
+        android:id="@+id/expensesFragment"
+        android:name="com.dreamteam.rand.ui.transactions.ExpensesFragment"
         android:label="AddTransactionFragment" />
 
     <fragment
