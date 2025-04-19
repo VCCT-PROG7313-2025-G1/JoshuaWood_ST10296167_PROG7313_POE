@@ -94,7 +94,16 @@
     <fragment
         android:id="@+id/goalFragment"
         android:name="com.dreamteam.rand.ui.goals.GoalFragment"
-        android:label="GoalFragment" />
+        android:label="GoalFragment" >
+        <action
+            android:id="@+id/action_goal_to_addGoal"
+            app:destination="@id/addGoalFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addGoalFragment"
+        android:name="com.dreamteam.rand.ui.goals.AddGoalFragment"
+        android:label="AddGoalFragment" />
 
     <fragment
         android:id="@+id/profileFragment"

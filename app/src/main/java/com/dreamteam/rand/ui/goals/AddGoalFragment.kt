@@ -8,15 +8,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.dreamteam.rand.R
 import com.dreamteam.rand.data.RandDatabase
 import com.dreamteam.rand.data.repository.GoalRepository
-import com.dreamteam.rand.databinding.FragmentGoalBinding
+import com.dreamteam.rand.databinding.FragmentAddGoalBinding
 import com.dreamteam.rand.ui.auth.UserViewModel
 
-class GoalFragment : Fragment() {
+class AddGoalFragment : Fragment() {
 
-    private var _binding: FragmentGoalBinding? = null
+    private var _binding: FragmentAddGoalBinding? = null
     private val binding get() = _binding!!
 
     private val userViewModel: UserViewModel by activityViewModels()
@@ -31,36 +30,18 @@ class GoalFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentGoalBinding.inflate(inflater, container, false)
+        _binding = FragmentAddGoalBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupToolbar()
-        setupClickListeners()
-        observeViewModel()
-    }
-
-    private fun setupClickListeners() {
-        binding.addGoalFab.setOnClickListener {
-            findNavController().navigate(R.id.action_goal_to_addGoal)
-        }
     }
 
     private fun setupToolbar() {
         binding.toolbar.setNavigationOnClickListener {
             findNavController().navigateUp()
-        }
-    }
-
-    private fun observeViewModel() {
-        userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
-            if (user == null) {
-                findNavController().navigate(R.id.action_dashboard_to_welcome)
-                return@observe
-            }
-            // Future: Load and display goals using goalViewModel
         }
     }
 
