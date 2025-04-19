@@ -19,7 +19,7 @@ class GoalRepository(private val goalDao: GoalDao) {
         return goalDao.getGoal(id)
     }
     
-    suspend fun createGoal(goal: Goal): Long {
+    suspend fun insertGoal(goal: Goal): Long {
         return goalDao.insertGoal(goal)
     }
     
