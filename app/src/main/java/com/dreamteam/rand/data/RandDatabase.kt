@@ -13,7 +13,8 @@ import com.dreamteam.rand.data.entity.*
         User::class,
         Transaction::class,
         Category::class,
-        SavingsGoal::class,
+        // TODO: uncomment when goal is implemented
+        // Goal::class,
         Achievement::class,
         Budget::class,
         BudgetCategory::class
@@ -26,7 +27,8 @@ abstract class RandDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun transactionDao(): TransactionDao
     abstract fun categoryDao(): CategoryDao
-    abstract fun savingsGoalDao(): SavingsGoalDao
+    // TODO: uncomment when goal is implemented
+    // abstract fun goalDao(): GoalDao
     abstract fun achievementDao(): AchievementDao
     abstract fun budgetDao(): BudgetDao
 

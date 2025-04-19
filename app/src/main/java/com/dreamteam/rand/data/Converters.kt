@@ -1,7 +1,6 @@
 package com.dreamteam.rand.data
 
 import androidx.room.TypeConverter
-import com.dreamteam.rand.data.entity.GoalStatus
 import com.dreamteam.rand.data.entity.TransactionType
 import java.util.Date
 
@@ -26,13 +25,4 @@ class Converters {
         return TransactionType.valueOf(value)
     }
 
-    @TypeConverter
-    fun fromGoalStatus(value: GoalStatus): String {
-        return value.name
-    }
-
-    @TypeConverter
-    fun toGoalStatus(value: String): GoalStatus {
-        return GoalStatus.valueOf(value)
-    }
 } 

@@ -61,7 +61,7 @@
             app:destination="@id/budgetFragment" />
         <action
             android:id="@+id/action_dashboard_to_savings"
-            app:destination="@id/savingsFragment" />
+            app:destination="@id/goalFragment" />
         <action
             android:id="@+id/action_dashboard_to_profile"
             app:destination="@id/profileFragment" />
@@ -92,9 +92,9 @@
         android:label="BudgetFragment" />
 
     <fragment
-        android:id="@+id/savingsFragment"
-        android:name="com.dreamteam.rand.ui.savings.SavingsFragment"
-        android:label="SavingsFragment" />
+        android:id="@+id/goalFragment"
+        android:name="com.dreamteam.rand.ui.goals.GoalFragment"
+        android:label="GoalFragment" />
 
     <fragment
         android:id="@+id/profileFragment"

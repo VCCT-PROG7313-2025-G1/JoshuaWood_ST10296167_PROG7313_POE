@@ -14,7 +14,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="@drawable/ic_back"
-            app:title="Savings Goals"
+            app:title="Goals"
             app:titleTextColor="@color/white" />
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -46,7 +46,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Total Savings"
+                        android:text="Goals Overview"
                         android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
                         android:textStyle="bold" />
 
@@ -54,7 +54,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Savings goals coming soon"
+                        android:text="Goals feature coming soon"
                         android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
 
                 </LinearLayout>
@@ -71,7 +71,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:contentDescription="Add savings goal"
+        android:contentDescription="Add goal"
         app:srcCompat="@drawable/ic_add"
         app:tint="@color/white" />
 
