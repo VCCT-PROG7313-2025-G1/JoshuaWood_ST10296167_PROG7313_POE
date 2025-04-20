@@ -22,11 +22,14 @@ data class Goal(
     val id: Long = 0,
     val userId: String,
     val name: String,
-    val monthYear: Long,
+    val month: Int, // 1-12
+    val year: Int,  // e.g., 2025
     val minAmount: Double,
     val maxAmount: Double,
     val currentSpent: Double = 0.0,
-    val spendingStatus: GoalSpendingStatus = GoalSpendingStatus.ON_TRACK,
+    val spendingStatus: GoalSpendingStatus = if (currentSpent < minAmount) GoalSpendingStatus.BELOW_MINIMUM 
+        else if (currentSpent > maxAmount) GoalSpendingStatus.OVER_BUDGET 
+        else GoalSpendingStatus.ON_TRACK,
     val color: String,
     val createdAt: Long
 )

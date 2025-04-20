@@ -75,7 +75,7 @@
             app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_dashboard_to_addTransaction"
-            app:destination="@id/addTransactionFragment" />
+            app:destination="@id/expensesFragment" />
         <action
             android:id="@+id/action_dashboard_to_categories"
             app:destination="@id/categoriesFragment" />

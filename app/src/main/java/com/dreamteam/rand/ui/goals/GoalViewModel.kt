@@ -4,61 +4,57 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.dreamteam.rand.data.entity.Goal
 import com.dreamteam.rand.data.entity.GoalSpendingStatus
 import com.dreamteam.rand.data.repository.GoalRepository
 import kotlinx.coroutines.launch
-import java.util.Date
 
-class GoalViewModel(private val repository: GoalRepository) : ViewModel() {
-    private val _saveSuccess = MutableLiveData<Boolean>()
-    val saveSuccess: LiveData<Boolean> = _saveSuccess
+class GoalViewModel(
+    private val repository: GoalRepository
+) : ViewModel() {
 
-    fun getGoals(userId: String) = repository.getGoals(userId).asLiveData()
-
-    fun getGoalsByMonth(userId: String, monthYear: Long) = 
-        repository.getGoalsByMonth(userId, monthYear).asLiveData()
-
-    suspend fun getGoal(id: Long) = repository.getGoal(id)
+    private val _saveSuccess = MutableLiveData<Boolean?>()
+    val saveSuccess: LiveData<Boolean?> = _saveSuccess
 
     fun saveGoal(
-        userId: String, 
-        name: String, 
-        monthYear: Long,
+        userId: String,
+        name: String,
+        month: Int,
+        year: Int,
         minAmount: Double,
         maxAmount: Double,
         color: String
     ) {
         viewModelScope.launch {
-            val goal = Goal(
-                userId = userId,
-                name = name,
-                monthYear = monthYear,
-                minAmount = minAmount,
-                maxAmount = maxAmount,
-                currentSpent = 0.0,
-                spendingStatus = GoalSpendingStatus.ON_TRACK,
-                color = color,
-                createdAt = Date().time
-            )
-            
-            val result = repository.insertGoal(goal)
-            _saveSuccess.postValue(result > 0)
+            try {
+                val currentSpent = 0.0
+                val goal = Goal(
+                    userId = userId,
+                    name = name,
+                    month = month,
+                    year = year,
+                    minAmount = minAmount,
+                    maxAmount = maxAmount,
+                    currentSpent = currentSpent,
+                    spendingStatus = GoalSpendingStatus.BELOW_MINIMUM, // Initialize as BELOW_MINIMUM since currentSpent is 0
+                    color = color,
+                    createdAt = System.currentTimeMillis()
+                )
+                val goalId = repository.insertGoal(goal)
+                _saveSuccess.value = goalId > 0
+            } catch (e: Exception) {
+                _saveSuccess.value = false
+            }
         }
     }
 
-    fun deleteGoal(goal: Goal) {
-        viewModelScope.launch {
-            repository.deleteGoal(goal)
-        }
+    fun getGoalsByMonthAndYear(userId: String, month: Int, year: Int): LiveData<List<Goal>> {
+        return repository.getGoalsByMonthAndYear(userId, month, year)
     }
 
-    fun updateSpentAmount(goalId: Long, newSpentAmount: Double) {
-        viewModelScope.launch {
-            repository.updateSpentAmount(goalId, newSpentAmount)
-        }
+    fun getAllGoalsOrdered(userId: String): LiveData<List<Goal>> {
+        return repository.getAllGoalsOrdered(userId)
     }
 
     fun resetSaveStatus() {

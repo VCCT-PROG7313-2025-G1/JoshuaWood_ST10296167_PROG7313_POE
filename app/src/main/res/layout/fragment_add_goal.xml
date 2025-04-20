@@ -63,20 +63,23 @@
 
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- Month Input -->
+                    <!-- Month Input - Updated for MaterialDatePicker -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/monthLayout"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:hint="Month">
+                        android:hint="Select Month and Year"
+                        app:endIconDrawable="@drawable/ic_settings"
+                        app:endIconMode="custom">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/monthInput"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="date"
+                            android:focusable="false"
+                            android:inputType="none"
                             android:maxLines="1" />
 
                     </com.google.android.material.textfield.TextInputLayout>
