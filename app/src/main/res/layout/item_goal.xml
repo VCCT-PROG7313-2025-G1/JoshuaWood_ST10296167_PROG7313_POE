@@ -103,7 +103,7 @@
                 android:layout_marginTop="16dp"
                 tools:text="On Track"
                 tools:chipBackgroundColor="@color/green_light"
-                tools:textColor="@color/green" />
+                tools:textColor="@color/progress_green" />
 
         </LinearLayout>
     </LinearLayout>

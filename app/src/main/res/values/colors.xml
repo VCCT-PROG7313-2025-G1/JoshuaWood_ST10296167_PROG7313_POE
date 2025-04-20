@@ -30,7 +30,7 @@
     <color name="ripple">#1F000000</color>
 
    <!-- progress bar colors-->
-    <color name="progress_yellow">#FFD600</color>
+    <color name="progress_blue">#2196F3</color>
     <color name="progress_green">#4CAF50</color>
     <color name="progress_red">#F44336</color>
     

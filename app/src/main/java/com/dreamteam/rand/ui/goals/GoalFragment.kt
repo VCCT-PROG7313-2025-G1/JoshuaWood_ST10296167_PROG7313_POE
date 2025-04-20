@@ -10,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dreamteam.rand.R
+import com.dreamteam.rand.data.entity.Goal
 import com.dreamteam.rand.data.RandDatabase
 import com.dreamteam.rand.data.repository.GoalRepository
 import com.dreamteam.rand.databinding.FragmentGoalBinding
@@ -53,13 +54,24 @@ class GoalFragment : Fragment() {
 
     private fun setupRecyclerView() {
         goalAdapter = GoalAdapter { goal ->
-            // Edit goal functionality will be implemented later
+            showDeleteConfirmationDialog(goal)
         }
 
         binding.goalsRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = goalAdapter
         }
+    }
+
+    private fun showDeleteConfirmationDialog(goal: Goal) {
+        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("Delete Goal")
+            .setMessage("Are you sure you want to delete '${goal.name}'?")
+            .setPositiveButton("Delete") { _, _ ->
+                goalViewModel.deleteGoal(goal)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun setupClickListeners() {

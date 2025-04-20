@@ -14,7 +14,7 @@ import com.dreamteam.rand.databinding.ItemGoalBinding
 import java.text.SimpleDateFormat
 import java.util.*
 
-class GoalAdapter(private val onEditClick: (Goal) -> Unit) :
+class GoalAdapter(private val onDeleteClick: (Goal) -> Unit) :
     ListAdapter<Goal, GoalAdapter.GoalViewHolder>(GoalDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GoalViewHolder {
@@ -68,7 +68,7 @@ class GoalAdapter(private val onEditClick: (Goal) -> Unit) :
             when (goal.spendingStatus) {
                 GoalSpendingStatus.BELOW_MINIMUM -> {
                     binding.statusChip.text = "Below Minimum"
-                    binding.statusChip.setTextColor(ContextCompat.getColor(context, R.color.progress_yellow))
+                    binding.statusChip.setTextColor(ContextCompat.getColor(context, R.color.progress_blue))
                 }
                 GoalSpendingStatus.ON_TRACK -> {
                     binding.statusChip.text = "On Track"
@@ -80,9 +80,9 @@ class GoalAdapter(private val onEditClick: (Goal) -> Unit) :
                 }
             }
 
-            // Set edit button click listener
+            // Set delete button click listener
             binding.editButton.setOnClickListener {
-                onEditClick(goal)
+                onDeleteClick(goal)
             }
         }
     }

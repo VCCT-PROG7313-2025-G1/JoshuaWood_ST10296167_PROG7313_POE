@@ -49,6 +49,16 @@ class GoalViewModel(
         }
     }
 
+    fun deleteGoal(goal: Goal) {
+        viewModelScope.launch {
+            try {
+                repository.deleteGoal(goal)
+            } catch (e: Exception) {
+                // Handle error if needed
+            }
+        }
+    }
+
     fun getGoalsByMonthAndYear(userId: String, month: Int, year: Int): LiveData<List<Goal>> {
         return repository.getGoalsByMonthAndYear(userId, month, year)
     }
