@@ -75,7 +75,7 @@
             app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_dashboard_to_addTransaction"
-            app:destination="@id/addTransactionFragment" />
+            app:destination="@id/expensesFragment" />
         <action
             android:id="@+id/action_dashboard_to_categories"
             app:destination="@id/categoriesFragment" />
@@ -94,7 +94,16 @@
     <fragment
         android:id="@+id/goalFragment"
         android:name="com.dreamteam.rand.ui.goals.GoalFragment"
-        android:label="GoalFragment" />
+        android:label="GoalFragment" >
+        <action
+            android:id="@+id/action_goal_to_addGoal"
+            app:destination="@id/addGoalFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addGoalFragment"
+        android:name="com.dreamteam.rand.ui.goals.AddGoalFragment"
+        android:label="AddGoalFragment" />
 
     <fragment
         android:id="@+id/profileFragment"
@@ -119,8 +128,8 @@
     </fragment>
 
     <fragment
-        android:id="@+id/addTransactionFragment"
-        android:name="com.dreamteam.rand.ui.transactions.AddTransactionFragment"
+        android:id="@+id/expensesFragment"
+        android:name="com.dreamteam.rand.ui.transactions.ExpensesFragment"
         android:label="AddTransactionFragment" />
 
     <fragment

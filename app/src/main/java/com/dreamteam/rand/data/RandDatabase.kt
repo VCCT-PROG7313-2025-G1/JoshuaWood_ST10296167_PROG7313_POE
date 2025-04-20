@@ -13,13 +13,12 @@ import com.dreamteam.rand.data.entity.*
         User::class,
         Transaction::class,
         Category::class,
-        // TODO: uncomment when goal is implemented
-        // Goal::class,
+        Goal::class,
         Achievement::class,
         Budget::class,
         BudgetCategory::class
     ],
-    version = 1,
+    version = 3,  // changed from 1 to 3 after 2 db schema changes
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -27,8 +26,7 @@ abstract class RandDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun transactionDao(): TransactionDao
     abstract fun categoryDao(): CategoryDao
-    // TODO: uncomment when goal is implemented
-    // abstract fun goalDao(): GoalDao
+    abstract fun goalDao(): GoalDao
     abstract fun achievementDao(): AchievementDao
     abstract fun budgetDao(): BudgetDao
 
@@ -44,10 +42,11 @@ abstract class RandDatabase : RoomDatabase() {
                     "rand_database"
                 )
                 .addCallback(RandDatabaseCallback())
+                .fallbackToDestructiveMigration() // This will recreate tables if no migration found
                 .build()
                 INSTANCE = instance
                 instance
             }
         }
     }
-} 
+}
