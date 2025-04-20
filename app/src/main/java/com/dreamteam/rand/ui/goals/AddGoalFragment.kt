@@ -68,7 +68,7 @@ class AddGoalFragment : Fragment() {
     private fun showMonthYearPicker() {
         val calendar = Calendar.getInstance()
         
-        // Set constraints to only show future dates
+        // Set constraints to only allow users to select future dates
         val constraintsBuilder = CalendarConstraints.Builder()
             .setStart(calendar.timeInMillis)
         
@@ -85,7 +85,7 @@ class AddGoalFragment : Fragment() {
             selectedMonth = selectedDate.get(Calendar.MONTH) + 1 // Calendar months are 0-based
             selectedYear = selectedDate.get(Calendar.YEAR)
             
-            // Format the date to show in the input field (e.g., "January 2025")
+            // Format the date to show in the input field
             val dateFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
             binding.monthInput.setText(dateFormat.format(selectedDate.time))
         }

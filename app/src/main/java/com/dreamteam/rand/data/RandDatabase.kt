@@ -18,7 +18,7 @@ import com.dreamteam.rand.data.entity.*
         Budget::class,
         BudgetCategory::class
     ],
-    version = 3,
+    version = 3,  // changed from 1 to 3 after 2 db schema changes
     exportSchema = false
 )
 @TypeConverters(Converters::class)

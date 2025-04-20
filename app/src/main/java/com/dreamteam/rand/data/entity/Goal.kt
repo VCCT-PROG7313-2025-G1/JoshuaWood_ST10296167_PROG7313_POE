@@ -23,7 +23,7 @@ data class Goal(
     val userId: String,
     val name: String,
     val month: Int, // 1-12
-    val year: Int,  // e.g., 2025
+    val year: Int,
     val minAmount: Double,
     val maxAmount: Double,
     val currentSpent: Double = 0.0,
