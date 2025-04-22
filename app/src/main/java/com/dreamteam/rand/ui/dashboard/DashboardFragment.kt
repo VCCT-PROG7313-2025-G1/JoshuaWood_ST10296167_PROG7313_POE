@@ -73,6 +73,9 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
             R.id.nav_profile -> {
                 findNavController().navigate(R.id.action_dashboard_to_profile)
             }
+            R.id.nav_photo -> {
+                findNavController().navigate(R.id.action_dashboard_to_photo)
+            }
             R.id.nav_settings -> {
                 findNavController().navigate(R.id.action_dashboard_to_settings)
             }
