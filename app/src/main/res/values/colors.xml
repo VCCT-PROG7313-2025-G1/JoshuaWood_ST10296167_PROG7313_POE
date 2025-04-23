@@ -42,4 +42,9 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Accent colors -->
+    <color name="accent">#FF5252</color>
+    <color name="accent_light">#FFECEE</color>
+    <color name="accent_dark">#C50E29</color>
 </resources>
