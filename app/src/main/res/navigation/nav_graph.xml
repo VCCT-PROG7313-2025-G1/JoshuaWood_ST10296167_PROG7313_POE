@@ -79,6 +79,9 @@
         <action
             android:id="@+id/action_dashboard_to_categories"
             app:destination="@id/categoriesFragment" />
+        <action
+            android:id="@+id/action_dashboard_to_photo"
+            app:destination="@id/photoFragment" />
     </fragment>
 
     <fragment
@@ -145,5 +148,10 @@
         android:id="@+id/addCategoryFragment"
         android:name="com.dreamteam.rand.ui.categories.AddCategoryFragment"
         android:label="AddCategoryFragment" />
+
+    <fragment
+        android:id="@+id/photoFragment"
+        android:name="com.dreamteam.rand.ui.photo.PhotoFragment"
+        android:label="PhotoFragment" />
 
 </navigation> 

@@ -43,4 +43,7 @@
     <string name="add_expense">Add Expense</string>
     <string name="total_balance">Total Balance</string>
     <string name="monthly_budget">Monthly Budget</string>
+
+<!--    Photo-->
+    <string name="takes_a_photo">Takes a photo</string>
 </resources>
