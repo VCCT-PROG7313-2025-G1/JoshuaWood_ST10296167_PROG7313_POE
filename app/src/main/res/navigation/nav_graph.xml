@@ -55,7 +55,7 @@
         android:label="DashboardFragment">
         <action
             android:id="@+id/action_dashboard_to_transactions"
-            app:destination="@id/transactionsFragment" />
+            app:destination="@id/expensesFragment" />
         <action
             android:id="@+id/action_dashboard_to_budget"
             app:destination="@id/budgetFragment" />
@@ -75,7 +75,7 @@
             app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_dashboard_to_addTransaction"
-            app:destination="@id/expensesFragment" />
+            app:destination="@id/addExpenseFragment" />
         <action
             android:id="@+id/action_dashboard_to_categories"
             app:destination="@id/categoriesFragment" />
@@ -85,9 +85,13 @@
     </fragment>
 
     <fragment
-        android:id="@+id/transactionsFragment"
-        android:name="com.dreamteam.rand.ui.transactions.ExpensesFragment"
-        android:label="ExpensesFragment" />
+        android:id="@+id/expensesFragment"
+        android:name="com.dreamteam.rand.ui.expenses.ExpensesFragment"
+        android:label="ExpensesFragment">
+        <action
+            android:id="@+id/action_expenses_to_addExpense"
+            app:destination="@id/addExpenseFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/budgetFragment"
@@ -131,9 +135,13 @@
     </fragment>
 
     <fragment
-        android:id="@+id/expensesFragment"
-        android:name="com.dreamteam.rand.ui.transactions.ExpensesFragment"
-        android:label="AddTransactionFragment" />
+        android:id="@+id/addExpenseFragment"
+        android:name="com.dreamteam.rand.ui.expenses.AddExpenseFragment"
+        android:label="AddExpenseFragment">
+        <action
+            android:id="@+id/action_addExpense_to_photo"
+            app:destination="@id/photoFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/categoriesFragment"
