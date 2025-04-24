@@ -14,7 +14,9 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResult
 import androidx.navigation.fragment.findNavController
 import com.dreamteam.rand.databinding.FragmentPhotoBinding
 import com.google.common.util.concurrent.ListenableFuture
@@ -63,14 +65,11 @@ class PhotoFragment : Fragment() {
         // Save photo to expense
         binding.savePhotoButton.setOnClickListener {
             latestPhotoFile?.let { file ->
-                // TODO:
-                // Example: send the path back via FragmentResult API or Navigation args later
-                Toast.makeText(requireContext(), "Photo saved: ${file.absolutePath}", Toast.LENGTH_SHORT).show()
-
-                // This is where you would return to the add expense screen
-                // and send the file path, e.g.:
-                // findNavController().previousBackStackEntry?.savedStateHandle?.set("photoPath", file.absolutePath)
-                // findNavController().navigateUp()
+                // Send result back using Fragment Result API
+                setFragmentResult("photoResult", bundleOf("photoPath" to file.absolutePath))
+                
+                Toast.makeText(requireContext(), "Photo saved", Toast.LENGTH_SHORT).show()
+                findNavController().navigateUp()
             } ?: run {
                 Toast.makeText(requireContext(), "No photo to save", Toast.LENGTH_SHORT).show()
             }
@@ -125,6 +124,8 @@ class PhotoFragment : Fragment() {
                     requireActivity().runOnUiThread {
                         // Preview taken photo
                         binding.imgSavedPhoto.setImageURI(Uri.fromFile(photoFile))
+                        binding.imgSavedPhoto.visibility = View.VISIBLE
+                        binding.savePhotoButton.visibility = View.VISIBLE
                     }
                 }
 
