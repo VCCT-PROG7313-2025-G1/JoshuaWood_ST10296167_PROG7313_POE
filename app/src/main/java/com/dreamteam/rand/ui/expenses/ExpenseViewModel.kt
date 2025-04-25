@@ -50,6 +50,20 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
     fun getExpensesByCategory(userId: String, categoryId: Long) = 
         repository.getExpensesByCategory(userId, categoryId).asLiveData()
 
+    fun getExpensesByCategoryAndDateRange(
+        userId: String,
+        categoryId: Long,
+        startDate: Long?,
+        endDate: Long?
+    ): LiveData<List<Transaction>> {
+        return repository.getTransactionsByCategoryAndDateRange(
+            userId = userId,
+            categoryId = categoryId,
+            startDate = startDate,
+            endDate = endDate
+        ).asLiveData()
+    }
+
     fun saveExpense(userId: String, amount: Double, description: String) {
         viewModelScope.launch {
             // Use direct category ID if available, otherwise fall back to LiveData value

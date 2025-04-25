@@ -32,6 +32,14 @@ interface TransactionDao {
         categoryId: Long
     ): Flow<List<Transaction>>
 
+    @Query("SELECT * FROM transactions WHERE userId = :userId AND categoryId = :categoryId AND date BETWEEN :startDate AND :endDate ORDER BY date DESC")
+    suspend fun getTransactionsByCategoryAndDateRange(
+        userId: String,
+        categoryId: Long,
+        startDate: Long,
+        endDate: Long
+    ): List<Transaction>
+
     @Insert
     suspend fun insertTransaction(transaction: Transaction): Long
 
@@ -53,4 +61,4 @@ interface TransactionDao {
         startDate: Long,
         endDate: Long
     ): Double?
-} 
+}
