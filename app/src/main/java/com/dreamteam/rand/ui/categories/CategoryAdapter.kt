@@ -8,9 +8,21 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dreamteam.rand.data.entity.Category
 import com.dreamteam.rand.databinding.ItemCategoryBinding
+import java.text.NumberFormat
+import java.util.Locale
 
 class CategoryAdapter(private val onEditClick: (Category) -> Unit) :
     ListAdapter<Category, CategoryAdapter.CategoryViewHolder>(CategoryDiffCallback()) {
+
+    private val categoryTotals = mutableMapOf<Long, Double>()
+
+    fun updateCategoryTotal(categoryId: Long, total: Double) {
+        categoryTotals[categoryId] = total
+        // Find the position of the category and notify the change
+        currentList.indexOfFirst { it.id == categoryId }.takeIf { it != -1 }?.let { position ->
+            notifyItemChanged(position)
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryViewHolder {
         val binding = ItemCategoryBinding.inflate(
@@ -22,20 +34,27 @@ class CategoryAdapter(private val onEditClick: (Category) -> Unit) :
     }
 
     override fun onBindViewHolder(holder: CategoryViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        val category = getItem(position)
+        holder.bind(category, categoryTotals[category.id] ?: 0.0)
+        holder.binding.editButton.setOnClickListener {
+            onEditClick(category)
+        }
     }
 
-    inner class CategoryViewHolder(private val binding: ItemCategoryBinding) :
+    inner class CategoryViewHolder(val binding: ItemCategoryBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(category: Category) {
+        fun bind(category: Category, totalSpent: Double) {
             binding.categoryName.text = category.name
+            
+            // Format currency amount
+            val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("en", "ZA"))
+            binding.totalSpentAmount.text = currencyFormatter.format(totalSpent)
 
             // Set color
             try {
                 binding.categoryColorIndicator.setBackgroundColor(Color.parseColor(category.color))
             } catch (e: Exception) {
-                // If color parsing fails, use a default color
                 binding.categoryColorIndicator.setBackgroundColor(Color.GRAY)
             }
 
@@ -49,10 +68,6 @@ class CategoryAdapter(private val onEditClick: (Category) -> Unit) :
             if (iconResId != 0) {
                 binding.categoryIcon.setImageResource(iconResId)
             }
-
-            binding.editButton.setOnClickListener {
-                onEditClick(category)
-            }
         }
     }
 
@@ -62,7 +77,10 @@ class CategoryAdapter(private val onEditClick: (Category) -> Unit) :
         }
 
         override fun areContentsTheSame(oldItem: Category, newItem: Category): Boolean {
-            return oldItem == newItem
+            return oldItem == newItem && 
+                   oldItem.name == newItem.name &&
+                   oldItem.color == newItem.color &&
+                   oldItem.icon == newItem.icon
         }
     }
-} 
+}

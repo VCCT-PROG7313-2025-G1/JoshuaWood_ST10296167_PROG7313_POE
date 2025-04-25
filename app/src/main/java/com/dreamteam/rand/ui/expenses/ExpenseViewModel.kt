@@ -47,6 +47,9 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
 
     fun getExpenses(userId: String) = repository.getExpenses(userId).asLiveData()
 
+    fun getExpensesByCategory(userId: String, categoryId: Long) = 
+        repository.getExpensesByCategory(userId, categoryId).asLiveData()
+
     fun saveExpense(userId: String, amount: Double, description: String) {
         viewModelScope.launch {
             // Use direct category ID if available, otherwise fall back to LiveData value
@@ -116,4 +119,4 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
             throw IllegalArgumentException("Unknown ViewModel class")
         }
     }
-} 
+}

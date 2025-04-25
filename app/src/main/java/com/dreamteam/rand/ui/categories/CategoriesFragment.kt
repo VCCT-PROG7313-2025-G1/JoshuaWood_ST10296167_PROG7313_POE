@@ -13,9 +13,10 @@ import com.dreamteam.rand.R
 import com.dreamteam.rand.data.RandDatabase
 import com.dreamteam.rand.data.entity.TransactionType
 import com.dreamteam.rand.data.repository.CategoryRepository
+import com.dreamteam.rand.data.repository.ExpenseRepository
 import com.dreamteam.rand.databinding.FragmentCategoriesBinding
 import com.dreamteam.rand.ui.auth.UserViewModel
-import com.google.android.material.tabs.TabLayout
+import com.dreamteam.rand.ui.expenses.ExpenseViewModel
 
 class CategoriesFragment : Fragment() {
     private var _binding: FragmentCategoriesBinding? = null
@@ -23,10 +24,17 @@ class CategoriesFragment : Fragment() {
     
     private val userViewModel: UserViewModel by activityViewModels()
     private lateinit var categoryAdapter: CategoryAdapter
+    
     private val categoryViewModel: CategoryViewModel by viewModels {
         val database = RandDatabase.getDatabase(requireContext())
         val repository = CategoryRepository(database.categoryDao())
         CategoryViewModel.Factory(repository)
+    }
+    
+    private val expenseViewModel: ExpenseViewModel by viewModels {
+        val database = RandDatabase.getDatabase(requireContext())
+        val repository = ExpenseRepository(database.transactionDao())
+        ExpenseViewModel.Factory(repository)
     }
 
     override fun onCreateView(
@@ -103,7 +111,15 @@ class CategoriesFragment : Fragment() {
                 // Update category count badge
                 binding.categoryCountText.text = categories.size.toString()
                 
-                // Update the adapter
+                // Get expenses for each category
+                categories.forEach { category ->
+                    expenseViewModel.getExpensesByCategory(userId, category.id).observe(viewLifecycleOwner) { expenses ->
+                        val totalSpent = expenses.sumOf { it.amount }
+                        categoryAdapter.updateCategoryTotal(category.id, totalSpent)
+                    }
+                }
+                
+                // Update the adapter with categories
                 categoryAdapter.submitList(categories)
             }
         }
@@ -113,4 +129,4 @@ class CategoriesFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-} 
+}
