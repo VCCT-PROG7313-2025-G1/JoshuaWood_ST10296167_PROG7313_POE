@@ -42,7 +42,7 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
     }
 
     fun setPhotoUri(uri: String?) {
-        _photoUri.value = uri
+        _photoUri.value = uri ?: ""
     }
 
     fun getExpenses(userId: String) = repository.getExpenses(userId).asLiveData()
@@ -104,7 +104,7 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
     }
 
     fun resetSaveStatus() {
-        _saveSuccess.value = null
+        _saveSuccess.value = false
     }
 
     class Factory(private val repository: ExpenseRepository) : ViewModelProvider.Factory {

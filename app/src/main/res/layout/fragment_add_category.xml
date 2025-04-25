@@ -75,7 +75,7 @@
                                 android:layout_height="24dp"
                                 android:layout_gravity="center"
                                 app:srcCompat="@drawable/ic_food"
-                                android:tint="@color/white" />
+                                app:tint="@color/white" />
                         </FrameLayout>
 
                         <TextView
