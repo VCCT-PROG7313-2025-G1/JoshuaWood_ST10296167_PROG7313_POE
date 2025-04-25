@@ -75,7 +75,7 @@ class CategoryViewModel(private val repository: CategoryRepository) : ViewModel(
     }
 
     fun resetSaveStatus() {
-        _saveSuccess.value = null
+        _saveSuccess.value = false
     }
 
     class Factory(private val repository: CategoryRepository) : ViewModelProvider.Factory {
