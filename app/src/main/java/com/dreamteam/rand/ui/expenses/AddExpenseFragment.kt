@@ -293,11 +293,11 @@ class AddExpenseFragment : Fragment() {
         expenseViewModel.saveSuccess.observe(viewLifecycleOwner) { success ->
             if (success == true) {
                 Toast.makeText(requireContext(), "Expense saved successfully", Toast.LENGTH_SHORT).show()
-                expenseViewModel.resetSaveStatus()
+               // expenseViewModel.resetSaveStatus()
                 findNavController().navigateUp()
             } else if (success == false) {
                 Toast.makeText(requireContext(), "Failed to save expense", Toast.LENGTH_SHORT).show()
-                expenseViewModel.resetSaveStatus()
+              //  expenseViewModel.resetSaveStatus()
             }
         }
     }

@@ -234,11 +234,11 @@ class AddCategoryFragment : Fragment() {
         categoryViewModel.saveSuccess.observe(viewLifecycleOwner) { success ->
             if (success == true) {
                 Toast.makeText(requireContext(), "Category saved successfully", Toast.LENGTH_SHORT).show()
-                categoryViewModel.resetSaveStatus()
+              //  categoryViewModel.resetSaveStatus()
                 findNavController().navigateUp()
             } else if (success == false) {
                 Toast.makeText(requireContext(), "Failed to save category", Toast.LENGTH_SHORT).show()
-                categoryViewModel.resetSaveStatus()
+             //   categoryViewModel.resetSaveStatus()
             }
         }
     }
