@@ -51,30 +51,41 @@ class GoalAdapter(private val onDeleteClick: (Goal) -> Unit) :
 
             // Set amounts
             binding.currentAmount.text = String.format("R %.2f", goal.currentSpent)
-            binding.minAmount.text = String.format("Min: R %.2f", goal.minAmount)
-            binding.maxAmount.text = String.format("Max: R %.2f", goal.maxAmount)
+            binding.minAmount.text = String.format("R %.2f", goal.minAmount)
+            binding.maxAmount.text = String.format("R %.2f", goal.maxAmount)
+            binding.minAmountLabel.text = String.format("R %.2f", goal.minAmount)
 
-            // Calculate progress
-            val progress = when {
-                goal.maxAmount <= goal.minAmount -> 0 // Prevent division by zero
-                else -> ((goal.currentSpent - goal.minAmount) / (goal.maxAmount - goal.minAmount) * 100)
+            // Calculate progress for minimum goal (0 to minAmount)
+            val minProgress = when {
+                goal.minAmount <= 0 -> 0
+                else -> ((goal.currentSpent / goal.minAmount) * 100)
                     .coerceIn(0.0, 100.0)
                     .toInt()
             }
-            binding.goalProgress.progress = progress
+            binding.minGoalProgress.progress = minProgress
+
+            // Calculate progress for maximum goal (minAmount to maxAmount)
+            val maxProgress = when {
+                goal.maxAmount <= goal.minAmount -> 0
+                goal.currentSpent <= goal.minAmount -> 0
+                else -> (((goal.currentSpent - goal.minAmount) / (goal.maxAmount - goal.minAmount)) * 100)
+                    .coerceIn(0.0, 100.0)
+                    .toInt()
+            }
+            binding.maxGoalProgress.progress = maxProgress
 
             // Set status chip style based on spending status
             val context = binding.root.context
-            when (goal.spendingStatus) {
-                GoalSpendingStatus.BELOW_MINIMUM -> {
+            when {
+                goal.currentSpent < goal.minAmount -> {
                     binding.statusChip.text = "Below Minimum"
                     binding.statusChip.setTextColor(ContextCompat.getColor(context, R.color.progress_blue))
                 }
-                GoalSpendingStatus.ON_TRACK -> {
+                goal.currentSpent <= goal.maxAmount -> {
                     binding.statusChip.text = "On Track"
                     binding.statusChip.setTextColor(ContextCompat.getColor(context, R.color.progress_green))
                 }
-                GoalSpendingStatus.OVER_BUDGET -> {
+                else -> {
                     binding.statusChip.text = "Over Budget"
                     binding.statusChip.setTextColor(ContextCompat.getColor(context, R.color.progress_red))
                 }
