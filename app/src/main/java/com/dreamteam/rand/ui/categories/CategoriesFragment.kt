@@ -59,6 +59,7 @@ class CategoriesFragment : Fragment() {
         setupToolbar()
         setupRecyclerView()
         setupClickListeners()
+        binding.dateRangeLayout.isEndIconVisible = false  // Set initial state
         observeViewModel()
     }
 
@@ -80,6 +81,14 @@ class CategoriesFragment : Fragment() {
         }
     }
 
+    private fun clearDateRange() {
+        startDate = null
+        endDate = null
+        binding.dateRangeField.setText("")
+        binding.dateRangeLayout.isEndIconVisible = false
+        loadCategoriesWithDateRange()
+    }
+
     private fun setupClickListeners() {
         binding.addCategoryFab.setOnClickListener {
             findNavController().navigate(R.id.action_categories_to_addCategory)
@@ -91,6 +100,11 @@ class CategoriesFragment : Fragment() {
 
         binding.dateRangeField.setOnClickListener {
             showDateRangePicker()
+        }
+
+        // Handle clear button click
+        binding.dateRangeLayout.setEndIconOnClickListener {
+            clearDateRange()
         }
     }
 
@@ -120,6 +134,10 @@ class CategoriesFragment : Fragment() {
             val startText = dateFormat.format(Date(startDate!!))
             val endText = dateFormat.format(Date(endDate!!))
             binding.dateRangeField.setText("$startText - $endText")
+            binding.dateRangeLayout.isEndIconVisible = true
+        } else {
+            binding.dateRangeField.setText("")
+            binding.dateRangeLayout.isEndIconVisible = false
         }
     }
 

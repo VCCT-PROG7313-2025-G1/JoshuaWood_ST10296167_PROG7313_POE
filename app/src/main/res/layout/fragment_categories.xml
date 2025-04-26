@@ -83,6 +83,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:minWidth="150dp"
+                        app:endIconMode="custom"
+                        app:endIconDrawable="@drawable/ic_close"
+                        app:endIconTint="@color/grey"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
 
                         <com.google.android.material.textfield.TextInputEditText
