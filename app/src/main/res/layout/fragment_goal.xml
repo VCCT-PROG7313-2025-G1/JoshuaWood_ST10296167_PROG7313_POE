@@ -49,10 +49,11 @@
                     android:id="@+id/goalCountText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_marginStart="12dp"
                     android:background="@drawable/rounded_counter_bg"
                     android:paddingHorizontal="8dp"
-                    android:paddingVertical="2dp"
+                    android:paddingVertical="4dp"
                     android:textColor="@color/white"
                     android:textSize="12sp" />
 
