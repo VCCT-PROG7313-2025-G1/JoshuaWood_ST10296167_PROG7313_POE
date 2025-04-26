@@ -72,7 +72,6 @@ class CategoriesFragment : Fragment() {
     private fun setupRecyclerView() {
         categoryAdapter = CategoryAdapter { category ->
             // Navigate to edit category screen (not implemented yet)
-            // You can implement this later by passing the category ID
         }
         
         binding.categoriesRecyclerView.apply {
@@ -110,7 +109,7 @@ class CategoriesFragment : Fragment() {
 
     private fun showDateRangePicker() {
         val dateRangePicker = MaterialDatePicker.Builder.dateRangePicker()
-            .setTitleText("Select Date Range")
+            .setTitleText("Select Range")
             .setSelection(
                 androidx.core.util.Pair(
                     startDate ?: MaterialDatePicker.todayInUtcMilliseconds(),
@@ -178,7 +177,7 @@ class CategoriesFragment : Fragment() {
         categories.forEach { category ->
             expenseViewModel.getExpensesByCategoryAndDateRange(
                 userId = userId,
-                categoryId = category.id.toLong(),
+                categoryId = category.id,
                 startDate = startDate,
                 endDate = endDate
             ).observe(viewLifecycleOwner) { expenses ->

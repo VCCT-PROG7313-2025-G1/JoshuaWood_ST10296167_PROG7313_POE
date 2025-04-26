@@ -15,11 +15,7 @@ interface TransactionDao {
         AND date BETWEEN :startDate AND :endDate 
         ORDER BY date DESC
     """)
-    fun getTransactionsByDateRange(
-        userId: String,
-        startDate: Long,
-        endDate: Long
-    ): Flow<List<Transaction>>
+    fun getTransactionsByDateRange(userId: String, startDate: Long, endDate: Long): Flow<List<Transaction>>
 
     @Query("""
         SELECT * FROM transactions 
@@ -27,10 +23,7 @@ interface TransactionDao {
         AND categoryId = :categoryId 
         ORDER BY date DESC
     """)
-    fun getTransactionsByCategory(
-        userId: String,
-        categoryId: Long
-    ): Flow<List<Transaction>>
+    fun getTransactionsByCategory(userId: String, categoryId: Long): Flow<List<Transaction>>
 
     @Query("SELECT * FROM transactions WHERE userId = :userId AND categoryId = :categoryId AND date BETWEEN :startDate AND :endDate ORDER BY date DESC")
     suspend fun getTransactionsByCategoryAndDateRange(
@@ -55,10 +48,5 @@ interface TransactionDao {
         AND type = :type 
         AND date BETWEEN :startDate AND :endDate
     """)
-    suspend fun getTotalAmountByTypeAndDateRange(
-        userId: String,
-        type: String,
-        startDate: Long,
-        endDate: Long
-    ): Double?
+    suspend fun getTotalAmountByTypeAndDateRange(userId: String, type: String, startDate: Long, endDate: Long): Double?
 }
