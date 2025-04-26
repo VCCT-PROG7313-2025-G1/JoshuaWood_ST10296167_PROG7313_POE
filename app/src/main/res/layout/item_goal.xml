@@ -80,7 +80,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Max:"
+                        android:text="Min:"
                         android:textAppearance="?attr/textAppearanceHeadline6"/>
 
                     <FrameLayout
@@ -131,7 +131,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Min:"
+                        android:text="Max:"
                         android:textAppearance="?attr/textAppearanceHeadline6"/>
                     
                     <FrameLayout
