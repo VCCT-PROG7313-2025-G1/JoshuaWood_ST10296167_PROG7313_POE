@@ -42,6 +42,17 @@ class ExpenseRepository(private val transactionDao: TransactionDao) {
         emit(transactions)
     }
 
+    fun getExpensesByMonthAndYear(
+        userId: String,
+        month: Int,
+        year: Int
+    ): Flow<List<Transaction>> {
+        // Format month and year as strings with leading zeros for month
+        val monthStr = String.format("%02d", month)
+        val yearStr = year.toString()
+        return transactionDao.getExpensesByMonthAndYear(userId, monthStr, yearStr)
+    }
+
     suspend fun insertExpense(expense: Transaction): Long {
         return transactionDao.insertTransaction(expense)
     }

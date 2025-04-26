@@ -15,6 +15,9 @@ import com.dreamteam.rand.data.RandDatabase
 import com.dreamteam.rand.data.repository.GoalRepository
 import com.dreamteam.rand.databinding.FragmentGoalBinding
 import com.dreamteam.rand.ui.auth.UserViewModel
+import com.dreamteam.rand.ui.expenses.ExpenseViewModel
+import com.dreamteam.rand.data.repository.ExpenseRepository
+import java.util.Calendar
 
 class GoalFragment : Fragment() {
     private var _binding: FragmentGoalBinding? = null
@@ -27,6 +30,12 @@ class GoalFragment : Fragment() {
         val database = RandDatabase.getDatabase(requireContext())
         val repository = GoalRepository(database.goalDao())
         GoalViewModel.Factory(repository)
+    }
+    
+    private val expenseViewModel: ExpenseViewModel by viewModels {
+        val database = RandDatabase.getDatabase(requireContext())
+        val repository = ExpenseRepository(database.transactionDao())
+        ExpenseViewModel.Factory(repository)
     }
 
     override fun onCreateView(
@@ -109,6 +118,18 @@ class GoalFragment : Fragment() {
 
                 // Update goal count badge
                 binding.goalCountText.text = goals.size.toString()
+
+                // Update each goal with its expenses
+                goals.forEach { goal ->
+                    expenseViewModel.getExpensesByMonthAndYear(
+                        userId = userId,
+                        month = goal.month,
+                        year = goal.year
+                    ).observe(viewLifecycleOwner) { expenses ->
+                        val totalSpent = expenses.sumOf { it.amount }
+                        goalAdapter.updateGoalExpenses(goal.copy(currentSpent = totalSpent))
+                    }
+                }
 
                 // Update the adapter
                 goalAdapter.submitList(goals)

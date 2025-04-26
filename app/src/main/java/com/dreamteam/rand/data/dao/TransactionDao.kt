@@ -49,4 +49,12 @@ interface TransactionDao {
         AND date BETWEEN :startDate AND :endDate
     """)
     suspend fun getTotalAmountByTypeAndDateRange(userId: String, type: String, startDate: Long, endDate: Long): Double?
+
+    @Query("""
+        SELECT * FROM transactions 
+        WHERE userId = :userId 
+        AND strftime('%m', datetime(date/1000, 'unixepoch')) = :month
+        AND strftime('%Y', datetime(date/1000, 'unixepoch')) = :year
+    """)
+    fun getExpensesByMonthAndYear(userId: String, month: String, year: String): Flow<List<Transaction>>
 }
