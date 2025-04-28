@@ -11,6 +11,8 @@ import com.dreamteam.rand.data.entity.TransactionType
 import com.dreamteam.rand.data.repository.ExpenseRepository
 import kotlinx.coroutines.launch
 import java.util.Date
+import java.text.NumberFormat
+import java.util.Locale
 
 class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() {
     private val _selectedCategoryId = MutableLiveData<Long>()
@@ -27,6 +29,9 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
 
     private val _totalMonthlyExpenses = MutableLiveData<Double>(0.0)
     val totalMonthlyExpenses: LiveData<Double> = _totalMonthlyExpenses
+
+    private val _totalExpenses = MutableLiveData<String>()
+    val totalExpenses: LiveData<String> = _totalExpenses
 
     // Directly track the category ID to ensure it doesn't get lost
     private var directCategoryId: Long? = null
@@ -56,7 +61,7 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
         startDate: Long?,
         endDate: Long?
     ): LiveData<List<Transaction>> {
-        return repository.getTransactionsByCategoryAndDateRange(
+        return repository.getExpensesByCategoryAndDateRange(
             userId = userId,
             categoryId = categoryId,
             startDate = startDate,
@@ -66,8 +71,8 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
 
     fun getExpensesByDateRange(
         userId: String,
-        startDate: Long,
-        endDate: Long
+        startDate: Long?,
+        endDate: Long?
     ): LiveData<List<Transaction>> {
         return repository.getExpensesByDateRange(userId, startDate, endDate).asLiveData()
     }
@@ -80,6 +85,32 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
         return repository.getExpensesByMonthAndYear(userId, month, year).asLiveData()
     }
 
+    fun fetchTotalExpensesByDateRange(userId: String, startDate: Long?, endDate: Long?) {
+        viewModelScope.launch {
+            val total = repository.getTotalExpensesByDateRange(userId, startDate, endDate)
+            val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("en", "ZA"))
+            _totalExpenses.value = currencyFormatter.format(total)
+        }
+    }
+
+    fun fetchTotalExpensesByCategoryAndDateRange(
+        userId: String,
+        categoryId: Long,
+        startDate: Long?,
+        endDate: Long?
+    ) {
+        viewModelScope.launch {
+            val total = repository.getTotalExpensesByCategoryAndDateRange(
+                userId = userId,
+                categoryId = categoryId,
+                startDate = startDate,
+                endDate = endDate
+            )
+            val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("en", "ZA"))
+            _totalExpenses.value = currencyFormatter.format(total)
+        }
+    }
+
     fun saveExpense(userId: String, amount: Double, description: String) {
         viewModelScope.launch {
             // Use direct category ID if available, otherwise fall back to LiveData value
@@ -88,18 +119,16 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
             android.util.Log.d("ExpenseViewModel", "Creating expense with direct category ID: $directCategoryId, LiveData value: ${_selectedCategoryId.value}")
             android.util.Log.d("ExpenseViewModel", "Final category ID being used: $categoryIdToUse")
             
-            val expense = Transaction(
+            val receiptUri = _photoUri.value
+            val date = _selectedDate.value ?: Date().time
+            
+            val result = repository.insertExpense(
                 userId = userId,
                 amount = amount,
-                type = TransactionType.EXPENSE,
-                categoryId = categoryIdToUse,
                 description = description,
-                date = _selectedDate.value ?: Date().time,
-                receiptUri = _photoUri.value,
-                createdAt = Date().time
+                categoryId = categoryIdToUse,
+                receiptUri = receiptUri
             )
-            
-            val result = repository.insertExpense(expense)
             _saveSuccess.postValue(result > 0)
             
             // Update monthly total

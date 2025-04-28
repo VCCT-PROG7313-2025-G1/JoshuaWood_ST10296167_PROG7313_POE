@@ -123,9 +123,28 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
             // Navigate to edit expense when implemented
         })
         
+        // Set receipt click listener
+        expenseAdapter.setOnReceiptClickListener { receiptUri ->
+            showReceiptImage(receiptUri)
+        }
+        
         binding.transactionsRecyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = expenseAdapter
+        }
+    }
+
+    private fun showReceiptImage(receiptUri: String) {
+        try {
+            // Create and show the image viewer dialog
+            val imageViewerDialog = com.dreamteam.rand.ui.common.ImageViewerDialog.newInstance(receiptUri)
+            imageViewerDialog.show(parentFragmentManager, "ImageViewerDialog")
+        } catch (e: Exception) {
+            android.widget.Toast.makeText(
+                requireContext(),
+                "Error opening receipt: ${e.message}",
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
