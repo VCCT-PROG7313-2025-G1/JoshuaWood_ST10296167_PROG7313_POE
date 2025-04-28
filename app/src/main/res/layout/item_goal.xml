@@ -63,37 +63,115 @@
                 android:textStyle="bold"
                 tools:text="R 2,500" />
 
-            <!-- Progress bar container -->
-            <FrameLayout
+            <!-- Progress bars container -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp">
+                android:layout_marginTop="16dp"
+                android:orientation="vertical">
 
-                <ProgressBar
-                    android:id="@+id/goalProgress"
-                    style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                <!-- Minimum goal progress -->
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="8dp"
-                    android:progressDrawable="@drawable/goal_progress_bar" />
-
-                <!-- Min and max markers -->
-                <TextView
-                    android:id="@+id/minAmount"
-                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:textAppearance="?attr/textAppearanceCaption"
-                    tools:text="Min: R 2,000" />
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/maxAmount"
-                    android:layout_width="wrap_content"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Min:"
+                        android:textAppearance="?attr/textAppearanceHeadline6"/>
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ProgressBar
+                            android:id="@+id/minGoalProgress"
+                            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="8dp"
+                            android:progressDrawable="@drawable/min_goal_progress_bar" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="R 0"
+                            android:textAppearance="?attr/textAppearanceCaption"/>
+
+                        <TextView
+                            android:id="@+id/minAmount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="end"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1"
+                            android:gravity="end"
+                            android:textAppearance="?attr/textAppearanceCaption"
+                            tools:text="R 2,000"/>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Maximum goal progress -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:layout_marginTop="12dp"
-                    android:textAppearance="?attr/textAppearanceCaption"
-                    tools:text="Max: R 3,000" />
-            </FrameLayout>
+                    android:layout_marginTop="16dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Max:"
+                        android:textAppearance="?attr/textAppearanceHeadline6"/>
+                    
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ProgressBar
+                            android:id="@+id/maxGoalProgress"
+                            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="8dp"
+                            android:progressDrawable="@drawable/max_goal_progress_bar" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/minAmountLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?attr/textAppearanceCaption"
+                            tools:text="R 2,000"/>
+
+                        <TextView
+                            android:id="@+id/maxAmount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="end"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1"
+                            android:gravity="end"
+                            android:textAppearance="?attr/textAppearanceCaption"
+                            tools:text="R 3,000"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
 
             <!-- Status chip -->
             <com.google.android.material.chip.Chip

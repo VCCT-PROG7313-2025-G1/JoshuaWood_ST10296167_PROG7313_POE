@@ -11,11 +11,16 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dreamteam.rand.R
 import com.dreamteam.rand.data.RandDatabase
+import com.dreamteam.rand.data.entity.Category
 import com.dreamteam.rand.data.entity.TransactionType
 import com.dreamteam.rand.data.repository.CategoryRepository
+import com.dreamteam.rand.data.repository.ExpenseRepository
 import com.dreamteam.rand.databinding.FragmentCategoriesBinding
 import com.dreamteam.rand.ui.auth.UserViewModel
-import com.google.android.material.tabs.TabLayout
+import com.dreamteam.rand.ui.expenses.ExpenseViewModel
+import com.google.android.material.datepicker.MaterialDatePicker
+import java.text.SimpleDateFormat
+import java.util.*
 
 class CategoriesFragment : Fragment() {
     private var _binding: FragmentCategoriesBinding? = null
@@ -23,10 +28,21 @@ class CategoriesFragment : Fragment() {
     
     private val userViewModel: UserViewModel by activityViewModels()
     private lateinit var categoryAdapter: CategoryAdapter
+    
+    private var startDate: Long? = null
+    private var endDate: Long? = null
+    private val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
+    
     private val categoryViewModel: CategoryViewModel by viewModels {
         val database = RandDatabase.getDatabase(requireContext())
         val repository = CategoryRepository(database.categoryDao())
         CategoryViewModel.Factory(repository)
+    }
+    
+    private val expenseViewModel: ExpenseViewModel by viewModels {
+        val database = RandDatabase.getDatabase(requireContext())
+        val repository = ExpenseRepository(database.transactionDao())
+        ExpenseViewModel.Factory(repository)
     }
 
     override fun onCreateView(
@@ -43,6 +59,7 @@ class CategoriesFragment : Fragment() {
         setupToolbar()
         setupRecyclerView()
         setupClickListeners()
+        binding.dateRangeLayout.isEndIconVisible = false  // Set initial state
         observeViewModel()
     }
 
@@ -55,7 +72,6 @@ class CategoriesFragment : Fragment() {
     private fun setupRecyclerView() {
         categoryAdapter = CategoryAdapter { category ->
             // Navigate to edit category screen (not implemented yet)
-            // You can implement this later by passing the category ID
         }
         
         binding.categoriesRecyclerView.apply {
@@ -64,14 +80,63 @@ class CategoriesFragment : Fragment() {
         }
     }
 
+    private fun clearDateRange() {
+        startDate = null
+        endDate = null
+        binding.dateRangeField.setText("")
+        binding.dateRangeLayout.isEndIconVisible = false
+        loadCategoriesWithDateRange()
+    }
+
     private fun setupClickListeners() {
         binding.addCategoryFab.setOnClickListener {
             findNavController().navigate(R.id.action_categories_to_addCategory)
         }
         
-        // Add click listener for the empty state add button
         binding.addFirstCategoryBtn.setOnClickListener {
             findNavController().navigate(R.id.action_categories_to_addCategory)
+        }
+
+        binding.dateRangeField.setOnClickListener {
+            showDateRangePicker()
+        }
+
+        // Handle clear button click
+        binding.dateRangeLayout.setEndIconOnClickListener {
+            clearDateRange()
+        }
+    }
+
+    private fun showDateRangePicker() {
+        val dateRangePicker = MaterialDatePicker.Builder.dateRangePicker()
+            .setTitleText("Select Range")
+            .setSelection(
+                androidx.core.util.Pair(
+                    startDate ?: MaterialDatePicker.todayInUtcMilliseconds(),
+                    endDate ?: MaterialDatePicker.todayInUtcMilliseconds()
+                )
+            )
+            .build()
+
+        dateRangePicker.addOnPositiveButtonClickListener { selection ->
+            startDate = selection.first
+            endDate = selection.second
+            updateDateRangeText()
+            loadCategoriesWithDateRange()
+        }
+
+        dateRangePicker.show(parentFragmentManager, "DATE_RANGE_PICKER")
+    }
+
+    private fun updateDateRangeText() {
+        if (startDate != null && endDate != null) {
+            val startText = dateFormat.format(Date(startDate!!))
+            val endText = dateFormat.format(Date(endDate!!))
+            binding.dateRangeField.setText("$startText - $endText")
+            binding.dateRangeLayout.isEndIconVisible = true
+        } else {
+            binding.dateRangeField.setText("")
+            binding.dateRangeLayout.isEndIconVisible = false
         }
     }
 
@@ -100,17 +165,32 @@ class CategoriesFragment : Fragment() {
                 binding.categoriesRecyclerView.visibility = View.VISIBLE
                 binding.headerSection.visibility = View.VISIBLE
                 
-                // Update category count badge
                 binding.categoryCountText.text = categories.size.toString()
-                
-                // Update the adapter
-                categoryAdapter.submitList(categories)
+                loadCategoriesWithDateRange(categories, userId)
             }
         }
+    }
+
+    private fun loadCategoriesWithDateRange(categories: List<Category> = categoryAdapter.currentList, userId: String? = userViewModel.currentUser.value?.uid) {
+        if (userId == null) return
+
+        categories.forEach { category ->
+            expenseViewModel.getExpensesByCategoryAndDateRange(
+                userId = userId,
+                categoryId = category.id,
+                startDate = startDate,
+                endDate = endDate
+            ).observe(viewLifecycleOwner) { expenses ->
+                val totalSpent = expenses.sumOf { it.amount }
+                categoryAdapter.updateCategoryTotal(category.id, totalSpent)
+            }
+        }
+        
+        categoryAdapter.submitList(categories)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
-} 
+}

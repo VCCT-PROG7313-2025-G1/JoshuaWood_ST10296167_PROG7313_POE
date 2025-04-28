@@ -78,6 +78,9 @@ dependencies {
     // Gson
     implementation(libs.gson)
     
+    // PhotoView for image zooming
+    implementation("com.github.chrisbanes:PhotoView:2.3.0")
+    
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

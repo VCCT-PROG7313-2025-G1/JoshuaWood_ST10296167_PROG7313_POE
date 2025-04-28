@@ -33,34 +33,71 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Header section with counter -->
+            <!-- Header section with counter and filter -->
             <LinearLayout
                 android:id="@+id/headerSection"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:paddingBottom="16dp">
 
-                <TextView
-                    android:layout_width="0dp"
+                <!-- Title, counter, and filter row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Your Categories"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-                    android:textStyle="bold" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
-                <TextView
-                    android:id="@+id/categoryCountText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:background="@drawable/rounded_counter_bg"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="4dp"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    tools:text="5" />
+                    <!-- Left side: Title and counter -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Your Categories"
+                            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/categoryCountText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginStart="12dp"
+                            android:background="@drawable/rounded_counter_bg"
+                            android:paddingHorizontal="8dp"
+                            android:paddingVertical="4dp"
+                            android:textColor="@color/white"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            tools:text="5" />
+                    </LinearLayout>
+
+                    <!-- Right side: Date Range Picker -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/dateRangeLayout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minWidth="150dp"
+                        app:endIconMode="custom"
+                        app:endIconDrawable="@drawable/ic_close"
+                        app:endIconTint="@color/grey"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/dateRangeField"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:focusable="false"
+                            android:hint="Date Range"
+                            android:drawableEnd="@drawable/ic_calendar"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
             </LinearLayout>
 
             <com.google.android.material.tabs.TabLayout
@@ -145,7 +182,6 @@
         android:contentDescription="Add category"
         android:text="New Category"
         app:icon="@drawable/ic_add"
-        app:iconTint="@color/white"
-        app:backgroundTint="@color/primary" />
+        app:iconTint="@color/white" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout> 
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

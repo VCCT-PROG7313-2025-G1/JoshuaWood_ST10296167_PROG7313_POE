@@ -35,6 +35,9 @@
     <string name="settings">Settings</string>
     <string name="logout">Logout</string>
 
+    <!--    Categories-->
+    <string name="clear_date_range">Clear date range</string>
+
     <!-- Dashboard -->
     <string name="welcome_message">Welcome back, %s!</string>
     <string name="budget_progress" formatted="false">%s of %s</string>

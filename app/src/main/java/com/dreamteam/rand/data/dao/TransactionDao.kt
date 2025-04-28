@@ -15,11 +15,7 @@ interface TransactionDao {
         AND date BETWEEN :startDate AND :endDate 
         ORDER BY date DESC
     """)
-    fun getTransactionsByDateRange(
-        userId: String,
-        startDate: Long,
-        endDate: Long
-    ): Flow<List<Transaction>>
+    fun getTransactionsByDateRange(userId: String, startDate: Long, endDate: Long): Flow<List<Transaction>>
 
     @Query("""
         SELECT * FROM transactions 
@@ -27,10 +23,15 @@ interface TransactionDao {
         AND categoryId = :categoryId 
         ORDER BY date DESC
     """)
-    fun getTransactionsByCategory(
+    fun getTransactionsByCategory(userId: String, categoryId: Long): Flow<List<Transaction>>
+
+    @Query("SELECT * FROM transactions WHERE userId = :userId AND categoryId = :categoryId AND date BETWEEN :startDate AND :endDate ORDER BY date DESC")
+    suspend fun getTransactionsByCategoryAndDateRange(
         userId: String,
-        categoryId: Long
-    ): Flow<List<Transaction>>
+        categoryId: Long,
+        startDate: Long,
+        endDate: Long
+    ): List<Transaction>
 
     @Insert
     suspend fun insertTransaction(transaction: Transaction): Long
@@ -47,10 +48,13 @@ interface TransactionDao {
         AND type = :type 
         AND date BETWEEN :startDate AND :endDate
     """)
-    suspend fun getTotalAmountByTypeAndDateRange(
-        userId: String,
-        type: String,
-        startDate: Long,
-        endDate: Long
-    ): Double?
-} 
+    suspend fun getTotalAmountByTypeAndDateRange(userId: String, type: String, startDate: Long, endDate: Long): Double?
+
+    @Query("""
+        SELECT * FROM transactions 
+        WHERE userId = :userId 
+        AND strftime('%m', datetime(date/1000, 'unixepoch')) = :month
+        AND strftime('%Y', datetime(date/1000, 'unixepoch')) = :year
+    """)
+    fun getExpensesByMonthAndYear(userId: String, month: String, year: String): Flow<List<Transaction>>
+}
