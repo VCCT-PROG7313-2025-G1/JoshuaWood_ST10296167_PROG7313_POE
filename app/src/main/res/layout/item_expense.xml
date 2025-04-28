@@ -9,10 +9,20 @@
     app:cardCornerRadius="8dp"
     app:cardElevation="2dp">
 
+    <!-- Category color indicator -->
+    <View
+        android:id="@+id/categoryColorIndicator"
+        android:layout_width="4dp"
+        android:layout_height="match_parent"
+        android:background="@color/primary" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="12dp">
+        android:paddingStart="16dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="12dp">
 
         <ImageView
             android:id="@+id/categoryIcon"
@@ -73,25 +83,58 @@
             app:layout_constraintTop_toTopOf="@id/expenseDescription"
             tools:text="R150.00" />
 
+        <!-- Receipt image indicator -->
         <ImageView
-            android:id="@+id/receiptIndicator"
+            android:id="@+id/receiptImageIcon"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_marginTop="8dp"
-            android:src="@drawable/ic_receipt"
+            android:src="@drawable/ic_image"
             android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/expenseDescription"
             app:tint="@color/grey" />
 
+        <!-- Replace TextView with Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/viewReceiptButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:text="View Receipt"
+            android:textSize="12sp"
+            android:minHeight="36dp"
+            android:paddingVertical="4dp"
+            android:visibility="gone"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            app:layout_constraintStart_toEndOf="@id/receiptImageIcon"
+            app:layout_constraintTop_toTopOf="@id/receiptImageIcon"
+            app:layout_constraintBottom_toBottomOf="@id/receiptImageIcon" />
+
+        <!-- Keep this for backward compatibility -->
+        <TextView
+            android:id="@+id/viewReceiptText"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Hide these - we'll use them for backwards compatibility but not display them -->
+        <ImageView
+            android:id="@+id/receiptIndicator"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/expenseDescription" />
+
         <ImageView
             android:id="@+id/receiptThumbnail"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_marginTop="8dp"
-            android:scaleType="centerCrop"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:visibility="gone"
-            app:layout_constraintStart_toEndOf="@id/receiptIndicator"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/expenseDescription" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
