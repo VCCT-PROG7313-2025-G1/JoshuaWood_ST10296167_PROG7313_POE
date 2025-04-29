@@ -13,54 +13,89 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.util.Date
 
+// this viewmodel handles all the category-related data and operations
+// it keeps track of what's selected and manages saving/updating categories
 class CategoryViewModel(private val repository: CategoryRepository) : ViewModel() {
+    // keep track of what type of category is selected (expense or income)
     private val _selectedType = MutableLiveData<TransactionType>(TransactionType.EXPENSE)
     val selectedType: LiveData<TransactionType> = _selectedType
 
+    // keep track of what color is selected for the category
     private val _selectedColor = MutableLiveData<String>("#FF5252") // Default red color
     val selectedColor: LiveData<String> = _selectedColor
 
+    // keep track of what icon is selected for the category
     private val _selectedIcon = MutableLiveData<String>("ic_shopping") // Default shopping icon
     val selectedIcon: LiveData<String> = _selectedIcon
 
+    // let the UI know if saving was successful
     private val _saveSuccess = MutableLiveData<Boolean>()
     val saveSuccess: LiveData<Boolean> = _saveSuccess
 
+    // update the selected category type
     fun setSelectedType(type: TransactionType) {
         _selectedType.value = type
     }
 
+    // update the selected color
     fun setSelectedColor(color: String) {
         _selectedColor.value = color
     }
 
+    // update the selected icon
     fun setSelectedIcon(icon: String) {
         _selectedIcon.value = icon
     }
 
+    // get all categories for a user
     fun getCategories(userId: String) = repository.getCategories(userId).asLiveData()
 
+    // get categories filtered by type (expense or income)
     fun getCategoriesByType(userId: String, type: TransactionType) = 
         repository.getCategoriesByType(userId, type).asLiveData()
 
+    // save a new category with the current selections
     fun saveCategory(userId: String, name: String, isDefault: Boolean = false) {
         viewModelScope.launch {
+            val type = _selectedType.value ?: TransactionType.EXPENSE
+            val color = _selectedColor.value ?: "#FF5252"
+            val icon = _selectedIcon.value ?: "ic_shopping"
+            
+            // Enhanced logging before saving category
+            android.util.Log.d("CategoryViewModel", "==================== CATEGORY DETAILS ====================")
+            android.util.Log.d("CategoryViewModel", "Saving new category for user: $userId")
+            android.util.Log.d("CategoryViewModel", "Name: $name")
+            android.util.Log.d("CategoryViewModel", "Type: $type")
+            android.util.Log.d("CategoryViewModel", "Color: $color")
+            android.util.Log.d("CategoryViewModel", "Icon: $icon")
+            android.util.Log.d("CategoryViewModel", "Is Default: $isDefault")
+            android.util.Log.d("CategoryViewModel", "=======================================================")
+            
             val category = Category(
                 userId = userId,
                 name = name,
-                type = _selectedType.value ?: TransactionType.EXPENSE,
+                type = type,
                 budget = null,
-                color = _selectedColor.value ?: "#FF5252",
-                icon = _selectedIcon.value ?: "ic_shopping",
+                color = color,
+                icon = icon,
                 isDefault = isDefault,
                 createdAt = Date().time
             )
             
             val result = repository.insertCategory(category)
+            
+            // Log the result
+            if (result > 0) {
+                android.util.Log.d("CategoryViewModel", "✅ Category saved successfully with ID: $result")
+            } else {
+                android.util.Log.e("CategoryViewModel", "❌ Failed to save category")
+            }
+            
             _saveSuccess.postValue(result > 0)
         }
     }
 
+    // update an existing category
     fun updateCategory(category: Category) {
         viewModelScope.launch {
             repository.updateCategory(category)
@@ -68,16 +103,19 @@ class CategoryViewModel(private val repository: CategoryRepository) : ViewModel(
         }
     }
 
+    // delete a category
     fun deleteCategory(category: Category) {
         viewModelScope.launch {
             repository.deleteCategory(category)
         }
     }
 
+    // reset the save status after showing success/failure
     fun resetSaveStatus() {
         _saveSuccess.value = false
     }
 
+    // factory class to create the viewmodel with its dependencies
     class Factory(private val repository: CategoryRepository) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {

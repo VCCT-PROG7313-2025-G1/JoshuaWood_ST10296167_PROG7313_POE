@@ -5,6 +5,8 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+// monthly budget table - tracks total budget for each month
+// ai note: could predict future budgets based on spending trends
 @Entity(
     tableName = "budgets",
     foreignKeys = [
@@ -20,13 +22,15 @@ import androidx.room.PrimaryKey
 data class Budget(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val userId: String,
-    val month: Long,
-    val totalAmount: Double,
-    val createdAt: Long,
-    val updatedAt: Long
+    val userId: String,           // who owns this budget
+    val month: Long,              // target month
+    val totalAmount: Double,      // total budget amount
+    val createdAt: Long,          // when budget was created
+    val updatedAt: Long           // last update time
 )
 
+// tracks budget amounts for each category
+// ai note: could suggest category splits based on past spending
 @Entity(
     tableName = "budget_categories",
     foreignKeys = [
@@ -48,8 +52,8 @@ data class Budget(
 data class BudgetCategory(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val budgetId: Long,
-    val categoryId: Long,
-    val amount: Double,
-    val spent: Double
+    val budgetId: Long,           // parent budget
+    val categoryId: Long,         // spending category
+    val amount: Double,           // budgeted amount
+    val spent: Double             // amount spent so far
 ) 

@@ -8,6 +8,7 @@ import android.widget.AdapterView
 import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.TextView
+import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.fragment.app.activityViewModels
@@ -26,7 +27,10 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import java.text.SimpleDateFormat
 import java.util.*
 
+// displays and manages the list of expenses with filtering capabilities
 class ExpensesFragment : Fragment() {
+    private val TAG = "ExpensesFragment"
+    
     private var _binding: FragmentExpensesBinding? = null
     private val binding get() = _binding!!
     
@@ -56,32 +60,41 @@ class ExpensesFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        Log.d(TAG, "Creating expenses view")
         _binding = FragmentExpensesBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d(TAG, "Setting up expenses view with savedInstanceState: ${savedInstanceState != null}")
         setupToolbar()
         setupRecyclerView()
         setupClickListeners()
         
         // Initialize with "All Categories" by default
         selectedCategoryId = null
+        Log.d(TAG, "Initialized with default category selection: null")
         
         updateClearAllButtonVisibility()
         observeViewModel()
     }
     
+    // sets up the toolbar with navigation
     private fun setupToolbar() {
+        Log.d(TAG, "Setting up toolbar")
         binding.toolbar.setNavigationOnClickListener {
+            Log.d(TAG, "Navigating back")
             findNavController().navigateUp()
         }
     }
     
+    // sets up the recycler view for displaying expenses
     private fun setupRecyclerView() {
+        Log.d(TAG, "Setting up recycler view with layout manager and adapter")
         expenseAdapter = ExpenseAdapter(
             onItemClick = { expense ->
+                Log.d(TAG, "Expense clicked - ID: ${expense.id}, Amount: ${expense.amount}, Category: ${expense.categoryId}")
                 // Navigate to edit expense screen (when implemented)
                 // findNavController().navigate(R.id.action_expenses_to_editExpense)
             }
@@ -89,42 +102,59 @@ class ExpensesFragment : Fragment() {
         
         // Set receipt click listener
         expenseAdapter.setOnReceiptClickListener { receiptUri ->
+            Log.d(TAG, "Receipt clicked - URI: $receiptUri")
             showReceiptImage(receiptUri)
         }
         
         binding.expensesRecyclerView.apply {
+            Log.d(TAG, "Configuring RecyclerView with LinearLayoutManager")
             layoutManager = LinearLayoutManager(requireContext())
             adapter = expenseAdapter
+            Log.d(TAG, "RecyclerView setup complete")
         }
     }
     
+    // sets up all click listeners for the fragment
     private fun setupClickListeners() {
+        Log.d(TAG, "Setting up click listeners")
         binding.addExpenseFab.setOnClickListener {
+            Log.d(TAG, "Add expense FAB clicked")
             findNavController().navigate(R.id.action_expenses_to_addExpense)
         }
         
         binding.dateRangeField.setOnClickListener {
+            Log.d(TAG, "Date range field clicked")
             showDateRangePicker()
         }
         
         // Handle clear button click for date range
         binding.dateRangeLayout.setEndIconOnClickListener {
+            Log.d(TAG, "Clearing date range")
             clearDateRange()
         }
         
         // Handle clear button click for category filter
         binding.categoryFilterLayout.setEndIconOnClickListener {
+            Log.d(TAG, "Clearing category filter")
             clearCategoryFilter()
         }
         
         // Handle clear all filters button
         val clearAllButton = view?.findViewById<Button>(R.id.clearAllFiltersButton)
         clearAllButton?.setOnClickListener {
+            Log.d(TAG, "Clearing all filters")
             clearAllFilters()
         }
     }
     
+    // sets up the category dropdown with available categories
     private fun setupCategoryDropdown(categories: List<Category>) {
+        Log.d(TAG, "Setting up category dropdown with ${categories.size} categories")
+        if (categories.isEmpty()) {
+            Log.w(TAG, "No categories available for dropdown")
+            return
+        }
+        
         categoryAdapter = CategoryDropdownAdapter(
             requireContext(),
             R.layout.item_dropdown_category,
@@ -135,7 +165,9 @@ class ExpensesFragment : Fragment() {
         dropdownField.setAdapter(categoryAdapter)
         
         // Set "All Categories" as the default selection
-        dropdownField.setText(categoryAdapter.getItem(0)?.name, false)
+        val defaultCategory = categoryAdapter.getItem(0)
+        dropdownField.setText(defaultCategory?.name, false)
+        Log.d(TAG, "Set default category: ${defaultCategory?.name}")
         
         // Set threshold to 0 to show all options without typing
         dropdownField.threshold = 0
@@ -144,6 +176,7 @@ class ExpensesFragment : Fragment() {
         dropdownField.setOnTouchListener { v, event ->
             if (event.action == android.view.MotionEvent.ACTION_UP) {
                 if (!dropdownField.isPopupShowing) {
+                    Log.d(TAG, "Showing category dropdown")
                     dropdownField.showDropDown()
                 }
             }
@@ -156,6 +189,8 @@ class ExpensesFragment : Fragment() {
             val selectedCategory = categoryAdapter.getItem(position)
             selectedCategoryId = if (selectedCategory?.id == -1L) null else selectedCategory?.id
             
+            Log.d(TAG, "Category selected - Name: ${selectedCategory?.name}, ID: $selectedCategoryId, Position: $position")
+            
             // Update the field text to show the selected category name
             dropdownField.setText(selectedCategory?.name, false)
             
@@ -165,7 +200,9 @@ class ExpensesFragment : Fragment() {
         }
     }
     
+    // shows the date range picker dialog
     private fun showDateRangePicker() {
+        Log.d(TAG, "Showing date range picker")
         val dateRangePicker = MaterialDatePicker.Builder.dateRangePicker()
             .setTitleText("Select Range")
             .setSelection(
@@ -179,6 +216,7 @@ class ExpensesFragment : Fragment() {
         dateRangePicker.addOnPositiveButtonClickListener { selection ->
             startDate = selection.first
             endDate = selection.second
+            Log.d(TAG, "Date range selected: ${dateFormat.format(Date(startDate!!))} - ${dateFormat.format(Date(endDate!!))}")
             updateDateRangeText()
             loadExpensesWithFilters()
         }
@@ -186,7 +224,9 @@ class ExpensesFragment : Fragment() {
         dateRangePicker.show(parentFragmentManager, "DATE_RANGE_PICKER")
     }
     
+    // updates the date range text display
     private fun updateDateRangeText() {
+        Log.d(TAG, "Updating date range text")
         if (startDate != null && endDate != null) {
             val startText = dateFormat.format(Date(startDate!!))
             val endText = dateFormat.format(Date(endDate!!))
@@ -199,7 +239,9 @@ class ExpensesFragment : Fragment() {
         }
     }
     
+    // clears the date range filter
     private fun clearDateRange() {
+        Log.d(TAG, "Clearing date range filter")
         startDate = null
         endDate = null
         binding.dateRangeField.setText("")
@@ -208,7 +250,9 @@ class ExpensesFragment : Fragment() {
         loadExpensesWithFilters()
     }
     
+    // clears the category filter
     private fun clearCategoryFilter() {
+        Log.d(TAG, "Clearing category filter")
         selectedCategoryId = null
         binding.categoryFilterField.setText("")
         binding.categoryFilterLayout.isEndIconVisible = false
@@ -216,13 +260,17 @@ class ExpensesFragment : Fragment() {
         loadExpensesWithFilters()
     }
     
+    // clears all active filters
     private fun clearAllFilters() {
+        Log.d(TAG, "Clearing all filters")
         clearDateRange()
         clearCategoryFilter()
         updateClearAllButtonVisibility()
     }
     
+    // updates the visibility of the clear all filters button
     private fun updateClearAllButtonVisibility() {
+        Log.d(TAG, "Updating clear all button visibility")
         // Show the clear all filters button if any filter is active
         val anyFilterActive = startDate != null || selectedCategoryId != null
         
@@ -231,9 +279,13 @@ class ExpensesFragment : Fragment() {
         clearAllButton?.visibility = if (anyFilterActive) View.VISIBLE else View.GONE
     }
     
+    // loads expenses based on current filters
     private fun loadExpensesWithFilters() {
+        Log.d(TAG, "Loading expenses with filters - Category: $selectedCategoryId, Date Range: $startDate - $endDate")
         userViewModel.currentUser.value?.let { user ->
+            Log.d(TAG, "Loading expenses for user: ${user.uid}")
             if (selectedCategoryId != null) {
+                Log.d(TAG, "Filtering by category: $selectedCategoryId")
                 // Filter by category and date range if both are selected
                 expenseViewModel.getExpensesByCategoryAndDateRange(
                     userId = user.uid,
@@ -241,10 +293,18 @@ class ExpensesFragment : Fragment() {
                     startDate = startDate,
                     endDate = endDate
                 ).observe(viewLifecycleOwner) { expenses ->
+                    Log.d(TAG, "Loaded ${expenses.size} expenses for category $selectedCategoryId")
+                    if (expenses.isEmpty()) {
+                        Log.d(TAG, "No expenses found for the selected filters")
+                    } else {
+                        Log.d(TAG, "First expense: ID=${expenses.first().id}, Amount=${expenses.first().amount}")
+                        Log.d(TAG, "Last expense: ID=${expenses.last().id}, Amount=${expenses.last().amount}")
+                    }
                     updateExpensesList(expenses)
                 }
                 
                 // Update totals for this category and date range
+                Log.d(TAG, "Fetching total expenses for category $selectedCategoryId")
                 expenseViewModel.fetchTotalExpensesByCategoryAndDateRange(
                     userId = user.uid,
                     categoryId = selectedCategoryId!!,
@@ -252,62 +312,75 @@ class ExpensesFragment : Fragment() {
                     endDate = endDate
                 )
             } else {
+                Log.d(TAG, "Loading all expenses (no category filter)")
                 // Just filter by date range
                 expenseViewModel.getExpensesByDateRange(
                     userId = user.uid,
                     startDate = startDate,
                     endDate = endDate
                 ).observe(viewLifecycleOwner) { expenses ->
+                    Log.d(TAG, "Loaded ${expenses.size} expenses for date range")
                     updateExpensesList(expenses)
                 }
                 
                 // Update total expenses for the selected date range
+                Log.d(TAG, "Fetching total expenses for date range")
                 expenseViewModel.fetchTotalExpensesByDateRange(user.uid, startDate, endDate)
             }
+        } ?: run {
+            Log.w(TAG, "No user logged in, cannot load expenses")
         }
     }
     
     private fun updateExpensesList(expenses: List<com.dreamteam.rand.data.entity.Transaction>) {
-        android.util.Log.d("ExpensesFragment", "Loaded ${expenses.size} expenses")
+        Log.d(TAG, "Updating expenses list with ${expenses.size} items")
         
         // Update expense count badge
         try {
             val countView = view?.findViewById<TextView>(R.id.expenseCount)
             countView?.text = "${expenses.size} items"
             countView?.visibility = if (expenses.isEmpty()) View.GONE else View.VISIBLE
+            Log.d(TAG, "Updated expense count badge: ${expenses.size} items")
         } catch (e: Exception) {
-            android.util.Log.e("ExpensesFragment", "Error updating expense count: ${e.message}")
+            Log.e(TAG, "Error updating expense count: ${e.message}", e)
         }
         
         if (expenses.isEmpty()) {
+            Log.d(TAG, "Showing empty state")
             // Show empty state
             binding.emptyStateContainer.visibility = View.VISIBLE
             binding.expensesRecyclerView.visibility = View.GONE
         } else {
+            Log.d(TAG, "Showing expenses list")
             // Show expenses
             binding.emptyStateContainer.visibility = View.GONE
             binding.expensesRecyclerView.visibility = View.VISIBLE
             
             // Update the adapter with expenses
             expenseAdapter.submitList(expenses)
+            Log.d(TAG, "Submitted ${expenses.size} expenses to adapter")
         }
     }
     
     private fun observeViewModel() {
+        Log.d(TAG, "Setting up ViewModel observers")
         userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
             if (user == null) {
+                Log.w(TAG, "No user logged in, navigating to welcome screen")
                 findNavController().navigate(R.id.action_dashboard_to_welcome)
                 return@observe
             }
             
+            Log.d(TAG, "User logged in: ${user.uid}")
             // Load categories for the adapter
             categoryViewModel.getCategoriesByType(user.uid, TransactionType.EXPENSE)
                 .observe(viewLifecycleOwner) { categories ->
-                    android.util.Log.d("ExpensesFragment", "Loaded ${categories.size} categories")
-                    if (categories.isNotEmpty()) {
-                        // Log some category information for debugging
+                    Log.d(TAG, "Loaded ${categories.size} categories for user ${user.uid}")
+                    if (categories.isEmpty()) {
+                        Log.w(TAG, "No categories found for user ${user.uid}")
+                    } else {
                         categories.forEach { category ->
-                            android.util.Log.d("ExpensesFragment", "Category: ${category.name}, ID: ${category.id}")
+                            Log.d(TAG, "Category loaded - Name: ${category.name}, ID: ${category.id}, Type: ${category.type}")
                         }
                     }
                     expenseAdapter.updateCategoryMap(categories)
@@ -320,16 +393,20 @@ class ExpensesFragment : Fragment() {
         
         // Observe total expenses
         expenseViewModel.totalExpenses.observe(viewLifecycleOwner) { total ->
+            Log.d(TAG, "Total expenses updated: $total")
             binding.totalExpensesValue.text = total.toString()
         }
     }
 
     private fun showReceiptImage(receiptUri: String) {
+        Log.d(TAG, "Attempting to show receipt image: $receiptUri")
         try {
             // Create and show the image viewer dialog
             val imageViewerDialog = com.dreamteam.rand.ui.common.ImageViewerDialog.newInstance(receiptUri)
             imageViewerDialog.show(parentFragmentManager, "ImageViewerDialog")
+            Log.d(TAG, "Successfully showed receipt image dialog")
         } catch (e: Exception) {
+            Log.e(TAG, "Error showing receipt image: ${e.message}", e)
             android.widget.Toast.makeText(
                 requireContext(),
                 "Error opening receipt: ${e.message}",
@@ -339,6 +416,7 @@ class ExpensesFragment : Fragment() {
     }
 
     override fun onDestroyView() {
+        Log.d(TAG, "Destroying view and cleaning up resources")
         super.onDestroyView()
         _binding = null
     }

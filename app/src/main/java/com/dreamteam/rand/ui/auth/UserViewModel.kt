@@ -11,24 +11,30 @@ import com.dreamteam.rand.data.entity.User
 import com.dreamteam.rand.data.repository.UserRepository
 import kotlinx.coroutines.launch
 
+// handles all the user stuff like signing in, signing up, and keeping track of who's logged in
 class UserViewModel(application: Application) : AndroidViewModel(application) {
+    // grab the stuff we need to work with users
     private val userRepository: UserRepository
+    // keep track of who's logged in
     private val _currentUser = MutableLiveData<User?>()
     val currentUser: LiveData<User?> = _currentUser
 
+    // keep track of any errors that happen
     private val _error = MutableLiveData<String>()
     val error: LiveData<String> = _error
     
+    // store some stuff on the device so we remember who's logged in
     private val sharedPreferences = application.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
 
     init {
         val userDao = RandDatabase.getDatabase(application).userDao()
         userRepository = UserRepository(userDao)
         
-        // Check if user is already logged in
+        // check if someone was already logged in
         checkForSavedUser()
     }
     
+    // see if we remember who was logged in last time
     private fun checkForSavedUser() {
         val savedUserId = sharedPreferences.getString("user_id", null)
         val savedEmail = sharedPreferences.getString("user_email", null)
@@ -40,17 +46,18 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                     result.onSuccess { user ->
                         _currentUser.value = user
                     }.onFailure { exception ->
-                        // If there's an issue loading the user, log the error but don't clear preferences
+                        // if we can't load their info, just tell them there was an error
                         _error.value = "Failed to load user data: ${exception.message}"
                     }
                 } catch (e: Exception) {
-                    // Only clear preferences if there's a serious issue like database corruption
+                    // only clear everything if something really bad happened
                     _error.value = "Error: ${e.message}"
                 }
             }
         }
     }
 
+    // create a new account for someone
     fun registerUser(name: String, email: String, password: String) {
         viewModelScope.launch {
             val result = userRepository.registerUser(name, email, password)
@@ -63,6 +70,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // let someone sign in to their account
     fun loginUser(email: String, password: String) {
         viewModelScope.launch {
             val result = userRepository.loginUser(email, password)
@@ -75,6 +83,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
     
+    // remember who's logged in on the device
     private fun saveUserToPreferences(user: User) {
         sharedPreferences.edit().apply {
             putString("user_id", user.uid)
@@ -83,6 +92,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
     
+    // forget who was logged in
     private fun clearUserPreferences() {
         sharedPreferences.edit().apply {
             remove("user_id")
@@ -91,6 +101,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // update how far they've gotten in the app
     fun updateUserProgress(level: Int, xp: Int) {
         viewModelScope.launch {
             currentUser.value?.let { user ->
@@ -102,6 +113,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // change what the app looks like for them
     fun updateUserTheme(theme: String) {
         viewModelScope.launch {
             currentUser.value?.let { user ->
@@ -113,6 +125,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // turn notifications on or off
     fun updateNotificationSettings(enabled: Boolean) {
         viewModelScope.launch {
             currentUser.value?.let { user ->
@@ -124,6 +137,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // change what kind of money they see
     fun updateUserCurrency(currency: String) {
         viewModelScope.launch {
             currentUser.value?.let { user ->
@@ -135,6 +149,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // get the latest info about them
     fun refreshUser() {
         viewModelScope.launch {
             currentUser.value?.let { user ->
@@ -148,6 +163,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // sign them out
     fun logoutUser() {
         _currentUser.value = null
         clearUserPreferences()

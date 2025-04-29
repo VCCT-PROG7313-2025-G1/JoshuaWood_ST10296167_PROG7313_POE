@@ -20,11 +20,6 @@
             android:title="Categories" />
 
         <item
-            android:id="@+id/nav_budget"
-            android:icon="@drawable/ic_budget"
-            android:title="Budget" />
-
-        <item
             android:id="@+id/nav_savings"
             android:icon="@drawable/ic_savings"
             android:title="Goals" />
@@ -33,12 +28,6 @@
             android:id="@+id/nav_profile"
             android:icon="@drawable/ic_profile"
             android:title="Profile" />
-
-<!--        temporary photo placement-->
-        <item
-            android:id="@+id/nav_photo"
-            android:icon="@drawable/ic_photo"
-            android:title="Photo" />
     </group>
 
     <item android:title="Settings">

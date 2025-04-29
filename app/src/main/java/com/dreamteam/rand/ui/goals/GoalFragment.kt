@@ -1,6 +1,7 @@
 package com.dreamteam.rand.ui.goals
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,10 +20,16 @@ import com.dreamteam.rand.ui.expenses.ExpenseViewModel
 import com.dreamteam.rand.data.repository.ExpenseRepository
 import java.util.Calendar
 
+// this fragment shows all your spending goals
+// you can see how much you've spent compared to your goals and add new ones
 class GoalFragment : Fragment() {
+    private val TAG = "GoalFragment"
+    
+    // binding to access all the views
     private var _binding: FragmentGoalBinding? = null
     private val binding get() = _binding!!
 
+    // viewmodels to handle user data, goals, and expenses
     private val userViewModel: UserViewModel by activityViewModels()
     private lateinit var goalAdapter: GoalAdapter
 
@@ -38,31 +45,41 @@ class GoalFragment : Fragment() {
         ExpenseViewModel.Factory(repository)
     }
 
+    // create the view for showing goals
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        Log.d(TAG, "Creating goals view")
         _binding = FragmentGoalBinding.inflate(inflater, container, false)
         return binding.root
     }
 
+    // setup all the UI components after the view is created
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d(TAG, "Setting up goals view")
         setupToolbar()
         setupRecyclerView()
         setupClickListeners()
         observeViewModel()
     }
 
+    // setup the toolbar with back button
     private fun setupToolbar() {
+        Log.d(TAG, "Setting up toolbar")
         binding.toolbar.setNavigationOnClickListener {
+            Log.d(TAG, "Toolbar back button clicked")
             findNavController().navigateUp()
         }
     }
 
+    // setup the list of goals
     private fun setupRecyclerView() {
+        Log.d(TAG, "Setting up recycler view")
         goalAdapter = GoalAdapter { goal ->
+            Log.d(TAG, "Goal clicked for deletion - ID: ${goal.id}, Name: ${goal.name}")
             showDeleteConfirmationDialog(goal)
         }
 
@@ -70,74 +87,99 @@ class GoalFragment : Fragment() {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = goalAdapter
         }
+        Log.d(TAG, "RecyclerView setup complete")
     }
 
+    // ask the user if they really want to delete a goal
     private fun showDeleteConfirmationDialog(goal: Goal) {
+        Log.d(TAG, "Showing delete confirmation dialog for goal: ${goal.name}")
         androidx.appcompat.app.AlertDialog.Builder(requireContext())
             .setTitle("Delete Goal")
             .setMessage("Are you sure you want to delete '${goal.name}'?")
             .setPositiveButton("Delete") { _, _ ->
+                Log.d(TAG, "User confirmed deletion of goal: ${goal.name}")
                 goalViewModel.deleteGoal(goal)
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton("Cancel") { _, _ ->
+                Log.d(TAG, "User cancelled deletion of goal: ${goal.name}")
+            }
             .show()
     }
 
+    // setup buttons to add new goals
     private fun setupClickListeners() {
+        Log.d(TAG, "Setting up click listeners")
         binding.addGoalFab.setOnClickListener {
+            Log.d(TAG, "Add goal FAB clicked")
             findNavController().navigate(R.id.action_goal_to_addGoal)
         }
 
         binding.addFirstGoalBtn.setOnClickListener {
+            Log.d(TAG, "Add first goal button clicked")
             findNavController().navigate(R.id.action_goal_to_addGoal)
         }
     }
 
+    // watch for changes in the user and goals
     private fun observeViewModel() {
+        Log.d(TAG, "Setting up ViewModel observers")
         userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
             if (user == null) {
+                Log.w(TAG, "No user logged in, navigating to welcome screen")
                 findNavController().navigate(R.id.action_dashboard_to_welcome)
                 return@observe
             }
 
-            // Load all goals ordered by year and month
+            Log.d(TAG, "User logged in: ${user.uid}")
+            // load all goals ordered by year and month
             loadGoals(user.uid)
         }
     }
 
+    // load all goals and their spending amounts
     private fun loadGoals(userId: String) {
+        Log.d(TAG, "Loading goals for user: $userId")
         goalViewModel.getAllGoalsOrdered(userId).observe(viewLifecycleOwner) { goals ->
+            Log.d(TAG, "Loaded ${goals.size} goals")
             if (goals.isEmpty()) {
+                Log.d(TAG, "No goals found, showing empty state")
                 binding.emptyStateContainer.visibility = View.VISIBLE
                 binding.goalsContainer.visibility = View.GONE
                 binding.headerSection.visibility = View.GONE
             } else {
+                Log.d(TAG, "Showing goals list")
                 binding.emptyStateContainer.visibility = View.GONE
                 binding.goalsContainer.visibility = View.VISIBLE
                 binding.headerSection.visibility = View.VISIBLE
 
-                // Update goal count badge
+                // update how many goals you have
                 binding.goalCountText.text = goals.size.toString()
+                Log.d(TAG, "Goal count updated: ${goals.size}")
 
-                // Update each goal with its expenses
+                // update each goal with how much was spent that month
                 goals.forEach { goal ->
+                    Log.d(TAG, "Loading expenses for goal: ${goal.name} (Month: ${goal.month}, Year: ${goal.year})")
                     expenseViewModel.getExpensesByMonthAndYear(
                         userId = userId,
                         month = goal.month,
                         year = goal.year
                     ).observe(viewLifecycleOwner) { expenses ->
                         val totalSpent = expenses.sumOf { it.amount }
+                        Log.d(TAG, "Goal ${goal.name} total spent: $totalSpent (${expenses.size} expenses)")
                         goalAdapter.updateGoalExpenses(goal.copy(currentSpent = totalSpent))
                     }
                 }
 
-                // Update the adapter
+                // update the list of goals
                 goalAdapter.submitList(goals)
+                Log.d(TAG, "Submitted ${goals.size} goals to adapter")
             }
         }
     }
 
+    // clean up when the view is destroyed
     override fun onDestroyView() {
+        Log.d(TAG, "Destroying goals view")
         super.onDestroyView()
         _binding = null
     }

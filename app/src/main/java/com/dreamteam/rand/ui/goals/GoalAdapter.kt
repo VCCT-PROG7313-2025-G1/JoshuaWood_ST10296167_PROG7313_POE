@@ -14,20 +14,25 @@ import com.dreamteam.rand.databinding.ItemGoalBinding
 import java.text.SimpleDateFormat
 import java.util.*
 
+// this adapter shows a list of goals in a recyclerview
+// each goal shows its name, month/year, progress bars, and spending status
 class GoalAdapter(private val onDeleteClick: (Goal) -> Unit) :
     ListAdapter<Goal, GoalAdapter.GoalViewHolder>(GoalDiffCallback()) {
 
+    // keep track of goals and their current spending amounts
     private val goals = mutableMapOf<Long, Goal>()
 
+    // update how much has been spent on a goal
     fun updateGoalExpenses(updatedGoal: Goal) {
         goals[updatedGoal.id] = updatedGoal
-        // Find the position of the goal in the current list
+        // find where this goal is in the list
         val position = currentList.indexOfFirst { it.id == updatedGoal.id }
         if (position != -1) {
             notifyItemChanged(position)
         }
     }
 
+    // create a new view for a goal
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GoalViewHolder {
         val binding = ItemGoalBinding.inflate(
             LayoutInflater.from(parent.context),
@@ -37,18 +42,21 @@ class GoalAdapter(private val onDeleteClick: (Goal) -> Unit) :
         return GoalViewHolder(binding)
     }
 
+    // fill in the goal info when it's shown
     override fun onBindViewHolder(holder: GoalViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 
+    // this class holds all the views for a single goal
     inner class GoalViewHolder(private val binding: ItemGoalBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
+        // fill in all the goal details
         fun bind(goal: Goal) {
-            // Use the updated goal from our map if available
+            // use the latest spending amount if we have it
             val currentGoal = goals[goal.id] ?: goal
 
-            // Set goal name and header color
+            // show the goal name and color
             binding.goalName.text = currentGoal.name
             try {
                 binding.goalHeader.setBackgroundColor(Color.parseColor(currentGoal.color))
@@ -56,20 +64,20 @@ class GoalAdapter(private val onDeleteClick: (Goal) -> Unit) :
                 binding.goalHeader.setBackgroundColor(Color.GRAY)
             }
 
-            // Set month and year
+            // show the month and year
             val calendar = Calendar.getInstance()
             calendar.set(Calendar.MONTH, currentGoal.month - 1) // Calendar months are 0-based
             calendar.set(Calendar.YEAR, currentGoal.year)
             val dateFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
             binding.monthYear.text = dateFormat.format(calendar.time)
 
-            // Set amounts
+            // show all the amounts
             binding.currentAmount.text = String.format("R %.2f", currentGoal.currentSpent)
             binding.minAmount.text = String.format("R %.2f", currentGoal.minAmount)
             binding.maxAmount.text = String.format("R %.2f", currentGoal.maxAmount)
             binding.minAmountLabel.text = String.format("R %.2f", currentGoal.minAmount)
 
-            // Calculate progress for minimum goal (0 to minAmount)
+            // figure out how far along we are to the minimum goal
             val minProgress = when {
                 currentGoal.minAmount <= 0 -> 0
                 else -> ((currentGoal.currentSpent / currentGoal.minAmount) * 100)
@@ -78,7 +86,7 @@ class GoalAdapter(private val onDeleteClick: (Goal) -> Unit) :
             }
             binding.minGoalProgress.progress = minProgress
 
-            // Calculate progress for maximum goal (minAmount to maxAmount)
+            // figure out how far along we are to the maximum goal
             val maxProgress = when {
                 currentGoal.maxAmount <= currentGoal.minAmount -> 0
                 currentGoal.currentSpent <= currentGoal.minAmount -> 0
@@ -88,7 +96,7 @@ class GoalAdapter(private val onDeleteClick: (Goal) -> Unit) :
             }
             binding.maxGoalProgress.progress = maxProgress
 
-            // Set status chip style based on spending status
+            // show if we're spending too much or too little
             val context = binding.root.context
             when {
                 currentGoal.currentSpent < currentGoal.minAmount -> {
@@ -105,18 +113,21 @@ class GoalAdapter(private val onDeleteClick: (Goal) -> Unit) :
                 }
             }
 
-            // Set delete button click listener
+            // handle when the delete button is clicked
             binding.deleteButton.setOnClickListener {
                 onDeleteClick(currentGoal)
             }
         }
     }
 
+    // this class helps the recyclerview figure out what changed in the list
     private class GoalDiffCallback : DiffUtil.ItemCallback<Goal>() {
+        // check if two items are the same goal
         override fun areItemsTheSame(oldItem: Goal, newItem: Goal): Boolean {
             return oldItem.id == newItem.id
         }
 
+        // check if the goal's details changed
         override fun areContentsTheSame(oldItem: Goal, newItem: Goal): Boolean {
             return oldItem.id == newItem.id &&
                    oldItem.name == newItem.name &&

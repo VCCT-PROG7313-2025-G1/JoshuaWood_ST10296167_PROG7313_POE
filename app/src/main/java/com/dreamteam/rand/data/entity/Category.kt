@@ -5,6 +5,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+// spending categories table - organizes transactions
 @Entity(
     tableName = "categories",
     foreignKeys = [
@@ -20,12 +21,12 @@ import androidx.room.PrimaryKey
 data class Category(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val userId: String,
-    val name: String,
-    val type: TransactionType,
-    val budget: Double?,
-    val color: String,
-    val icon: String,
-    val isDefault: Boolean,
-    val createdAt: Long
+    val userId: String,           // who owns this category
+    val name: String,             // category name
+    val type: TransactionType,    // income or expense
+    val budget: Double?,          // budget limit (optional)
+    val color: String,            // ui color
+    val icon: String,             // category icon
+    val isDefault: Boolean,       // is it a system category
+    val createdAt: Long           // when category was created
 ) 

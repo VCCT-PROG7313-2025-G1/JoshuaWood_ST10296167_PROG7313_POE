@@ -5,6 +5,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+// tracks user achievements and rewards
 @Entity(
     tableName = "achievements",
     foreignKeys = [
@@ -20,11 +21,11 @@ import androidx.room.PrimaryKey
 data class Achievement(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val userId: String,
-    val type: String,
-    val unlockedAt: Long,
-    val progress: Int,
-    val description: String,
-    val icon: String,
-    val xpReward: Int
+    val userId: String,           // who earned this
+    val type: String,             // achievement type
+    val unlockedAt: Long,         // when it was earned
+    val progress: Int,            // progress towards completion
+    val description: String,      // what it's for
+    val icon: String,             // achievement icon
+    val xpReward: Int             // experience points earned
 ) 

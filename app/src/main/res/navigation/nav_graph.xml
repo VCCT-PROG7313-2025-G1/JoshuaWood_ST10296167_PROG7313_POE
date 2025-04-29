@@ -57,9 +57,6 @@
             android:id="@+id/action_dashboard_to_transactions"
             app:destination="@id/expensesFragment" />
         <action
-            android:id="@+id/action_dashboard_to_budget"
-            app:destination="@id/budgetFragment" />
-        <action
             android:id="@+id/action_dashboard_to_savings"
             app:destination="@id/goalFragment" />
         <action
@@ -92,11 +89,6 @@
             android:id="@+id/action_expenses_to_addExpense"
             app:destination="@id/addExpenseFragment" />
     </fragment>
-
-    <fragment
-        android:id="@+id/budgetFragment"
-        android:name="com.dreamteam.rand.ui.budget.BudgetFragment"
-        android:label="BudgetFragment" />
 
     <fragment
         android:id="@+id/goalFragment"

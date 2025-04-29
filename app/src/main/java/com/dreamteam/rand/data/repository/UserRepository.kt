@@ -6,8 +6,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
+// handles all user-related operations
 class UserRepository(private val userDao: UserDao) {
 
+    // register a new user
     suspend fun registerUser(name: String, email: String, password: String): Result<User> {
         return withContext(Dispatchers.IO) {
             try {
@@ -35,6 +37,7 @@ class UserRepository(private val userDao: UserDao) {
         }
     }
 
+    // log in a user
     suspend fun loginUser(email: String, password: String): Result<User> {
         return withContext(Dispatchers.IO) {
             try {
@@ -50,6 +53,7 @@ class UserRepository(private val userDao: UserDao) {
         }
     }
 
+    // update user's level and xp
     suspend fun updateUserProgress(uid: String, level: Int, xp: Int): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
@@ -61,6 +65,7 @@ class UserRepository(private val userDao: UserDao) {
         }
     }
 
+    // change user's theme
     suspend fun updateUserTheme(uid: String, theme: String): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
@@ -72,6 +77,7 @@ class UserRepository(private val userDao: UserDao) {
         }
     }
 
+    // toggle notifications
     suspend fun updateNotificationSettings(uid: String, enabled: Boolean): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
@@ -83,6 +89,7 @@ class UserRepository(private val userDao: UserDao) {
         }
     }
 
+    // change user's currency
     suspend fun updateUserCurrency(uid: String, currency: String): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
@@ -94,6 +101,7 @@ class UserRepository(private val userDao: UserDao) {
         }
     }
 
+    // get user by their id
     suspend fun getUserByUid(uid: String): Result<User> {
         return withContext(Dispatchers.IO) {
             try {

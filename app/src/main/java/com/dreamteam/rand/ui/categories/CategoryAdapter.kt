@@ -11,11 +11,15 @@ import com.dreamteam.rand.databinding.ItemCategoryBinding
 import java.text.NumberFormat
 import java.util.Locale
 
+// this adapter shows a list of categories in a recyclerview
+// each category shows its name, how much was spent, its color, and an icon
 class CategoryAdapter(private val onEditClick: (Category) -> Unit) :
     ListAdapter<Category, CategoryAdapter.CategoryViewHolder>(CategoryDiffCallback()) {
 
+    // keep track of how much was spent in each category
     private val categoryTotals = mutableMapOf<Long, Double>()
 
+    // update how much was spent in a category and refresh its display
     fun updateCategoryTotal(categoryId: Long, total: Double) {
         categoryTotals[categoryId] = total
         // Find the position of the category and notify the change
@@ -24,6 +28,7 @@ class CategoryAdapter(private val onEditClick: (Category) -> Unit) :
         }
     }
 
+    // create a new view for a category
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryViewHolder {
         val binding = ItemCategoryBinding.inflate(
             LayoutInflater.from(parent.context),
@@ -33,29 +38,32 @@ class CategoryAdapter(private val onEditClick: (Category) -> Unit) :
         return CategoryViewHolder(binding)
     }
 
+    // fill in the category info when it's shown
     override fun onBindViewHolder(holder: CategoryViewHolder, position: Int) {
         val category = getItem(position)
         holder.bind(category, categoryTotals[category.id] ?: 0.0)
     }
 
+    // this class holds all the views for a single category
     inner class CategoryViewHolder(val binding: ItemCategoryBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
+        // fill in all the category details
         fun bind(category: Category, totalSpent: Double) {
             binding.categoryName.text = category.name
             
-            // Format currency amount
+            // show the amount spent in south african rand
             val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("en", "ZA"))
             binding.totalSpentAmount.text = currencyFormatter.format(totalSpent)
 
-            // Set color
+            // set the category's color
             try {
                 binding.categoryColorIndicator.setBackgroundColor(Color.parseColor(category.color))
             } catch (e: Exception) {
                 binding.categoryColorIndicator.setBackgroundColor(Color.GRAY)
             }
 
-            // Set icon
+            // set the category's icon
             val resources = binding.root.context.resources
             val packageName = binding.root.context.packageName
             val iconResId = resources.getIdentifier(
@@ -68,11 +76,14 @@ class CategoryAdapter(private val onEditClick: (Category) -> Unit) :
         }
     }
 
+    // this class helps the recyclerview figure out what changed in the list
     private class CategoryDiffCallback : DiffUtil.ItemCallback<Category>() {
+        // check if two items are the same category
         override fun areItemsTheSame(oldItem: Category, newItem: Category): Boolean {
             return oldItem.id == newItem.id
         }
 
+        // check if the category's details changed
         override fun areContentsTheSame(oldItem: Category, newItem: Category): Boolean {
             return oldItem == newItem && 
                    oldItem.name == newItem.name &&
