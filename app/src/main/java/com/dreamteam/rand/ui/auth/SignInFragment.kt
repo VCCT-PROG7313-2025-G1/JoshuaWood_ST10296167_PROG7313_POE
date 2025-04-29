@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.dreamteam.rand.R
@@ -29,8 +28,42 @@ class SignInFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupAnimations()
         setupClickListeners()
         observeViewModel()
+    }
+
+    private fun setupAnimations() {
+        // Define animation parameters
+        val fadeDuration = 500L // Duration of each fade-in
+        val translationDistance = -20f // Slight upward translation
+        val staggerDelay = 200L // Delay between each element
+
+        // List of views to animate with their respective start delays
+        val viewsToAnimate = listOf(
+            binding.logoImageView to 0L, // Initial delay is 0
+            binding.titleTextView to staggerDelay, // Delay for the first view
+            binding.cardView to staggerDelay * 2, // Delay for the second view
+            binding.emailLayout to staggerDelay * 3, // Delay for the third view ... etc
+            binding.passwordLayout to staggerDelay * 4,
+            binding.signInButton to staggerDelay * 5,
+            binding.forgotPasswordText to staggerDelay * 6,
+            binding.signUpPromptLayout to staggerDelay * 7
+        )
+
+        // Apply fade-in and translation animation to each view
+        viewsToAnimate.forEach { (view, delay) ->
+            view.apply {
+                alpha = 0f // Initial alpha
+                translationY = translationDistance // Initial translation
+                animate() // Start the animation
+                    .alpha(1f)
+                    .translationY(0f) // Fade-in and translation
+                    .setDuration(fadeDuration) // Duration of the animation
+                    .setStartDelay(delay)
+                    .start() // Start the animation
+            }
+        }
     }
 
     private fun setupClickListeners() {
@@ -38,12 +71,12 @@ class SignInFragment : Fragment() {
             if (validateInput()) {
                 val email = binding.emailInput.text.toString().trim()
                 val password = binding.passwordInput.text.toString().trim()
-                
+
                 // Mark login as in progress
                 isLoginInProgress = true
-                
+
                 userViewModel.loginUser(email, password)
-                
+
                 // Show loading state
                 binding.signInButton.isEnabled = false
                 binding.progressBar.visibility = View.VISIBLE
@@ -64,7 +97,7 @@ class SignInFragment : Fragment() {
             if (user != null && isLoginInProgress) {
                 // Reset flag first to prevent navigation loops
                 isLoginInProgress = false
-                
+
                 try {
                     findNavController().navigate(R.id.action_signIn_to_dashboard)
                 } catch (e: Exception) {
@@ -110,4 +143,4 @@ class SignInFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-} 
+}
