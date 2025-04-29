@@ -8,13 +8,14 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/primary">
+        android:background="@drawable/gradient_background">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="@drawable/ic_back"
+            app:navigationIconTint="@color/white"
             app:title="Expenses"
             app:titleTextColor="@color/white" />
 
@@ -128,7 +129,7 @@
                             android:hint="Tap to select category"/>
 
                     </com.google.android.material.textfield.TextInputLayout>
-                    
+
                     <!-- Clear All Filters Button -->
                     <Button
                         android:id="@+id/clearAllFiltersButton"
@@ -197,8 +198,8 @@
                 tools:visibility="visible">
 
                 <ImageView
-                    android:layout_width="150dp"
-                    android:layout_height="150dp"
+                    android:layout_width="162dp"
+                    android:layout_height="112dp"
                     android:src="@drawable/ic_empty_list" />
 
                 <TextView
@@ -232,6 +233,7 @@
         android:layout_margin="16dp"
         android:contentDescription="Add expense"
         app:srcCompat="@drawable/ic_add"
+
         app:tint="@color/white" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout> 
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

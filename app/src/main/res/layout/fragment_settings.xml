@@ -8,7 +8,7 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/primary">
+        android:background="@drawable/gradient_background">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
@@ -17,6 +17,7 @@
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
             app:navigationIcon="@drawable/ic_back"
+            app:navigationIconTint="@color/white"
             app:title="@string/settings"
             app:titleTextColor="@color/white" />
 
