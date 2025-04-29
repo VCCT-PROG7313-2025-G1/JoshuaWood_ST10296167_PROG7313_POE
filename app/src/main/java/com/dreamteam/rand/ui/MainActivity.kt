@@ -57,6 +57,7 @@ class MainActivity : AppCompatActivity() {
         
         // if they're already at the dashboard, we're good
         if (currentDestId == R.id.dashboardFragment) {
+            Log.d("MainActivity", "User already at dashboard, no navigation needed")
             return
         }
         
@@ -64,23 +65,38 @@ class MainActivity : AppCompatActivity() {
         when (currentDestId) {
             R.id.signInFragment -> {
                 try {
+                    Log.d("MainActivity", "Navigating from signIn to dashboard")
                     navController.navigate(R.id.action_signIn_to_dashboard)
                 } catch (e: Exception) {
-                    Log.e("MainActivity", "Navigation error: ${e.message}")
+                    Log.e("MainActivity", "Navigation error from signIn to dashboard: ${e.message}")
+                    // If navigation fails, try a safer approach with a simple navigate call
+                    try {
+                        navController.navigate(R.id.dashboardFragment)
+                    } catch (e2: Exception) {
+                        Log.e("MainActivity", "Critical navigation error: ${e2.message}")
+                    }
                 }
             }
             R.id.signUpFragment -> {
                 try {
+                    Log.d("MainActivity", "Navigating from signUp to dashboard")
                     navController.navigate(R.id.action_signUp_to_dashboard)
                 } catch (e: Exception) {
-                    Log.e("MainActivity", "Navigation error: ${e.message}")
+                    Log.e("MainActivity", "Navigation error from signUp to dashboard: ${e.message}")
+                    // If navigation fails, try a safer approach with a simple navigate call
+                    try {
+                        navController.navigate(R.id.dashboardFragment)
+                    } catch (e2: Exception) {
+                        Log.e("MainActivity", "Critical navigation error: ${e2.message}")
+                    }
                 }
             }
             R.id.welcomeFragment -> {
                 try {
+                    Log.d("MainActivity", "Navigating from welcome to signIn")
                     navController.navigate(R.id.action_welcome_to_signIn)
                 } catch (e: Exception) {
-                    Log.e("MainActivity", "Navigation error: ${e.message}")
+                    Log.e("MainActivity", "Navigation error from welcome to signIn: ${e.message}")
                 }
             }
         }

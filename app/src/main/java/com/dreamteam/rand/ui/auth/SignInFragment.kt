@@ -122,12 +122,40 @@ class SignInFragment : Fragment() {
                 // reset the flag so we don't try to navigate again
                 isLoginInProgress = false
 
+                // Ensure we're still on the SignInFragment before navigating
+                if (!isAdded || view == null) {
+                    Log.d(TAG, "Fragment no longer attached, skipping navigation")
+                    return@observe
+                }
+
                 try {
-                    Log.d(TAG, "Navigating to dashboard")
-                    findNavController().navigate(R.id.action_signIn_to_dashboard)
+                    // Check if we're on the sign-in fragment before navigating
+                    val currentDestId = findNavController().currentDestination?.id
+                    if (currentDestId == R.id.signInFragment) {
+                        Log.d(TAG, "Navigating to dashboard")
+                        findNavController().navigate(R.id.action_signIn_to_dashboard)
+                    } else if (currentDestId == R.id.dashboardFragment) {
+                        Log.d(TAG, "Already on dashboard, no navigation needed")
+                    } else {
+                        Log.d(TAG, "Not on signInFragment (current: $currentDestId), using safe navigation")
+                        // If on an unexpected screen, navigate directly to dashboard
+                        try {
+                            findNavController().navigate(R.id.dashboardFragment)
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Safe navigation failed: ${e.message}")
+                        }
+                    }
                 } catch (e: Exception) {
                     Log.e(TAG, "Navigation failed after login: ${e.message}")
-                    Snackbar.make(binding.root, "Login successful but navigation failed", Snackbar.LENGTH_LONG).show()
+                    if (isAdded && view != null) {
+                        Snackbar.make(binding.root, "Login successful but navigation failed", Snackbar.LENGTH_LONG).show()
+                    }
+                }
+                
+                // Always make sure to hide the loading spinner
+                if (isAdded && view != null) {
+                    binding.signInButton.isEnabled = true
+                    binding.progressBar.visibility = View.GONE
                 }
             }
         }
