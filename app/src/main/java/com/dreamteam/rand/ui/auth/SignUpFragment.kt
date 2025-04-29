@@ -6,12 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.util.Patterns
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.dreamteam.rand.R
 import com.dreamteam.rand.databinding.FragmentSignUpBinding
 import com.google.android.material.snackbar.Snackbar
+import android.animation.ObjectAnimator
+import android.animation.AnimatorSet
 
 class SignUpFragment : Fragment() {
 
@@ -33,6 +34,62 @@ class SignUpFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupClickListeners()
         observeViewModel()
+        startFadeInAnimations()
+    }
+
+    private fun startFadeInAnimations() {
+        // Create fade-in animators for each view
+        val logoAnimator = ObjectAnimator.ofFloat(binding.logoImageView, "alpha", 0f, 1f).apply {
+            duration = 500 // lasts 500 ms
+            startDelay = 100 // starts after 100ms
+        }
+
+
+        // creates a fade in animation for the title text view
+        val titleAnimator = ObjectAnimator.ofFloat(binding.titleTextView, "alpha", 0f, 1f).apply {
+            duration = 500 // lasts 500 ms
+            startDelay = 300 // starts after 300 ms
+        }
+
+        // Slower fade-in for text fields
+        val nameAnimator = ObjectAnimator.ofFloat(binding.nameLayout, "alpha", 0f, 1f).apply {
+            duration = 1000 // Slower duration
+            startDelay = 500 // starts after 500 ms
+        }
+
+        val emailAnimator = ObjectAnimator.ofFloat(binding.emailLayout, "alpha", 0f, 1f).apply {
+            duration = 1000 // Slower duration
+            startDelay = 700 // starts after 700 ms
+        }
+
+        val passwordAnimator = ObjectAnimator.ofFloat(binding.passwordLayout, "alpha", 0f, 1f).apply {
+            duration = 1000 // Slower duration
+            startDelay = 900 // starts after 900 ms
+        }
+
+        val buttonAnimator = ObjectAnimator.ofFloat(binding.signUpButton, "alpha", 0f, 1f).apply {
+            duration = 500 // short fade duration
+            startDelay = 1100 // start after 1100ms
+        }
+
+        val signInLayoutAnimator = ObjectAnimator.ofFloat(binding.signInLayout, "alpha", 0f, 1f).apply {
+            duration = 500 // short duration
+            startDelay = 1300 // starts last in the sequence
+        }
+
+        // Play animations together
+        AnimatorSet().apply {
+            playTogether(
+                logoAnimator,
+                titleAnimator,
+                nameAnimator,
+                emailAnimator,
+                passwordAnimator,
+                buttonAnimator,
+                signInLayoutAnimator
+            )
+            start() // starts the animation sequence
+        }
     }
 
     private fun setupClickListeners() {
@@ -41,12 +98,12 @@ class SignUpFragment : Fragment() {
                 val name = binding.nameInput.text.toString().trim()
                 val email = binding.emailInput.text.toString().trim()
                 val password = binding.passwordInput.text.toString().trim()
-                
+
                 // Mark registration as in progress
                 isRegistrationInProgress = true
-                
+
                 userViewModel.registerUser(name, email, password)
-                
+
                 // Show loading state
                 binding.signUpButton.isEnabled = false
                 binding.progressBar.visibility = View.VISIBLE
@@ -63,7 +120,7 @@ class SignUpFragment : Fragment() {
             if (user != null && isRegistrationInProgress) {
                 // Reset flag first to prevent navigation loops
                 isRegistrationInProgress = false
-                
+
                 try {
                     findNavController().navigate(R.id.action_signUp_to_dashboard)
                 } catch (e: Exception) {
@@ -123,4 +180,4 @@ class SignUpFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-} 
+}

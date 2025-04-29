@@ -27,6 +27,7 @@ class WelcomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupClickListeners()
+        animateViewsStaggered() // Call to start the staggered animation
     }
 
     private fun setupClickListeners() {
@@ -38,9 +39,33 @@ class WelcomeFragment : Fragment() {
             findNavController().navigate(R.id.action_welcome_to_signUp)
         }
     }
+// staggered fade in animation that is created when the onViewCreated method is called
+    // displays the logo, app name, tagline, and two buttons in a slow sequential sequence for a transition effect
+    private fun animateViewsStaggered() { // Staggered animation
+        val viewsToAnimate = listOf(
+            binding.logoImageView,
+            binding.taglineTextView,
+            binding.signInButton,
+            binding.signUpButton
+        )
+
+        val duration = 500L // Duration of each animation
+        val delayBetweenItems = 150L // Delay between each item
+
+        viewsToAnimate.forEachIndexed { index, view ->
+            view.alpha = 0f
+            view.translationY = 40f // Initial translation
+            view.animate()
+                .alpha(1f)
+                .translationY(0f) // Fade-in and translation
+                .setStartDelay(index * delayBetweenItems) // Delay based on position
+                .setDuration(duration)
+                .start()
+        }
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
-} 
+}
