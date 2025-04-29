@@ -12,12 +12,13 @@ import com.dreamteam.rand.R
 import com.dreamteam.rand.databinding.ActivityMainBinding
 import com.dreamteam.rand.ui.auth.UserViewModel
 
+// this is the main activity that handles the whole app's navigation and auth state
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
     
-    // Initialize the shared UserViewModel
+    // grab the shared viewmodel that knows if someone's logged in
     private val userViewModel: UserViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,40 +26,41 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Set up Navigation
+        // set up the navigation system
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
-        // Configure top-level destinations
+        // tell the app which screens are at the top level
         appBarConfiguration = AppBarConfiguration(
             setOf(R.id.welcomeFragment, R.id.dashboardFragment)
         )
 
-        // Observe authentication state and navigate accordingly
+        // watch for when someone logs in or out
         userViewModel.currentUser.observe(this) { user ->
             val currentDest = navController.currentDestination ?: return@observe
             Log.d("MainActivity", "Auth state changed: user=${user?.name}, at=${currentDest.label}")
             
             if (user != null) {
-                // User is logged in - move to dashboard if on auth screens
+                // they're logged in, make sure they're not stuck on login screens
                 handleLoggedInUser(currentDest)
             } else {
-                // User is logged out - move to auth screens if needed
+                // they're logged out, send them to the login screens
                 handleLoggedOutUser(currentDest)
             }
         }
     }
     
+    // handle what happens when someone logs in
     private fun handleLoggedInUser(currentDest: NavDestination) {
         val currentDestId = currentDest.id
         
-        // Don't do anything if we're already at the dashboard
+        // if they're already at the dashboard, we're good
         if (currentDestId == R.id.dashboardFragment) {
             return
         }
         
-        // Only handle known auth screens - welcome, signIn, signUp
+        // figure out which login screen they're on and send them to the right place
         when (currentDestId) {
             R.id.signInFragment -> {
                 try {
@@ -84,17 +86,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
     
+    // handle what happens when someone logs out
     private fun handleLoggedOutUser(currentDest: NavDestination) {
         val currentDestId = currentDest.id
         
-        // Don't do anything if we're already at an auth screen
+        // if they're already on a login screen, we're good
         if (currentDestId == R.id.welcomeFragment || 
             currentDestId == R.id.signInFragment || 
             currentDestId == R.id.signUpFragment) {
             return
         }
         
-        // Handle logout based on current screen
+        // figure out where they are and send them to the welcome screen
         try {
             when (currentDestId) {
                 R.id.dashboardFragment -> {
@@ -107,14 +110,14 @@ class MainActivity : AppCompatActivity() {
                     navController.navigate(R.id.action_profile_to_welcome)
                 }
                 else -> {
-                    // For any other screen, try to navigate directly to welcome
+                    // if we don't know where they are, just go to welcome
                     navController.navigate(R.id.welcomeFragment)
                 }
             }
         } catch (e: Exception) {
             Log.e("MainActivity", "Logout navigation error: ${e.message}")
             try {
-                // Last resort: clear back stack and go to welcome
+                // if all else fails, clear everything and go to welcome
                 navController.popBackStack()
                 navController.navigate(R.id.welcomeFragment)
             } catch (e: Exception) {
@@ -123,6 +126,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // handle the back button in the toolbar
     override fun onSupportNavigateUp(): Boolean {
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment

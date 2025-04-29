@@ -23,32 +23,39 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import java.text.SimpleDateFormat
 import java.util.*
 
-// displays and manages expense categories with spending statistics
+// this fragment shows all the categories and how much was spent in each one
+// you can filter by date range and see spending stats
 class CategoriesFragment : Fragment() {
     private val TAG = "CategoriesFragment"
     
+    // binding to access the views
     private var _binding: FragmentCategoriesBinding? = null
     private val binding get() = _binding!!
     
+    // viewmodels to handle data
     private val userViewModel: UserViewModel by activityViewModels()
     private lateinit var categoryAdapter: CategoryAdapter
     
+    // date range for filtering
     private var startDate: Long? = null
     private var endDate: Long? = null
     private val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
     
+    // setup the category viewmodel with its repository
     private val categoryViewModel: CategoryViewModel by viewModels {
         val database = RandDatabase.getDatabase(requireContext())
         val repository = CategoryRepository(database.categoryDao())
         CategoryViewModel.Factory(repository)
     }
     
+    // setup the expense viewmodel with its repository
     private val expenseViewModel: ExpenseViewModel by viewModels {
         val database = RandDatabase.getDatabase(requireContext())
         val repository = ExpenseRepository(database.transactionDao())
         ExpenseViewModel.Factory(repository)
     }
 
+    // create the view for this fragment
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -59,6 +66,7 @@ class CategoriesFragment : Fragment() {
         return binding.root
     }
 
+    // setup everything after the view is created
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "Setting up categories view")
@@ -69,6 +77,7 @@ class CategoriesFragment : Fragment() {
         observeViewModel()
     }
 
+    // setup the toolbar with back button
     private fun setupToolbar() {
         Log.d(TAG, "Setting up toolbar")
         binding.toolbar.setNavigationOnClickListener {
@@ -77,6 +86,7 @@ class CategoriesFragment : Fragment() {
         }
     }
 
+    // setup the list of categories
     private fun setupRecyclerView() {
         Log.d(TAG, "Setting up recycler view")
         categoryAdapter = CategoryAdapter { category ->
@@ -91,6 +101,7 @@ class CategoriesFragment : Fragment() {
         Log.d(TAG, "RecyclerView setup complete")
     }
 
+    // clear the date range filter
     private fun clearDateRange() {
         Log.d(TAG, "Clearing date range filter")
         startDate = null
@@ -100,6 +111,7 @@ class CategoriesFragment : Fragment() {
         loadCategoriesWithDateRange()
     }
 
+    // setup all the click listeners for buttons and fields
     private fun setupClickListeners() {
         Log.d(TAG, "Setting up click listeners")
         binding.addCategoryFab.setOnClickListener {
@@ -124,6 +136,7 @@ class CategoriesFragment : Fragment() {
         }
     }
 
+    // show the date picker dialog to select a date range
     private fun showDateRangePicker() {
         Log.d(TAG, "Showing date range picker")
         val dateRangePicker = MaterialDatePicker.Builder.dateRangePicker()
@@ -147,6 +160,7 @@ class CategoriesFragment : Fragment() {
         dateRangePicker.show(parentFragmentManager, "DATE_RANGE_PICKER")
     }
 
+    // update the text showing the selected date range
     private fun updateDateRangeText() {
         Log.d(TAG, "Updating date range text")
         if (startDate != null && endDate != null) {
@@ -161,6 +175,7 @@ class CategoriesFragment : Fragment() {
         }
     }
 
+    // watch for changes in the viewmodels
     private fun observeViewModel() {
         Log.d(TAG, "Setting up ViewModel observers")
         userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
@@ -176,6 +191,7 @@ class CategoriesFragment : Fragment() {
         }
     }
 
+    // load all categories for a user
     private fun loadCategories(userId: String, type: TransactionType) {
         Log.d(TAG, "Loading categories for user: $userId, type: $type")
         categoryViewModel.getCategoriesByType(userId, type).observe(viewLifecycleOwner) { categories ->
@@ -200,6 +216,7 @@ class CategoriesFragment : Fragment() {
         }
     }
 
+    // load categories with their spending totals for the selected date range
     private fun loadCategoriesWithDateRange(categories: List<Category> = categoryAdapter.currentList, userId: String? = userViewModel.currentUser.value?.uid) {
         if (userId == null) {
             Log.w(TAG, "Cannot load categories with date range: no user ID")
@@ -225,6 +242,7 @@ class CategoriesFragment : Fragment() {
         Log.d(TAG, "Submitted ${categories.size} categories to adapter")
     }
 
+    // clean up when the view is destroyed
     override fun onDestroyView() {
         Log.d(TAG, "Destroying categories view")
         super.onDestroyView()

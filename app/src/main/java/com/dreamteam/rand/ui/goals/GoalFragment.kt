@@ -20,13 +20,16 @@ import com.dreamteam.rand.ui.expenses.ExpenseViewModel
 import com.dreamteam.rand.data.repository.ExpenseRepository
 import java.util.Calendar
 
-// displays and manages spending goals with progress tracking
+// this fragment shows all your spending goals
+// you can see how much you've spent compared to your goals and add new ones
 class GoalFragment : Fragment() {
     private val TAG = "GoalFragment"
     
+    // binding to access all the views
     private var _binding: FragmentGoalBinding? = null
     private val binding get() = _binding!!
 
+    // viewmodels to handle user data, goals, and expenses
     private val userViewModel: UserViewModel by activityViewModels()
     private lateinit var goalAdapter: GoalAdapter
 
@@ -42,6 +45,7 @@ class GoalFragment : Fragment() {
         ExpenseViewModel.Factory(repository)
     }
 
+    // create the view for showing goals
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -52,6 +56,7 @@ class GoalFragment : Fragment() {
         return binding.root
     }
 
+    // setup all the UI components after the view is created
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "Setting up goals view")
@@ -61,6 +66,7 @@ class GoalFragment : Fragment() {
         observeViewModel()
     }
 
+    // setup the toolbar with back button
     private fun setupToolbar() {
         Log.d(TAG, "Setting up toolbar")
         binding.toolbar.setNavigationOnClickListener {
@@ -69,6 +75,7 @@ class GoalFragment : Fragment() {
         }
     }
 
+    // setup the list of goals
     private fun setupRecyclerView() {
         Log.d(TAG, "Setting up recycler view")
         goalAdapter = GoalAdapter { goal ->
@@ -83,6 +90,7 @@ class GoalFragment : Fragment() {
         Log.d(TAG, "RecyclerView setup complete")
     }
 
+    // ask the user if they really want to delete a goal
     private fun showDeleteConfirmationDialog(goal: Goal) {
         Log.d(TAG, "Showing delete confirmation dialog for goal: ${goal.name}")
         androidx.appcompat.app.AlertDialog.Builder(requireContext())
@@ -98,6 +106,7 @@ class GoalFragment : Fragment() {
             .show()
     }
 
+    // setup buttons to add new goals
     private fun setupClickListeners() {
         Log.d(TAG, "Setting up click listeners")
         binding.addGoalFab.setOnClickListener {
@@ -111,6 +120,7 @@ class GoalFragment : Fragment() {
         }
     }
 
+    // watch for changes in the user and goals
     private fun observeViewModel() {
         Log.d(TAG, "Setting up ViewModel observers")
         userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
@@ -121,11 +131,12 @@ class GoalFragment : Fragment() {
             }
 
             Log.d(TAG, "User logged in: ${user.uid}")
-            // Load all goals ordered by year and month
+            // load all goals ordered by year and month
             loadGoals(user.uid)
         }
     }
 
+    // load all goals and their spending amounts
     private fun loadGoals(userId: String) {
         Log.d(TAG, "Loading goals for user: $userId")
         goalViewModel.getAllGoalsOrdered(userId).observe(viewLifecycleOwner) { goals ->
@@ -141,11 +152,11 @@ class GoalFragment : Fragment() {
                 binding.goalsContainer.visibility = View.VISIBLE
                 binding.headerSection.visibility = View.VISIBLE
 
-                // Update goal count badge
+                // update how many goals you have
                 binding.goalCountText.text = goals.size.toString()
                 Log.d(TAG, "Goal count updated: ${goals.size}")
 
-                // Update each goal with its expenses
+                // update each goal with how much was spent that month
                 goals.forEach { goal ->
                     Log.d(TAG, "Loading expenses for goal: ${goal.name} (Month: ${goal.month}, Year: ${goal.year})")
                     expenseViewModel.getExpensesByMonthAndYear(
@@ -159,13 +170,14 @@ class GoalFragment : Fragment() {
                     }
                 }
 
-                // Update the adapter
+                // update the list of goals
                 goalAdapter.submitList(goals)
                 Log.d(TAG, "Submitted ${goals.size} goals to adapter")
             }
         }
     }
 
+    // clean up when the view is destroyed
     override fun onDestroyView() {
         Log.d(TAG, "Destroying goals view")
         super.onDestroyView()

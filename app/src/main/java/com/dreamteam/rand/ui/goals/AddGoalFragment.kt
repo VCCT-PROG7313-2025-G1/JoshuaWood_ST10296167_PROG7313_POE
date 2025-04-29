@@ -20,14 +20,16 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import java.text.SimpleDateFormat
 import java.util.*
 
-// lets you add a new spending goal with a name, amount range, and color
+// this fragment lets you add a new spending goal
+// you can set a name, amount range, month/year, and pick a color
 class AddGoalFragment : Fragment() {
     private val TAG = "AddGoalFragment"
     
+    // binding to access all the views
     private var _binding: FragmentAddGoalBinding? = null
     private val binding get() = _binding!!
     
-    // grab the current user and goal viewmodel
+    // viewmodels to handle user data and goals
     private val userViewModel: UserViewModel by activityViewModels()
     private val goalViewModel: GoalViewModel by viewModels {
         val database = RandDatabase.getDatabase(requireContext())
@@ -40,6 +42,7 @@ class AddGoalFragment : Fragment() {
     private var selectedMonth = 0
     private var selectedYear = 0
     
+    // create the view for adding a goal
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -50,10 +53,10 @@ class AddGoalFragment : Fragment() {
         return binding.root
     }
 
+    // setup all the UI components after the view is created
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "Setting up add goal view")
-        // set up all the ui stuff
         setupToolbar()
         setupColorSelection()
         setupMonthYearPicker()
@@ -61,7 +64,7 @@ class AddGoalFragment : Fragment() {
         observeViewModel()
     }
 
-    // set up the back button in the toolbar
+    // setup the toolbar with back button
     private fun setupToolbar() {
         Log.d(TAG, "Setting up toolbar")
         binding.toolbar.setNavigationOnClickListener {
@@ -70,7 +73,7 @@ class AddGoalFragment : Fragment() {
         }
     }
 
-    // set up the month/year picker button
+    // setup the month/year picker button
     private fun setupMonthYearPicker() {
         Log.d(TAG, "Setting up month/year picker")
         binding.monthInput.setOnClickListener {
@@ -110,7 +113,7 @@ class AddGoalFragment : Fragment() {
         datePicker.show(parentFragmentManager, "monthYearPicker")
     }
 
-    // set up the color picker buttons
+    // setup the color picker buttons
     private fun setupColorSelection() {
         Log.d(TAG, "Setting up color selection")
         // pair up each color button with its selection indicator
@@ -139,7 +142,7 @@ class AddGoalFragment : Fragment() {
         }
     }
 
-    // set up the save button with all the validation
+    // setup the save button with all the validation
     private fun setupSaveButton() {
         Log.d(TAG, "Setting up save button")
         binding.saveButton.setOnClickListener {
@@ -224,6 +227,7 @@ class AddGoalFragment : Fragment() {
         }
     }
 
+    // clean up when the view is destroyed
     override fun onDestroyView() {
         Log.d(TAG, "Destroying add goal view")
         super.onDestroyView()

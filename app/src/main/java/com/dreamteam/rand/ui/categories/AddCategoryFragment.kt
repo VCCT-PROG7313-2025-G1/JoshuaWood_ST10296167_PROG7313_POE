@@ -25,10 +25,12 @@ import com.dreamteam.rand.databinding.FragmentAddCategoryBinding
 import com.dreamteam.rand.ui.auth.UserViewModel
 import com.google.android.material.card.MaterialCardView
 
-// lets you add a new category with a name, icon, and color
+// this fragment lets you create a new category
+// you can pick a name, color, and icon for your category
 class AddCategoryFragment : Fragment() {
     private val TAG = "AddCategoryFragment"
     
+    // binding to access the views
     private var _binding: FragmentAddCategoryBinding? = null
     private val binding get() = _binding!!
     
@@ -53,6 +55,7 @@ class AddCategoryFragment : Fragment() {
         "ic_entertainment" to R.drawable.ic_entertainment
     )
 
+    // create the view for this fragment
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -63,6 +66,7 @@ class AddCategoryFragment : Fragment() {
         return binding.root
     }
 
+    // setup everything after the view is created
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "Setting up add category view")
@@ -253,12 +257,13 @@ class AddCategoryFragment : Fragment() {
                     Toast.makeText(requireContext(), "Failed to save category", Toast.LENGTH_SHORT).show()
                 }
                 null -> {
-                    Log.d(TAG, "Save operation not yet completed")
+                    // still saving, do nothing
                 }
             }
         }
     }
 
+    // clean up when the view is destroyed
     override fun onDestroyView() {
         Log.d(TAG, "Destroying add category view")
         super.onDestroyView()

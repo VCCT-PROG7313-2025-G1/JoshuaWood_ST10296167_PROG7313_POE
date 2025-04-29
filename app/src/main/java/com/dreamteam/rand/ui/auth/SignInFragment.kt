@@ -12,13 +12,15 @@ import com.dreamteam.rand.R
 import com.dreamteam.rand.databinding.FragmentSignInBinding
 import com.google.android.material.snackbar.Snackbar
 
-// handles user authentication with animations and validation
+// lets people sign in to their account with email and password
 class SignInFragment : Fragment() {
     private val TAG = "SignInFragment"
     
     private var _binding: FragmentSignInBinding? = null
     private val binding get() = _binding!!
+    // grab the shared viewmodel that handles signing in
     private val userViewModel: UserViewModel by activityViewModels()
+    // keep track of if we're already trying to sign in
     private var isLoginInProgress = false
 
     override fun onCreateView(
@@ -34,62 +36,65 @@ class SignInFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "Setting up sign in view")
+        // make everything fade in nicely and set up the buttons
         setupAnimations()
         setupClickListeners()
         observeViewModel()
     }
 
-    // sets up a sequence of fade-in and translation animations
+    // make everything fade in one after another for a nice effect
     private fun setupAnimations() {
         Log.d(TAG, "Setting up animations")
-        // Define animation parameters
-        val fadeDuration = 500L // Duration of each fade-in
-        val translationDistance = -20f // Slight upward translation
-        val staggerDelay = 200L // Delay between each element
+        // how long each animation takes and how far things move
+        val fadeDuration = 500L
+        val translationDistance = -20f
+        val staggerDelay = 200L
 
-        // List of views to animate with their respective start delays
+        // list of things to animate and when to start each one
         val viewsToAnimate = listOf(
-            binding.logoImageView to 0L, // Initial delay is 0
-            binding.titleTextView to staggerDelay, // Delay for the first view
-            binding.cardView to staggerDelay * 2, // Delay for the second view
-            binding.emailLayout to staggerDelay * 3, // Delay for the third view ... etc
+            binding.logoImageView to 0L,
+            binding.titleTextView to staggerDelay,
+            binding.cardView to staggerDelay * 2,
+            binding.emailLayout to staggerDelay * 3,
             binding.passwordLayout to staggerDelay * 4,
             binding.signInButton to staggerDelay * 5,
             binding.forgotPasswordText to staggerDelay * 6,
             binding.signUpPromptLayout to staggerDelay * 7
         )
 
-        // Apply fade-in and translation animation to each view
+        // make each thing fade in and slide up
         viewsToAnimate.forEach { (view, delay) ->
             view.apply {
-                alpha = 0f // Initial alpha
-                translationY = translationDistance // Initial translation
-                animate() // Start the animation
+                alpha = 0f
+                translationY = translationDistance
+                animate()
                     .alpha(1f)
-                    .translationY(0f) // Fade-in and translation
-                    .setDuration(fadeDuration) // Duration of the animation
+                    .translationY(0f)
+                    .setDuration(fadeDuration)
                     .setStartDelay(delay)
-                    .start() // Start the animation
+                    .start()
             }
         }
     }
 
-    // sets up click listeners for sign in button and navigation options
+    // set up what happens when they click the buttons
     private fun setupClickListeners() {
         Log.d(TAG, "Setting up click listeners")
         binding.signInButton.setOnClickListener {
             Log.d(TAG, "Sign in button clicked")
+            // check if they filled everything out right
             if (validateInput()) {
                 val email = binding.emailInput.text.toString().trim()
                 val password = binding.passwordInput.text.toString().trim()
 
                 Log.d(TAG, "Starting login process for user: $email")
-                // Mark login as in progress
+                // remember we're trying to sign in
                 isLoginInProgress = true
 
+                // try to sign them in
                 userViewModel.loginUser(email, password)
 
-                // Show loading state
+                // show the loading spinner
                 binding.signInButton.isEnabled = false
                 binding.progressBar.visibility = View.VISIBLE
             } else {
@@ -108,13 +113,13 @@ class SignInFragment : Fragment() {
         }
     }
 
-    // observes ViewModel for login results and errors
+    // watch for when they successfully sign in or if there's an error
     private fun observeViewModel() {
         Log.d(TAG, "Setting up ViewModel observers")
         userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
             if (user != null && isLoginInProgress) {
                 Log.d(TAG, "Login successful for user: ${user.email}")
-                // Reset flag first to prevent navigation loops
+                // reset the flag so we don't try to navigate again
                 isLoginInProgress = false
 
                 try {
@@ -132,14 +137,14 @@ class SignInFragment : Fragment() {
                 Log.e(TAG, "Login error: $it")
                 isLoginInProgress = false
                 Snackbar.make(binding.root, it, Snackbar.LENGTH_LONG).show()
-                // Reset loading state
+                // hide the loading spinner
                 binding.signInButton.isEnabled = true
                 binding.progressBar.visibility = View.GONE
             }
         }
     }
 
-    // validates user input before login
+    // check if they filled out the form right
     private fun validateInput(): Boolean {
         Log.d(TAG, "Validating user input")
         var isValid = true

@@ -17,25 +17,29 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+// this adapter shows a list of expenses in a recyclerview
+// each expense shows its amount, description, date, category, and receipt if it has one
 class ExpenseAdapter(
     private val onItemClick: (Transaction) -> Unit,
     private val categoryMap: MutableMap<Long, Category> = mutableMapOf()
 ) : ListAdapter<Transaction, ExpenseAdapter.ExpenseViewHolder>(ExpenseDiffCallback()) {
 
-    // Add a click handler for receipt images
+    // handle clicks on receipt images
     private var onReceiptClick: ((String) -> Unit)? = null
 
+    // set what happens when a receipt is clicked
     fun setOnReceiptClickListener(listener: (String) -> Unit) {
         onReceiptClick = listener
     }
 
+    // update the map of categories that we use to show category details
     fun updateCategoryMap(categories: List<Category>) {
         android.util.Log.d("ExpenseAdapter", "Updating category map with ${categories.size} categories")
         
         // Log current map content
         android.util.Log.d("ExpenseAdapter", "Current map has ${categoryMap.size} entries")
         
-        // Clear and repopulate the map
+        // clear and repopulate the map
         categoryMap.clear()
         categories.forEach { category -> 
             android.util.Log.d("ExpenseAdapter", "Adding category to map: ${category.name}, ID: ${category.id}")
@@ -48,6 +52,7 @@ class ExpenseAdapter(
         notifyDataSetChanged()
     }
 
+    // create a new view for an expense
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExpenseViewHolder {
         val binding = ItemExpenseBinding.inflate(
             LayoutInflater.from(parent.context),
@@ -57,31 +62,34 @@ class ExpenseAdapter(
         return ExpenseViewHolder(binding)
     }
 
+    // fill in the expense info when it's shown
     override fun onBindViewHolder(holder: ExpenseViewHolder, position: Int) {
         holder.bind(getItem(position), onItemClick, categoryMap, onReceiptClick)
     }
 
+    // this class holds all the views for a single expense
     class ExpenseViewHolder(private val binding: ItemExpenseBinding) : RecyclerView.ViewHolder(binding.root) {
         
+        // fill in all the expense details
         fun bind(expense: Transaction, onItemClick: (Transaction) -> Unit, categoryMap: Map<Long, Category>, onReceiptClick: ((String) -> Unit)?) {
             val context = binding.root.context
             val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
             val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("en", "ZA"))
             
-            // Set expense amount
+            // show how much was spent
             binding.expenseAmount.text = currencyFormatter.format(expense.amount)
             
-            // Set expense description
+            // show what it was spent on
             binding.expenseDescription.text = expense.description
             
-            // Set expense date
+            // show when it was spent
             binding.expenseDate.text = dateFormat.format(Date(expense.date))
             
-            // By default, hide receipt elements
+            // hide receipt stuff by default
             binding.receiptImageIcon.visibility = View.GONE
             binding.viewReceiptButton.visibility = View.GONE
             
-            // Set category details if available
+            // show category details if we have them
             expense.categoryId?.let { id ->
                 android.util.Log.d("ExpenseAdapter", "Expense has category ID: $id, looking for category in map with ${categoryMap.size} items")
                 categoryMap[id]?.let { category ->
@@ -89,14 +97,14 @@ class ExpenseAdapter(
                     binding.categoryName.text = category.name
                     binding.categoryName.visibility = View.VISIBLE
                     
-                    // Try to set category color indicator
+                    // try to show the category's color
                     try {
                         binding.categoryColorIndicator.setBackgroundColor(Color.parseColor(category.color))
                     } catch (e: Exception) {
                         binding.categoryColorIndicator.setBackgroundColor(context.getColor(R.color.primary))
                     }
                     
-                    // Try to load icon resource
+                    // try to show the category's icon
                     try {
                         val iconResourceId = context.resources.getIdentifier(
                             category.icon, "drawable", context.packageName
@@ -123,12 +131,12 @@ class ExpenseAdapter(
                 binding.categoryColorIndicator.setBackgroundColor(context.getColor(R.color.grey))
             }
             
-            // Show receipt icon and button if receipt is available
+            // show receipt stuff if we have a receipt
             expense.receiptUri?.let { uri ->
                 binding.receiptImageIcon.visibility = View.VISIBLE
                 binding.viewReceiptButton.visibility = View.VISIBLE
                 
-                // Set click listener for receipt view
+                // handle clicks on the receipt
                 val receiptClickListener = View.OnClickListener {
                     onReceiptClick?.invoke(uri)
                 }
@@ -137,18 +145,21 @@ class ExpenseAdapter(
                 binding.viewReceiptButton.setOnClickListener(receiptClickListener)
             }
             
-            // Set click listener for the item
+            // handle clicks on the whole expense item
             binding.root.setOnClickListener {
                 onItemClick(expense)
             }
         }
     }
 
+    // this class helps the recyclerview figure out what changed in the list
     class ExpenseDiffCallback : DiffUtil.ItemCallback<Transaction>() {
+        // check if two items are the same expense
         override fun areItemsTheSame(oldItem: Transaction, newItem: Transaction): Boolean {
             return oldItem.id == newItem.id
         }
 
+        // check if the expense's details changed
         override fun areContentsTheSame(oldItem: Transaction, newItem: Transaction): Boolean {
             return oldItem == newItem
         }

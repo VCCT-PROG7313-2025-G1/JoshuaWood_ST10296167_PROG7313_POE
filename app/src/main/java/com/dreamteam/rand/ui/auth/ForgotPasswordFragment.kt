@@ -11,6 +11,7 @@ import com.dreamteam.rand.R
 import com.dreamteam.rand.databinding.FragmentAuthBaseBinding
 import com.dreamteam.rand.databinding.ContentForgotPasswordBinding
 
+// lets people reset their password if they forgot it
 class ForgotPasswordFragment : Fragment() {
     private var _binding: FragmentAuthBaseBinding? = null
     private val binding get() = _binding!!
@@ -28,16 +29,17 @@ class ForgotPasswordFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        // Set up forgot password screen content
+        // set up the screen title
         binding.titleTextView.text = "Forgot Password"
         
-        // Inflate the forgot password content
+        // add the forgot password form
         forgotPasswordBinding = ContentForgotPasswordBinding.inflate(layoutInflater, binding.contentContainer, true)
         
-        // Set up navigation
+        // set up what happens when they click the buttons
         forgotPasswordBinding.resetPasswordButton.setOnClickListener {
             val email = forgotPasswordBinding.emailEditText.text.toString()
             
+            // check if they entered an email
             if (email.isBlank()) {
                 Toast.makeText(requireContext(), "Please enter your email", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -48,6 +50,7 @@ class ForgotPasswordFragment : Fragment() {
             findNavController().navigateUp()
         }
         
+        // let them go back to sign in
         forgotPasswordBinding.backToSignInTextView.setOnClickListener {
             findNavController().navigateUp()
         }

@@ -84,17 +84,11 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
             R.id.nav_categories -> {
                 findNavController().navigate(R.id.action_dashboard_to_categories)
             }
-            R.id.nav_budget -> {
-                findNavController().navigate(R.id.action_dashboard_to_budget)
-            }
             R.id.nav_savings -> {
                 findNavController().navigate(R.id.action_dashboard_to_savings)
             }
             R.id.nav_profile -> {
                 findNavController().navigate(R.id.action_dashboard_to_profile)
-            }
-            R.id.nav_photo -> {
-                findNavController().navigate(R.id.action_dashboard_to_photo)
             }
             R.id.nav_settings -> {
                 findNavController().navigate(R.id.action_dashboard_to_settings)

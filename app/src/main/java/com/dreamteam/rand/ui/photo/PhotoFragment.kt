@@ -24,26 +24,32 @@ import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-// handles camera operations and photo capture for expense receipts
+// this fragment handles taking photos of expense receipts
+// it uses the camera to take pictures and saves them for expenses
 class PhotoFragment : Fragment() {
     private val TAG = "PhotoFragment"
     
+    // binding to access all the views
     private var _binding: FragmentPhotoBinding? = null
     private val binding get() = _binding!!
-    // Camera lifecycle and feature control
+    
+    // stuff we need to control the camera
     private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
     private lateinit var cameraSelector: CameraSelector
     private var imageCapture: ImageCapture? = null
-    // Handles image capture
+    
+    // thread to handle taking photos
     private lateinit var imgCaptureExecutor: ExecutorService
-    // Reference to the latest saved file path
+    
+    // keep track of the last photo we took
     private var latestPhotoFile: File? = null
-    // Request for camera permission
+    
+    // ask for permission to use the camera
     private val requestCameraPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()) { permissionGranted->
         if (permissionGranted) {
             Log.d(TAG, "Camera permission granted, starting camera")
-            // Launch camera
+            // start the camera if they said yes
             startCamera()
         } else {
             Log.w(TAG, "Camera permission denied")
@@ -51,6 +57,7 @@ class PhotoFragment : Fragment() {
         }
     }
 
+    // create the view for taking photos
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -58,25 +65,27 @@ class PhotoFragment : Fragment() {
     ): View {
         Log.d(TAG, "Creating photo view")
         _binding = FragmentPhotoBinding.inflate(inflater, container, false)
+        
+        // start a thread to handle taking photos
         imgCaptureExecutor = Executors.newSingleThreadExecutor()
         Log.d(TAG, "Initialized image capture executor")
 
-        // Launch permission request
+        // ask for permission to use the camera
         Log.d(TAG, "Requesting camera permission")
         requestCameraPermission.launch(android.Manifest.permission.CAMERA)
 
-        // Take photo when FAB is clicked
+        // when they click the take photo button
         binding.takePhotoActionButton.setOnClickListener(){
             Log.d(TAG, "Take photo button clicked")
             takePhoto()
         }
 
-        // Save photo to expense
+        // when they click the save button
         binding.savePhotoButton.setOnClickListener {
             Log.d(TAG, "Save photo button clicked")
             latestPhotoFile?.let { file ->
                 Log.d(TAG, "Saving photo with path: ${file.absolutePath}")
-                // Send result back using Fragment Result API
+                // send the photo path back to whoever asked for it
                 setFragmentResult("photoResult", bundleOf("photoPath" to file.absolutePath))
                 
                 Toast.makeText(requireContext(), "Photo saved", Toast.LENGTH_SHORT).show()
@@ -90,12 +99,14 @@ class PhotoFragment : Fragment() {
         return binding.root
     }
 
+    // setup the view after it's created
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "Setting up photo view")
         setupToolbar()
     }
 
+    // setup the toolbar with back button
     private fun setupToolbar() {
         Log.d(TAG, "Setting up toolbar")
         binding.toolbar.setNavigationOnClickListener {
@@ -104,7 +115,7 @@ class PhotoFragment : Fragment() {
         }
     }
 
-    // Starts camera and binds preview and captured image to PhotoFragment lifecycle
+    // start up the camera and show the preview
     private fun startCamera() {
         Log.d(TAG, "Starting camera setup")
         cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
@@ -115,6 +126,7 @@ class PhotoFragment : Fragment() {
             {
                 try {
                     val cameraProvider = cameraProviderFuture.get()
+                    // setup the preview so they can see what they're taking a picture of
                     val preview = Preview.Builder().build().also {
                         it.setSurfaceProvider(binding.imgUserPhoto.surfaceProvider)
                     }
@@ -122,6 +134,7 @@ class PhotoFragment : Fragment() {
                     Log.d(TAG, "Created camera preview and image capture")
                     
                     try {
+                        // connect everything together
                         cameraProvider.unbindAll()
                         cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture)
                         Log.d(TAG, "Successfully bound camera to lifecycle")
@@ -134,25 +147,29 @@ class PhotoFragment : Fragment() {
             }, ContextCompat.getMainExecutor(requireContext()))
     }
 
-    // Takes photo and saves file reference
+    // take a picture and save it
     private fun takePhoto() {
         Log.d(TAG, "Preparing to take photo")
+        // create a file to save the photo to
         val photoFile = File(
             requireActivity().externalMediaDirs.first(),
             "ExpensePhoto_${System.currentTimeMillis()}.jpg"
         )
         Log.d(TAG, "Created photo file at: ${photoFile.absolutePath}")
 
+        // setup how we want to save the photo
         val outputFileOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
         Log.d(TAG, "Configured output file options")
 
+        // take the picture
         imageCapture?.takePicture(outputFileOptions, imgCaptureExecutor,
             object : ImageCapture.OnImageSavedCallback {
+                // when the photo is saved successfully
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     Log.d(TAG, "Photo successfully saved to: ${photoFile.absolutePath}")
-                    latestPhotoFile = photoFile // Save reference
+                    latestPhotoFile = photoFile // remember where we saved it
                     requireActivity().runOnUiThread {
-                        // Preview taken photo
+                        // show them the photo they just took
                         binding.imgSavedPhoto.setImageURI(Uri.fromFile(photoFile))
                         binding.imgSavedPhoto.visibility = View.VISIBLE
                         binding.savePhotoButton.visibility = View.VISIBLE
@@ -160,6 +177,7 @@ class PhotoFragment : Fragment() {
                     }
                 }
 
+                // if something went wrong
                 override fun onError(exception: ImageCaptureException) {
                     Log.e(TAG, "Photo capture failed: ${exception.message}", exception)
                     requireActivity().runOnUiThread {
@@ -170,6 +188,7 @@ class PhotoFragment : Fragment() {
         )
     }
 
+    // clean up when we're done
     override fun onDestroyView() {
         Log.d(TAG, "Destroying photo view")
         super.onDestroyView()

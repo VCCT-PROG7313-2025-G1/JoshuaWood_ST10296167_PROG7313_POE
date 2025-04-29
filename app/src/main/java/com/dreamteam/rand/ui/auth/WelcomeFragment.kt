@@ -10,9 +10,11 @@ import androidx.navigation.fragment.findNavController
 import com.dreamteam.rand.R
 import com.dreamteam.rand.databinding.FragmentWelcomeBinding
 
+// this is the first screen people see when they open the app
 class WelcomeFragment : Fragment() {
     private var _binding: FragmentWelcomeBinding? = null
     private val binding get() = _binding!!
+    // grab the shared viewmodel that knows if someone's logged in
     private val userViewModel: UserViewModel by activityViewModels()
 
     override fun onCreateView(
@@ -26,10 +28,12 @@ class WelcomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // set up the buttons and make everything fade in nicely
         setupClickListeners()
-        animateViewsStaggered() // Call to start the staggered animation
+        animateViewsStaggered()
     }
 
+    // set up what happens when they click the buttons
     private fun setupClickListeners() {
         binding.signInButton.setOnClickListener {
             findNavController().navigate(R.id.action_welcome_to_signIn)
@@ -39,9 +43,10 @@ class WelcomeFragment : Fragment() {
             findNavController().navigate(R.id.action_welcome_to_signUp)
         }
     }
-// staggered fade in animation that is created when the onViewCreated method is called
-    // displays the logo, app name, tagline, and two buttons in a slow sequential sequence for a transition effect
-    private fun animateViewsStaggered() { // Staggered animation
+
+    // make everything fade in one after another for a nice effect
+    private fun animateViewsStaggered() {
+        // list of things to animate
         val viewsToAnimate = listOf(
             binding.logoImageView,
             binding.taglineTextView,
@@ -49,16 +54,18 @@ class WelcomeFragment : Fragment() {
             binding.signUpButton
         )
 
-        val duration = 500L // Duration of each animation
-        val delayBetweenItems = 150L // Delay between each item
+        // how long each animation takes and how long to wait between them
+        val duration = 500L
+        val delayBetweenItems = 150L
 
+        // make each thing fade in and slide up
         viewsToAnimate.forEachIndexed { index, view ->
             view.alpha = 0f
-            view.translationY = 40f // Initial translation
+            view.translationY = 40f
             view.animate()
                 .alpha(1f)
-                .translationY(0f) // Fade-in and translation
-                .setStartDelay(index * delayBetweenItems) // Delay based on position
+                .translationY(0f)
+                .setStartDelay(index * delayBetweenItems)
                 .setDuration(duration)
                 .start()
         }

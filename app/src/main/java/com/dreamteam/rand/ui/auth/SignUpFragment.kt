@@ -15,13 +15,15 @@ import com.google.android.material.snackbar.Snackbar
 import android.animation.ObjectAnimator
 import android.animation.AnimatorSet
 
-// handles user registration with animations and validation
+// lets people create a new account with their name, email, and password
 class SignUpFragment : Fragment() {
     private val TAG = "SignUpFragment"
     
     private var _binding: FragmentSignUpBinding? = null
     private val binding get() = _binding!!
+    // grab the shared viewmodel that handles signing up
     private val userViewModel: UserViewModel by activityViewModels()
+    // keep track of if we're already trying to sign up
     private var isRegistrationInProgress = false
 
     override fun onCreateView(
@@ -37,53 +39,56 @@ class SignUpFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "Setting up sign up view")
+        // set up the buttons and make everything fade in nicely
         setupClickListeners()
         observeViewModel()
         startFadeInAnimations()
     }
 
-    // creates a sequence of fade-in animations for a smooth UI experience
+    // make everything fade in one after another for a nice effect
     private fun startFadeInAnimations() {
         Log.d(TAG, "Starting fade-in animations")
-        // Create fade-in animators for each view
+        // make the logo fade in first
         val logoAnimator = ObjectAnimator.ofFloat(binding.logoImageView, "alpha", 0f, 1f).apply {
-            duration = 500 // lasts 500 ms
-            startDelay = 100 // starts after 100ms
+            duration = 500
+            startDelay = 100
         }
 
-        // creates a fade in animation for the title text view
+        // then the title
         val titleAnimator = ObjectAnimator.ofFloat(binding.titleTextView, "alpha", 0f, 1f).apply {
-            duration = 500 // lasts 500 ms
-            startDelay = 300 // starts after 300 ms
+            duration = 500
+            startDelay = 300
         }
 
-        // Slower fade-in for text fields
+        // then the text fields one by one
         val nameAnimator = ObjectAnimator.ofFloat(binding.nameLayout, "alpha", 0f, 1f).apply {
-            duration = 1000 // Slower duration
-            startDelay = 500 // starts after 500 ms
+            duration = 1000
+            startDelay = 500
         }
 
         val emailAnimator = ObjectAnimator.ofFloat(binding.emailLayout, "alpha", 0f, 1f).apply {
-            duration = 1000 // Slower duration
-            startDelay = 700 // starts after 700 ms
+            duration = 1000
+            startDelay = 700
         }
 
         val passwordAnimator = ObjectAnimator.ofFloat(binding.passwordLayout, "alpha", 0f, 1f).apply {
-            duration = 1000 // Slower duration
-            startDelay = 900 // starts after 900 ms
+            duration = 1000
+            startDelay = 900
         }
 
+        // then the sign up button
         val buttonAnimator = ObjectAnimator.ofFloat(binding.signUpButton, "alpha", 0f, 1f).apply {
-            duration = 500 // short fade duration
-            startDelay = 1100 // start after 1100ms
+            duration = 500
+            startDelay = 1100
         }
 
+        // and finally the sign in link
         val signInLayoutAnimator = ObjectAnimator.ofFloat(binding.signInLayout, "alpha", 0f, 1f).apply {
-            duration = 500 // short duration
-            startDelay = 1300 // starts last in the sequence
+            duration = 500
+            startDelay = 1300
         }
 
-        // Play animations together
+        // play all the animations together
         AnimatorSet().apply {
             playTogether(
                 logoAnimator,
@@ -94,27 +99,29 @@ class SignUpFragment : Fragment() {
                 buttonAnimator,
                 signInLayoutAnimator
             )
-            start() // starts the animation sequence
+            start()
         }
     }
 
-    // sets up click listeners for sign up button and sign in text
+    // set up what happens when they click the buttons
     private fun setupClickListeners() {
         Log.d(TAG, "Setting up click listeners")
         binding.signUpButton.setOnClickListener {
             Log.d(TAG, "Sign up button clicked")
+            // check if they filled everything out right
             if (validateInput()) {
                 val name = binding.nameInput.text.toString().trim()
                 val email = binding.emailInput.text.toString().trim()
                 val password = binding.passwordInput.text.toString().trim()
 
                 Log.d(TAG, "Starting registration process for user: $email")
-                // Mark registration as in progress
+                // remember we're trying to sign up
                 isRegistrationInProgress = true
 
+                // try to create their account
                 userViewModel.registerUser(name, email, password)
 
-                // Show loading state
+                // show the loading spinner
                 binding.signUpButton.isEnabled = false
                 binding.progressBar.visibility = View.VISIBLE
             } else {
@@ -128,13 +135,13 @@ class SignUpFragment : Fragment() {
         }
     }
 
-    // observes ViewModel for user registration results and errors
+    // watch for when they successfully sign up or if there's an error
     private fun observeViewModel() {
         Log.d(TAG, "Setting up ViewModel observers")
         userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
             if (user != null && isRegistrationInProgress) {
                 Log.d(TAG, "Registration successful for user: ${user.email}")
-                // Reset flag first to prevent navigation loops
+                // reset the flag so we don't try to navigate again
                 isRegistrationInProgress = false
 
                 try {
@@ -152,14 +159,14 @@ class SignUpFragment : Fragment() {
                 Log.e(TAG, "Registration error: $it")
                 isRegistrationInProgress = false
                 Snackbar.make(binding.root, it, Snackbar.LENGTH_LONG).show()
-                // Reset loading state
+                // hide the loading spinner
                 binding.signUpButton.isEnabled = true
                 binding.progressBar.visibility = View.GONE
             }
         }
     }
 
-    // validates user input before registration
+    // check if they filled out the form right
     private fun validateInput(): Boolean {
         Log.d(TAG, "Validating user input")
         var isValid = true

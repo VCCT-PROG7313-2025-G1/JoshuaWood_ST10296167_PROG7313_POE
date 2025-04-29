@@ -30,13 +30,16 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-// handles adding new expenses with category selection and photo attachment
+// this fragment lets you add a new expense with all its details
+// you can pick a category, date, amount, and attach a photo of the receipt
 class AddExpenseFragment : Fragment() {
     private val TAG = "AddExpenseFragment"
     
+    // binding to access all the views
     private var _binding: FragmentAddExpenseBinding? = null
     private val binding get() = _binding!!
     
+    // viewmodels to handle user data, categories, and expenses
     private val userViewModel: UserViewModel by activityViewModels()
     private val categoryViewModel: CategoryViewModel by viewModels {
         val database = RandDatabase.getDatabase(requireContext())
@@ -50,11 +53,13 @@ class AddExpenseFragment : Fragment() {
         ExpenseViewModel.Factory(repository)
     }
     
+    // keep track of the photo path and category IDs
     private var selectedPhotoPath: String? = null
     private val categoryIdMap = mutableMapOf<String, Long>()
     private val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
     private val calendar = Calendar.getInstance()
 
+    // create the view for adding an expense
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -65,6 +70,7 @@ class AddExpenseFragment : Fragment() {
         return binding.root
     }
 
+    // setup all the UI components after the view is created
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "Setting up add expense view")
@@ -78,7 +84,7 @@ class AddExpenseFragment : Fragment() {
         setupPhotoResultListener()
     }
     
-    // sets up the toolbar with navigation
+    // setup the toolbar with back button
     private fun setupToolbar() {
         Log.d(TAG, "Setting up toolbar")
         binding.toolbar.setNavigationOnClickListener {
@@ -87,10 +93,10 @@ class AddExpenseFragment : Fragment() {
         }
     }
     
-    // sets up date picker with calendar dialog
+    // let the user pick a date for the expense
     private fun setupDatePicker() {
         Log.d(TAG, "Setting up date picker")
-        // Set initial date to today
+        // start with today's date
         binding.dateInput.setText(dateFormat.format(Date()))
         
         binding.dateInput.setOnClickListener {
@@ -115,7 +121,7 @@ class AddExpenseFragment : Fragment() {
         }
     }
     
-    // sets up amount input with live preview
+    // setup the amount input with live preview of the number
     private fun setupAmountInput() {
         Log.d(TAG, "Setting up amount input")
         binding.amountInput.addTextChangedListener(object : TextWatcher {
@@ -140,7 +146,7 @@ class AddExpenseFragment : Fragment() {
         })
     }
     
-    // sets up category dropdown with available expense categories
+    // setup the dropdown to pick which category the expense belongs to
     private fun setupCategoryDropdown() {
         Log.d(TAG, "Setting up category dropdown")
         userViewModel.currentUser.value?.let { user ->
@@ -149,7 +155,7 @@ class AddExpenseFragment : Fragment() {
                     if (categories.isNotEmpty()) {
                         val categoryNames = categories.map { it.name }.toTypedArray()
                         
-                        // Create a map of category names to IDs
+                        // keep track of which category name goes with which ID
                         categoryIdMap.clear()
                         categories.forEach { category ->
                             categoryIdMap[category.name] = category.id
@@ -164,11 +170,10 @@ class AddExpenseFragment : Fragment() {
                         
                         binding.categoryInput.setAdapter(adapter)
                         
-                        // Set default category if available
+                        // pick the first category by default
                         if (categoryNames.isNotEmpty()) {
                             val defaultCategory = categoryNames[0]
                             binding.categoryInput.setText(defaultCategory, false)
-                            // Set the selected category ID for the first item
                             val id = categoryIdMap[defaultCategory]
                             Log.d(TAG, "Setting default category: $defaultCategory with ID: $id")
                             if (id != null) {
@@ -179,7 +184,7 @@ class AddExpenseFragment : Fragment() {
                 }
         }
         
-        // Listen for category selection changes
+        // handle when user picks a different category
         binding.categoryInput.setOnItemClickListener { _, _, position, _ ->
             val selectedCategory = binding.categoryInput.adapter.getItem(position).toString()
             val id = categoryIdMap[selectedCategory]
@@ -190,7 +195,7 @@ class AddExpenseFragment : Fragment() {
         }
     }
     
-    // sets up photo attachment functionality
+    // setup the photo section for attaching receipt photos
     private fun setupPhotoSection() {
         Log.d(TAG, "Setting up photo section")
         binding.attachPhotoButton.setOnClickListener {
@@ -206,7 +211,7 @@ class AddExpenseFragment : Fragment() {
         }
     }
     
-    // updates the photo preview UI
+    // update the photo preview when a photo is added or removed
     private fun updatePhotoPreview() {
         Log.d(TAG, "Updating photo preview")
         if (selectedPhotoPath != null) {
@@ -229,7 +234,7 @@ class AddExpenseFragment : Fragment() {
         }
     }
     
-    // sets up listener for photo result from camera/gallery
+    // listen for when a photo is taken or picked from gallery
     private fun setupPhotoResultListener() {
         Log.d(TAG, "Setting up photo result listener")
         setFragmentResultListener("photoResult") { _, bundle ->
@@ -241,12 +246,12 @@ class AddExpenseFragment : Fragment() {
         }
     }
     
-    // sets up save button with validation and expense creation
+    // setup the save button to create the expense
     private fun setupSaveButton() {
         Log.d(TAG, "Setting up save button")
         binding.saveButton.setOnClickListener {
             Log.d(TAG, "Save button clicked")
-            // Validate inputs
+            // check if all the required fields are filled
             if (!validateInputs()) {
                 Log.w(TAG, "Input validation failed")
                 return@setOnClickListener
