@@ -36,9 +36,6 @@ class CategoryAdapter(private val onEditClick: (Category) -> Unit) :
     override fun onBindViewHolder(holder: CategoryViewHolder, position: Int) {
         val category = getItem(position)
         holder.bind(category, categoryTotals[category.id] ?: 0.0)
-        holder.binding.editButton.setOnClickListener {
-            onEditClick(category)
-        }
     }
 
     inner class CategoryViewHolder(val binding: ItemCategoryBinding) :

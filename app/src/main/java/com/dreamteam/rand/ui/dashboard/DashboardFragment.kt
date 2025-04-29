@@ -198,7 +198,6 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
             expenseViewModel.fetchTotalMonthlyExpenses(user.uid)
             expenseViewModel.totalMonthlyExpenses.observe(viewLifecycleOwner) { total ->
                 updateBalance(total)
-                updateBudgetProgress(total, 5000.00) // Using placeholder budget for now
             }
         }
     }
@@ -207,17 +206,6 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
         val formattedAmount = NumberFormat.getCurrencyInstance(Locale("en", "ZA"))
             .format(amount)
         binding.balanceText.text = formattedAmount
-    }
-
-    private fun updateBudgetProgress(spent: Double, total: Double) {
-        val progress = if (total > 0) ((spent / total) * 100).toInt() else 0
-        binding.budgetProgress.progress = progress
-        
-        val formattedSpent = NumberFormat.getCurrencyInstance(Locale("en", "ZA"))
-            .format(spent)
-        val formattedTotal = NumberFormat.getCurrencyInstance(Locale("en", "ZA"))
-            .format(total)
-        binding.budgetText.text = getString(R.string.budget_progress, formattedSpent, formattedTotal)
     }
 
     override fun onDestroyView() {

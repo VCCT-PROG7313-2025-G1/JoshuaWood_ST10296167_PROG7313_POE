@@ -41,7 +41,6 @@
             android:text="Category Name"
             android:textAppearance="?attr/textAppearanceHeadline6"
             android:textColor="@color/black"
-            app:layout_constraintEnd_toStartOf="@id/editButton"
             app:layout_constraintStart_toEndOf="@id/categoryColorIndicator"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -69,21 +68,7 @@
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@id/totalSpentLabel"
             app:layout_constraintStart_toEndOf="@id/totalSpentLabel"
-            app:layout_constraintEnd_toStartOf="@id/editButton"
             app:layout_constraintTop_toTopOf="@id/totalSpentLabel" />
-
-
-        <ImageButton
-            android:id="@+id/editButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Edit category"
-            android:padding="8dp"
-            android:src="@drawable/ic_edit"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
