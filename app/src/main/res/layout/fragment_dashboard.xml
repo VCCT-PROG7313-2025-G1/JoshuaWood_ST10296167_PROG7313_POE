@@ -86,43 +86,21 @@
 
                 </androidx.cardview.widget.CardView>
 
-                <!-- Budget Progress Card -->
+                <!-- Expenses Graph Card -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="200dp"
                     android:layout_marginBottom="16dp"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="4dp">
 
-                    <LinearLayout
+                    <TextView
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/monthly_budget"
-                            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
-                            android:textStyle="bold" />
-
-                        <com.google.android.material.progressindicator.LinearProgressIndicator
-                            android:id="@+id/budgetProgress"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="16dp"
-                            android:progress="65" />
-
-                        <TextView
-                            android:id="@+id/budgetText"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
-                            tools:text="R650 of R1,000" />
-
-                    </LinearLayout>
+                        android:layout_height="match_parent"
+                        android:padding="24dp"
+                        android:gravity="center"
+                        android:text="Expenses graph will go here"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"/>
 
                 </androidx.cardview.widget.CardView>
 
@@ -212,4 +190,4 @@
         app:headerLayout="@layout/nav_header"
         app:menu="@menu/drawer_menu" />
 
-</androidx.drawerlayout.widget.DrawerLayout> 
+</androidx.drawerlayout.widget.DrawerLayout>
