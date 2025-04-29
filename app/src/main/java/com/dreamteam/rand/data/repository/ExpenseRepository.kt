@@ -123,7 +123,8 @@ class ExpenseRepository(private val transactionDao: TransactionDao) {
         amount: Double,
         description: String,
         categoryId: Long?,
-        receiptUri: String?
+        receiptUri: String?,
+        date: Long = System.currentTimeMillis()
     ): Long {
         val transaction = Transaction(
             userId = userId,
@@ -132,10 +133,23 @@ class ExpenseRepository(private val transactionDao: TransactionDao) {
             type = TransactionType.EXPENSE,
             categoryId = categoryId,
             receiptUri = receiptUri,
-            date = System.currentTimeMillis(),
+            date = date,
             createdAt = System.currentTimeMillis()
         )
-        return transactionDao.insertTransaction(transaction)
+        
+        android.util.Log.d("ExpenseRepository", "Inserting expense in repository:")
+        android.util.Log.d("ExpenseRepository", "Transaction: $transaction")
+        android.util.Log.d("ExpenseRepository", "Transaction date: ${java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date(date))}")
+        
+        val result = transactionDao.insertTransaction(transaction)
+        
+        if (result > 0) {
+            android.util.Log.d("ExpenseRepository", "Transaction inserted with ID: $result")
+        } else {
+            android.util.Log.e("ExpenseRepository", "Failed to insert transaction")
+        }
+        
+        return result
     }
 
     // update an existing expense

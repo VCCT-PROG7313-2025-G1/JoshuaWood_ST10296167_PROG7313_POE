@@ -264,6 +264,17 @@ class AddExpenseFragment : Fragment() {
             val categoryName = binding.categoryInput.text.toString()
             val categoryId = categoryIdMap[categoryName]
             
+            // Log detailed information about the expense being created
+            Log.d(TAG, "------------- Creating New Expense -------------")
+            Log.d(TAG, "Description: $description")
+            Log.d(TAG, "Amount: $amount")
+            Log.d(TAG, "Category Name: $categoryName")
+            Log.d(TAG, "Category ID: $categoryId")
+            Log.d(TAG, "Date: ${binding.dateInput.text}")
+            Log.d(TAG, "Has Receipt Image: ${selectedPhotoPath != null}")
+            Log.d(TAG, "Receipt Path: $selectedPhotoPath")
+            Log.d(TAG, "------------------------------------------------")
+            
             Log.d(TAG, "Saving expense with category: $categoryName, ID: $categoryId")
             
             // Force update the selected category in the viewmodel to ensure it's correct
@@ -334,10 +345,12 @@ class AddExpenseFragment : Fragment() {
     private fun observeViewModel() {
         expenseViewModel.saveSuccess.observe(viewLifecycleOwner) { success ->
             if (success == true) {
+                Log.d(TAG, "✅ Expense saved successfully!")
                 Toast.makeText(requireContext(), "Expense saved successfully", Toast.LENGTH_SHORT).show()
                // expenseViewModel.resetSaveStatus()
                 findNavController().navigateUp()
             } else if (success == false) {
+                Log.e(TAG, "❌ Failed to save expense")
                 Toast.makeText(requireContext(), "Failed to save expense", Toast.LENGTH_SHORT).show()
               //  expenseViewModel.resetSaveStatus()
             }

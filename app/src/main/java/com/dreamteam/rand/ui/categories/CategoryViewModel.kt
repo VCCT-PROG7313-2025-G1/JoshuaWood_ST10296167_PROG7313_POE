@@ -57,18 +57,40 @@ class CategoryViewModel(private val repository: CategoryRepository) : ViewModel(
     // save a new category with the current selections
     fun saveCategory(userId: String, name: String, isDefault: Boolean = false) {
         viewModelScope.launch {
+            val type = _selectedType.value ?: TransactionType.EXPENSE
+            val color = _selectedColor.value ?: "#FF5252"
+            val icon = _selectedIcon.value ?: "ic_shopping"
+            
+            // Enhanced logging before saving category
+            android.util.Log.d("CategoryViewModel", "==================== CATEGORY DETAILS ====================")
+            android.util.Log.d("CategoryViewModel", "Saving new category for user: $userId")
+            android.util.Log.d("CategoryViewModel", "Name: $name")
+            android.util.Log.d("CategoryViewModel", "Type: $type")
+            android.util.Log.d("CategoryViewModel", "Color: $color")
+            android.util.Log.d("CategoryViewModel", "Icon: $icon")
+            android.util.Log.d("CategoryViewModel", "Is Default: $isDefault")
+            android.util.Log.d("CategoryViewModel", "=======================================================")
+            
             val category = Category(
                 userId = userId,
                 name = name,
-                type = _selectedType.value ?: TransactionType.EXPENSE,
+                type = type,
                 budget = null,
-                color = _selectedColor.value ?: "#FF5252",
-                icon = _selectedIcon.value ?: "ic_shopping",
+                color = color,
+                icon = icon,
                 isDefault = isDefault,
                 createdAt = Date().time
             )
             
             val result = repository.insertCategory(category)
+            
+            // Log the result
+            if (result > 0) {
+                android.util.Log.d("CategoryViewModel", "✅ Category saved successfully with ID: $result")
+            } else {
+                android.util.Log.e("CategoryViewModel", "❌ Failed to save category")
+            }
+            
             _saveSuccess.postValue(result > 0)
         }
     }

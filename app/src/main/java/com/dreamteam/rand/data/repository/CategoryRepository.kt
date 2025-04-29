@@ -25,7 +25,18 @@ class CategoryRepository(private val categoryDao: CategoryDao) {
     
     // add a new category
     suspend fun insertCategory(category: Category): Long {
-        return categoryDao.insertCategory(category)
+        android.util.Log.d("CategoryRepository", "Inserting category in repository:")
+        android.util.Log.d("CategoryRepository", "Category: $category")
+        
+        val result = categoryDao.insertCategory(category)
+        
+        if (result > 0) {
+            android.util.Log.d("CategoryRepository", "Category inserted with ID: $result")
+        } else {
+            android.util.Log.e("CategoryRepository", "Failed to insert category")
+        }
+        
+        return result
     }
     
     // update a category

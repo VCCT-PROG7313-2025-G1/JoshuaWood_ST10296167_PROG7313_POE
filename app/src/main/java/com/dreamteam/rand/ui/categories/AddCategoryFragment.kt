@@ -220,6 +220,15 @@ class AddCategoryFragment : Fragment() {
         Log.d(TAG, "Setting up save button")
         binding.saveButton.setOnClickListener {
             val categoryName = binding.categoryNameInput.text.toString().trim()
+            
+            // Log detailed information about the category being created
+            Log.d(TAG, "------------- Creating New Category -------------")
+            Log.d(TAG, "Name: $categoryName")
+            Log.d(TAG, "Color: $selectedColor")
+            Log.d(TAG, "Icon: $selectedIconName")
+            Log.d(TAG, "Type: ${categoryViewModel.selectedType.value}")
+            Log.d(TAG, "------------------------------------------------")
+            
             Log.d(TAG, "Attempting to save category - Name: $categoryName, Icon: $selectedIconName, Color: $selectedColor")
             
             // check if they entered a name
@@ -248,12 +257,12 @@ class AddCategoryFragment : Fragment() {
         categoryViewModel.saveSuccess.observe(viewLifecycleOwner) { success ->
             when (success) {
                 true -> {
-                    Log.d(TAG, "Category saved successfully")
+                    Log.d(TAG, "✅ Category saved successfully!")
                     Toast.makeText(requireContext(), "Category saved successfully", Toast.LENGTH_SHORT).show()
                     findNavController().navigateUp()
                 }
                 false -> {
-                    Log.w(TAG, "Failed to save category")
+                    Log.e(TAG, "❌ Failed to save category")
                     Toast.makeText(requireContext(), "Failed to save category", Toast.LENGTH_SHORT).show()
                 }
                 null -> {

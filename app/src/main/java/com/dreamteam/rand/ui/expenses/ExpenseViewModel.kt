@@ -141,14 +141,32 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
             val receiptUri = _photoUri.value
             val date = _selectedDate.value ?: Date().time
             
+            // Enhanced logging before saving expense
+            android.util.Log.d("ExpenseViewModel", "==================== EXPENSE DETAILS ====================")
+            android.util.Log.d("ExpenseViewModel", "Saving new expense for user: $userId")
+            android.util.Log.d("ExpenseViewModel", "Description: $description")
+            android.util.Log.d("ExpenseViewModel", "Amount: $amount")
+            android.util.Log.d("ExpenseViewModel", "Category ID: $categoryIdToUse")
+            android.util.Log.d("ExpenseViewModel", "Date: ${java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss", java.util.Locale.getDefault()).format(Date(date))}")
+            android.util.Log.d("ExpenseViewModel", "Receipt Image: ${receiptUri ?: "None"}")
+            android.util.Log.d("ExpenseViewModel", "=======================================================")
+            
             val result = repository.insertExpense(
                 userId = userId,
                 amount = amount,
                 description = description,
                 categoryId = categoryIdToUse,
-                receiptUri = receiptUri
+                receiptUri = receiptUri,
+                date = date
             )
             _saveSuccess.postValue(result > 0)
+            
+            // Log the result
+            if (result > 0) {
+                android.util.Log.d("ExpenseViewModel", "✅ Expense saved successfully with ID: $result")
+            } else {
+                android.util.Log.e("ExpenseViewModel", "❌ Failed to save expense")
+            }
             
             // update monthly total
             fetchTotalMonthlyExpenses(userId)
