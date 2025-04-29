@@ -4,11 +4,14 @@ import androidx.room.*
 import com.dreamteam.rand.data.entity.Transaction
 import kotlinx.coroutines.flow.Flow
 
+// handles all transaction database operations
 @Dao
 interface TransactionDao {
+    // get all transactions for a user, newest first
     @Query("SELECT * FROM transactions WHERE userId = :userId ORDER BY date DESC")
     fun getTransactions(userId: String): Flow<List<Transaction>>
 
+    // get transactions within a date range
     @Query("""
         SELECT * FROM transactions 
         WHERE userId = :userId 
@@ -17,6 +20,7 @@ interface TransactionDao {
     """)
     fun getTransactionsByDateRange(userId: String, startDate: Long, endDate: Long): Flow<List<Transaction>>
 
+    // get all transactions in a category
     @Query("""
         SELECT * FROM transactions 
         WHERE userId = :userId 
@@ -25,6 +29,7 @@ interface TransactionDao {
     """)
     fun getTransactionsByCategory(userId: String, categoryId: Long): Flow<List<Transaction>>
 
+    // get category transactions within a date range
     @Query("SELECT * FROM transactions WHERE userId = :userId AND categoryId = :categoryId AND date BETWEEN :startDate AND :endDate ORDER BY date DESC")
     suspend fun getTransactionsByCategoryAndDateRange(
         userId: String,
@@ -33,15 +38,19 @@ interface TransactionDao {
         endDate: Long
     ): List<Transaction>
 
+    // add a new transaction
     @Insert
     suspend fun insertTransaction(transaction: Transaction): Long
 
+    // update an existing transaction
     @Update
     suspend fun updateTransaction(transaction: Transaction)
 
+    // remove a transaction
     @Delete
     suspend fun deleteTransaction(transaction: Transaction)
 
+    // get total amount for a transaction type in a date range
     @Query("""
         SELECT SUM(amount) FROM transactions 
         WHERE userId = :userId 
@@ -50,6 +59,7 @@ interface TransactionDao {
     """)
     suspend fun getTotalAmountByTypeAndDateRange(userId: String, type: String, startDate: Long, endDate: Long): Double?
 
+    // get all transactions for a specific month and year
     @Query("""
         SELECT * FROM transactions 
         WHERE userId = :userId 

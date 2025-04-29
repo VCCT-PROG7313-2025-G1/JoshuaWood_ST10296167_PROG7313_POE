@@ -5,10 +5,12 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+// transaction types - either money in or money out
 enum class TransactionType {
     EXPENSE, INCOME
 }
 
+// main transaction table - tracks all money movements
 @Entity(
     tableName = "transactions",
     foreignKeys = [
@@ -34,12 +36,12 @@ enum class TransactionType {
 data class Transaction(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val userId: String,
-    val amount: Double,
-    val type: TransactionType,
-    val categoryId: Long?,
-    val description: String,
-    val date: Long,
-    val receiptUri: String?,
-    val createdAt: Long
+    val userId: String,           // who made the transaction
+    val amount: Double,           // how much money
+    val type: TransactionType,    // in or out
+    val categoryId: Long?,        // what kind of transaction
+    val description: String,      // what was it for
+    val date: Long,              // when did it happen
+    val receiptUri: String?,     // proof of purchase
+    val createdAt: Long          // when was it recorded
 ) 

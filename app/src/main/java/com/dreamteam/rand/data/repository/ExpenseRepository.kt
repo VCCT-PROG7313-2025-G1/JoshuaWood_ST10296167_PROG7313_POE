@@ -9,11 +9,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.first
 import java.util.Calendar
 
+// handles all expense-related operations
 class ExpenseRepository(private val transactionDao: TransactionDao) {
+    // get all expenses for a user
     fun getExpenses(userId: String): Flow<List<Transaction>> {
         return transactionDao.getTransactions(userId)
     }
 
+    // get expenses within a date range
     fun getExpensesByDateRange(userId: String, startDate: Long?, endDate: Long?): Flow<List<Transaction>> {
         return if (startDate != null && endDate != null) {
             transactionDao.getTransactionsByDateRange(userId, startDate, endDate)
@@ -22,10 +25,12 @@ class ExpenseRepository(private val transactionDao: TransactionDao) {
         }
     }
 
+    // get expenses in a category
     fun getExpensesByCategory(userId: String, categoryId: Long): Flow<List<Transaction>> {
         return transactionDao.getTransactionsByCategory(userId, categoryId)
     }
 
+    // get category expenses within a date range
     fun getExpensesByCategoryAndDateRange(
         userId: String,
         categoryId: Long,
@@ -45,6 +50,7 @@ class ExpenseRepository(private val transactionDao: TransactionDao) {
         emit(transactions)
     }
 
+    // get expenses for a specific month and year
     fun getExpensesByMonthAndYear(
         userId: String,
         month: Int,
@@ -56,6 +62,7 @@ class ExpenseRepository(private val transactionDao: TransactionDao) {
         return transactionDao.getExpensesByMonthAndYear(userId, monthStr, yearStr)
     }
 
+    // get total expenses in a date range
     suspend fun getTotalExpensesByDateRange(userId: String, startDate: Long?, endDate: Long?): Double {
         return if (startDate != null && endDate != null) {
             transactionDao.getTotalAmountByTypeAndDateRange(
@@ -80,6 +87,7 @@ class ExpenseRepository(private val transactionDao: TransactionDao) {
         }
     }
 
+    // get total expenses for a category in a date range
     suspend fun getTotalExpensesByCategoryAndDateRange(
         userId: String,
         categoryId: Long,
@@ -109,6 +117,7 @@ class ExpenseRepository(private val transactionDao: TransactionDao) {
         return transactions.sumOf { it.amount }
     }
 
+    // add a new expense
     suspend fun insertExpense(
         userId: String,
         amount: Double,
@@ -129,14 +138,17 @@ class ExpenseRepository(private val transactionDao: TransactionDao) {
         return transactionDao.insertTransaction(transaction)
     }
 
+    // update an existing expense
     suspend fun updateExpense(expense: Transaction) {
         transactionDao.updateTransaction(expense)
     }
 
+    // remove an expense
     suspend fun deleteExpense(expense: Transaction) {
         transactionDao.deleteTransaction(expense)
     }
 
+    // get total expenses for current month
     suspend fun getTotalExpensesForMonth(userId: String): Double {
         val calendar = Calendar.getInstance()
         val year = calendar.get(Calendar.YEAR)
