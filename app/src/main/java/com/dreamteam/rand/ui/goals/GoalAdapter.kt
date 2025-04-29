@@ -106,7 +106,7 @@ class GoalAdapter(private val onDeleteClick: (Goal) -> Unit) :
             }
 
             // Set delete button click listener
-            binding.editButton.setOnClickListener {
+            binding.deleteButton.setOnClickListener {
                 onDeleteClick(currentGoal)
             }
         }

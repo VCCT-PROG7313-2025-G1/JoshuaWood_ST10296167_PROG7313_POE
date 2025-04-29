@@ -32,11 +32,11 @@
                 tools:text="Monthly Groceries" />
 
             <ImageButton
-                android:id="@+id/editButton"
+                android:id="@+id/deleteButton"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_edit"
+                android:src="@drawable/ic_delete"
                 app:tint="@color/white" />
         </LinearLayout>
 
