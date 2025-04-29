@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.util.Patterns
+import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -14,8 +15,10 @@ import com.google.android.material.snackbar.Snackbar
 import android.animation.ObjectAnimator
 import android.animation.AnimatorSet
 
+// handles user registration with animations and validation
 class SignUpFragment : Fragment() {
-
+    private val TAG = "SignUpFragment"
+    
     private var _binding: FragmentSignUpBinding? = null
     private val binding get() = _binding!!
     private val userViewModel: UserViewModel by activityViewModels()
@@ -26,24 +29,27 @@ class SignUpFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        Log.d(TAG, "Creating sign up view")
         _binding = FragmentSignUpBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d(TAG, "Setting up sign up view")
         setupClickListeners()
         observeViewModel()
         startFadeInAnimations()
     }
 
+    // creates a sequence of fade-in animations for a smooth UI experience
     private fun startFadeInAnimations() {
+        Log.d(TAG, "Starting fade-in animations")
         // Create fade-in animators for each view
         val logoAnimator = ObjectAnimator.ofFloat(binding.logoImageView, "alpha", 0f, 1f).apply {
             duration = 500 // lasts 500 ms
             startDelay = 100 // starts after 100ms
         }
-
 
         // creates a fade in animation for the title text view
         val titleAnimator = ObjectAnimator.ofFloat(binding.titleTextView, "alpha", 0f, 1f).apply {
@@ -92,13 +98,17 @@ class SignUpFragment : Fragment() {
         }
     }
 
+    // sets up click listeners for sign up button and sign in text
     private fun setupClickListeners() {
+        Log.d(TAG, "Setting up click listeners")
         binding.signUpButton.setOnClickListener {
+            Log.d(TAG, "Sign up button clicked")
             if (validateInput()) {
                 val name = binding.nameInput.text.toString().trim()
                 val email = binding.emailInput.text.toString().trim()
                 val password = binding.passwordInput.text.toString().trim()
 
+                Log.d(TAG, "Starting registration process for user: $email")
                 // Mark registration as in progress
                 isRegistrationInProgress = true
 
@@ -107,23 +117,31 @@ class SignUpFragment : Fragment() {
                 // Show loading state
                 binding.signUpButton.isEnabled = false
                 binding.progressBar.visibility = View.VISIBLE
+            } else {
+                Log.w(TAG, "Registration validation failed")
             }
         }
 
         binding.signInText.setOnClickListener {
+            Log.d(TAG, "Navigating to sign in screen")
             findNavController().navigateUp()
         }
     }
 
+    // observes ViewModel for user registration results and errors
     private fun observeViewModel() {
+        Log.d(TAG, "Setting up ViewModel observers")
         userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
             if (user != null && isRegistrationInProgress) {
+                Log.d(TAG, "Registration successful for user: ${user.email}")
                 // Reset flag first to prevent navigation loops
                 isRegistrationInProgress = false
 
                 try {
+                    Log.d(TAG, "Navigating to dashboard")
                     findNavController().navigate(R.id.action_signUp_to_dashboard)
                 } catch (e: Exception) {
+                    Log.e(TAG, "Navigation failed after registration: ${e.message}")
                     Snackbar.make(binding.root, "Registration successful but navigation failed", Snackbar.LENGTH_LONG).show()
                 }
             }
@@ -131,6 +149,7 @@ class SignUpFragment : Fragment() {
 
         userViewModel.error.observe(viewLifecycleOwner) { errorMessage ->
             errorMessage?.let {
+                Log.e(TAG, "Registration error: $it")
                 isRegistrationInProgress = false
                 Snackbar.make(binding.root, it, Snackbar.LENGTH_LONG).show()
                 // Reset loading state
@@ -140,11 +159,14 @@ class SignUpFragment : Fragment() {
         }
     }
 
+    // validates user input before registration
     private fun validateInput(): Boolean {
+        Log.d(TAG, "Validating user input")
         var isValid = true
 
         val name = binding.nameInput.text.toString().trim()
         if (name.isEmpty()) {
+            Log.w(TAG, "Name validation failed: empty")
             binding.nameLayout.error = getString(R.string.error_name_required)
             isValid = false
         } else {
@@ -153,9 +175,11 @@ class SignUpFragment : Fragment() {
 
         val email = binding.emailInput.text.toString().trim()
         if (email.isEmpty()) {
+            Log.w(TAG, "Email validation failed: empty")
             binding.emailLayout.error = getString(R.string.error_email_required)
             isValid = false
         } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Log.w(TAG, "Email validation failed: invalid format")
             binding.emailLayout.error = getString(R.string.error_invalid_email)
             isValid = false
         } else {
@@ -164,9 +188,11 @@ class SignUpFragment : Fragment() {
 
         val password = binding.passwordInput.text.toString().trim()
         if (password.isEmpty()) {
+            Log.w(TAG, "Password validation failed: empty")
             binding.passwordLayout.error = getString(R.string.error_password_required)
             isValid = false
         } else if (password.length < 6) {
+            Log.w(TAG, "Password validation failed: too short")
             binding.passwordLayout.error = getString(R.string.error_password_too_short)
             isValid = false
         } else {
@@ -177,6 +203,7 @@ class SignUpFragment : Fragment() {
     }
 
     override fun onDestroyView() {
+        Log.d(TAG, "Destroying sign up view")
         super.onDestroyView()
         _binding = null
     }

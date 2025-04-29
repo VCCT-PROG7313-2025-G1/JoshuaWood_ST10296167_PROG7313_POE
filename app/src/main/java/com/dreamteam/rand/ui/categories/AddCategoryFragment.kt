@@ -3,6 +3,7 @@ package com.dreamteam.rand.ui.categories
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -24,10 +25,14 @@ import com.dreamteam.rand.databinding.FragmentAddCategoryBinding
 import com.dreamteam.rand.ui.auth.UserViewModel
 import com.google.android.material.card.MaterialCardView
 
+// lets you add a new category with a name, icon, and color
 class AddCategoryFragment : Fragment() {
+    private val TAG = "AddCategoryFragment"
+    
     private var _binding: FragmentAddCategoryBinding? = null
     private val binding get() = _binding!!
     
+    // grab the current user and category viewmodel
     private val userViewModel: UserViewModel by activityViewModels()
     private val categoryViewModel: CategoryViewModel by viewModels {
         val database = RandDatabase.getDatabase(requireContext())
@@ -35,10 +40,11 @@ class AddCategoryFragment : Fragment() {
         CategoryViewModel.Factory(repository)
     }
     
-    private var selectedColor = "#FF5252" // Default red color
-    private var selectedIconName = "ic_food" // Default food icon
+    // keep track of what the user picked
+    private var selectedColor = "#FF5252" // start with red
+    private var selectedIconName = "ic_food" // start with food icon
     
-    // Define icon resource IDs
+    // map of icon names to their drawable resources
     private val iconResourceMap = mapOf(
         "ic_food" to R.drawable.ic_food,
         "ic_shopping" to R.drawable.ic_shopping,
@@ -52,12 +58,15 @@ class AddCategoryFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        Log.d(TAG, "Creating add category view")
         _binding = FragmentAddCategoryBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d(TAG, "Setting up add category view")
+        // set up all the ui stuff
         setupToolbar()
         categoryViewModel.setSelectedType(TransactionType.EXPENSE)
         setupPreview()
@@ -68,89 +77,61 @@ class AddCategoryFragment : Fragment() {
         observeViewModel()
     }
 
+    // set up the back button in the toolbar
     private fun setupToolbar() {
+        Log.d(TAG, "Setting up toolbar")
         binding.toolbar.setNavigationOnClickListener {
+            Log.d(TAG, "Toolbar back button clicked")
             findNavController().navigateUp()
         }
     }
     
+    // set up the preview card with the default color and icon
     private fun setupPreview() {
-        // Set default values for the preview
-        binding.previewCategoryName.text = "Food"
-        binding.previewIconContainer.setBackgroundColor(Color.parseColor("#FF5252"))
-        binding.previewIconImage.setImageResource(R.drawable.ic_food)
-    }
-    
-    private fun setupNameInput() {
-        binding.categoryNameInput.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            
-            override fun afterTextChanged(s: Editable?) {
-                val text = s.toString().trim()
-                // Update preview with the entered name
-                binding.previewCategoryName.text = if (text.isEmpty()) "Category" else text
-            }
-        })
+        Log.d(TAG, "Setting up category preview")
+        // start with the default color
+        binding.previewIconContainer.setBackgroundColor(Color.parseColor(selectedColor))
+        // start with the default icon
+        binding.previewIconImage.setImageResource(iconResourceMap[selectedIconName] ?: R.drawable.ic_food)
     }
 
+    // set up the color picker buttons
     private fun setupColorOptions() {
-        // Color views
+        Log.d(TAG, "Setting up color options")
+        // pair up each color button with its selection indicator
         val colorViews = listOf(
-            binding.color1,
-            binding.color2,
-            binding.color3,
-            binding.color4,
-            binding.color5
+            binding.color1 to binding.color1Selected,
+            binding.color2 to binding.color2Selected,
+            binding.color3 to binding.color3Selected,
+            binding.color4 to binding.color4Selected,
+            binding.color5 to binding.color5Selected
         )
-        
-        // Selected indicators
-        val colorSelectedIndicators = listOf(
-            binding.color1Selected,
-            binding.color2Selected,
-            binding.color3Selected,
-            binding.color4Selected,
-            binding.color5Selected
-        )
-        
-        val colors = listOf(
-            "#FF5252", // Red
-            "#448AFF", // Blue
-            "#66BB6A", // Green
-            "#FFC107", // Yellow
-            "#9C27B0"  // Purple
-        )
-        
-        // Set initial selection
-        selectColor(0, colors[0], colorSelectedIndicators)
-        
-        // Set up click listeners for color options
-        colorViews.forEachIndexed { index, colorView ->
+
+        // the colors they can pick from
+        val colors = listOf("#FF5252", "#448AFF", "#66BB6A", "#FFC107", "#9C27B0")
+
+        // start with the first color selected
+        binding.color1Selected.visibility = View.VISIBLE
+
+        // when they click a color, show its indicator and hide the others
+        colorViews.forEachIndexed { index, (colorView, indicator) ->
             colorView.setOnClickListener {
-                selectColor(index, colors[index], colorSelectedIndicators)
+                Log.d(TAG, "Color selected: ${colors[index]}")
+                // hide all other indicators
+                colorViews.forEach { (_, ind) -> ind.visibility = View.GONE }
+                indicator.visibility = View.VISIBLE
+                selectedColor = colors[index]
+                
+                // update the preview with the new color
+                binding.previewIconContainer.setBackgroundColor(Color.parseColor(selectedColor))
             }
         }
     }
-    
-    private fun selectColor(index: Int, color: String, indicators: List<ImageView>) {
-        // Update the selected color
-        selectedColor = color
-        
-        // Update check mark visibility
-        indicators.forEachIndexed { i, indicator ->
-            indicator.visibility = if (i == index) View.VISIBLE else View.GONE
-        }
-        
-        // Update preview background - use backgroundTintList instead of setBackgroundColor
-        binding.previewIconContainer.backgroundTintList = ColorStateList.valueOf(Color.parseColor(color))
-        
-        // Update selected color in ViewModel
-        categoryViewModel.setSelectedColor(color)
-    }
 
+    // set up the icon picker buttons
     private fun setupIconOptions() {
-        // Icon cards
+        Log.d(TAG, "Setting up icon options")
+        // get all the icon cards and their images
         val iconCards = listOf(
             binding.icon1Card,
             binding.icon2Card,
@@ -158,8 +139,7 @@ class AddCategoryFragment : Fragment() {
             binding.icon4Card,
             binding.icon5Card
         )
-        
-        // Icon views
+
         val iconViews = listOf(
             binding.icon1,
             binding.icon2,
@@ -167,7 +147,8 @@ class AddCategoryFragment : Fragment() {
             binding.icon4,
             binding.icon5
         )
-        
+
+        // the icons they can pick from
         val iconNames = listOf(
             "ic_food",
             "ic_shopping",
@@ -175,75 +156,111 @@ class AddCategoryFragment : Fragment() {
             "ic_health",
             "ic_entertainment"
         )
-        
-        // Set initial selection
+
+        // start with the first icon selected
         selectIcon(0, iconNames[0], iconCards, iconViews)
-        
-        // Set up click listeners for icon options
+
+        // when they click an icon, select it
         iconCards.forEachIndexed { index, card ->
             card.setOnClickListener {
+                Log.d(TAG, "Icon selected: ${iconNames[index]}")
                 selectIcon(index, iconNames[index], iconCards, iconViews)
             }
         }
     }
-    
+
+    // handle when an icon is selected
     private fun selectIcon(index: Int, iconName: String, cards: List<MaterialCardView>, icons: List<ImageView>) {
-        // Update the selected icon
+        Log.d(TAG, "Selecting icon: $iconName")
+        // remember which icon they picked
         selectedIconName = iconName
         
-        // Update the card stroke and icon tint
+        // update the card borders and icon colors
         cards.forEachIndexed { i, card ->
             if (i == index) {
+                // highlight the selected icon
                 card.strokeWidth = resources.getDimensionPixelSize(R.dimen.card_selected_stroke_width)
                 card.strokeColor = ContextCompat.getColor(requireContext(), R.color.primary)
                 icons[i].setColorFilter(ContextCompat.getColor(requireContext(), R.color.primary))
             } else {
+                // unhighlight the others
                 card.strokeWidth = 0
                 icons[i].setColorFilter(ContextCompat.getColor(requireContext(), R.color.grey))
             }
         }
         
-        // Update preview icon
+        // update the preview with the new icon
         val resourceId = iconResourceMap[iconName] ?: R.drawable.ic_food
         binding.previewIconImage.setImageResource(resourceId)
         
-        // Update selected icon in ViewModel
+        // tell the viewmodel which icon was picked
         categoryViewModel.setSelectedIcon(iconName)
     }
 
+    // set up the name input field
+    private fun setupNameInput() {
+        Log.d(TAG, "Setting up name input")
+        binding.categoryNameInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                Log.d(TAG, "Category name changed: ${s?.toString()}")
+                // clear any error message when they type
+                binding.categoryNameLayout.error = null
+            }
+        })
+    }
+
+    // set up the save button with validation
     private fun setupSaveButton() {
+        Log.d(TAG, "Setting up save button")
         binding.saveButton.setOnClickListener {
             val categoryName = binding.categoryNameInput.text.toString().trim()
+            Log.d(TAG, "Attempting to save category - Name: $categoryName, Icon: $selectedIconName, Color: $selectedColor")
             
+            // check if they entered a name
             if (categoryName.isEmpty()) {
+                Log.d(TAG, "Validation failed: Empty category name")
                 binding.categoryNameLayout.error = "Category name is required"
                 return@setOnClickListener
             } else {
                 binding.categoryNameLayout.error = null
             }
             
+            // save the category if we have a user
             userViewModel.currentUser.value?.let { user ->
+                Log.d(TAG, "Saving category for user: ${user.uid}")
                 categoryViewModel.saveCategory(user.uid, categoryName)
             } ?: run {
+                Log.w(TAG, "Cannot save category: No user logged in")
                 Toast.makeText(requireContext(), "Please sign in to add categories", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
+    // watch for when the category gets saved
     private fun observeViewModel() {
+        Log.d(TAG, "Setting up ViewModel observers")
         categoryViewModel.saveSuccess.observe(viewLifecycleOwner) { success ->
-            if (success == true) {
-                Toast.makeText(requireContext(), "Category saved successfully", Toast.LENGTH_SHORT).show()
-              //  categoryViewModel.resetSaveStatus()
-                findNavController().navigateUp()
-            } else if (success == false) {
-                Toast.makeText(requireContext(), "Failed to save category", Toast.LENGTH_SHORT).show()
-             //   categoryViewModel.resetSaveStatus()
+            when (success) {
+                true -> {
+                    Log.d(TAG, "Category saved successfully")
+                    Toast.makeText(requireContext(), "Category saved successfully", Toast.LENGTH_SHORT).show()
+                    findNavController().navigateUp()
+                }
+                false -> {
+                    Log.w(TAG, "Failed to save category")
+                    Toast.makeText(requireContext(), "Failed to save category", Toast.LENGTH_SHORT).show()
+                }
+                null -> {
+                    Log.d(TAG, "Save operation not yet completed")
+                }
             }
         }
     }
 
     override fun onDestroyView() {
+        Log.d(TAG, "Destroying add category view")
         super.onDestroyView()
         _binding = null
     }

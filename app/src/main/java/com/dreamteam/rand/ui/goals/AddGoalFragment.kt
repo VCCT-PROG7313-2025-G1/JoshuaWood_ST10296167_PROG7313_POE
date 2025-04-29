@@ -1,6 +1,7 @@
 package com.dreamteam.rand.ui.goals
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,10 +20,14 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import java.text.SimpleDateFormat
 import java.util.*
 
+// lets you add a new spending goal with a name, amount range, and color
 class AddGoalFragment : Fragment() {
+    private val TAG = "AddGoalFragment"
+    
     private var _binding: FragmentAddGoalBinding? = null
     private val binding get() = _binding!!
     
+    // grab the current user and goal viewmodel
     private val userViewModel: UserViewModel by activityViewModels()
     private val goalViewModel: GoalViewModel by viewModels {
         val database = RandDatabase.getDatabase(requireContext())
@@ -30,6 +35,7 @@ class AddGoalFragment : Fragment() {
         GoalViewModel.Factory(repository)
     }
     
+    // keep track of what the user picked
     private var selectedColor = "#FF5252"
     private var selectedMonth = 0
     private var selectedYear = 0
@@ -39,12 +45,15 @@ class AddGoalFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        Log.d(TAG, "Creating add goal view")
         _binding = FragmentAddGoalBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d(TAG, "Setting up add goal view")
+        // set up all the ui stuff
         setupToolbar()
         setupColorSelection()
         setupMonthYearPicker()
@@ -52,23 +61,30 @@ class AddGoalFragment : Fragment() {
         observeViewModel()
     }
 
+    // set up the back button in the toolbar
     private fun setupToolbar() {
+        Log.d(TAG, "Setting up toolbar")
         binding.toolbar.setNavigationOnClickListener {
+            Log.d(TAG, "Toolbar back button clicked")
             findNavController().navigateUp()
         }
     }
 
+    // set up the month/year picker button
     private fun setupMonthYearPicker() {
-        // Set up click listener for the month input field
+        Log.d(TAG, "Setting up month/year picker")
         binding.monthInput.setOnClickListener {
+            Log.d(TAG, "Month input clicked")
             showMonthYearPicker()
         }
     }
 
+    // show a calendar to pick month and year
     private fun showMonthYearPicker() {
+        Log.d(TAG, "Showing month/year picker")
         val calendar = Calendar.getInstance()
         
-        // Set constraints to only allow users to select future dates
+        // only let them pick future dates
         val constraintsBuilder = CalendarConstraints.Builder()
             .setStart(calendar.timeInMillis)
         
@@ -81,19 +97,23 @@ class AddGoalFragment : Fragment() {
             val selectedDate = Calendar.getInstance()
             selectedDate.timeInMillis = selection
             
-            // Extract month (1-12) and year
-            selectedMonth = selectedDate.get(Calendar.MONTH) + 1 // Calendar months are 0-based
+            // get the month (1-12) and year they picked
+            selectedMonth = selectedDate.get(Calendar.MONTH) + 1
             selectedYear = selectedDate.get(Calendar.YEAR)
             
-            // Format the date to show in the input field
+            // show what they picked in the input field
             val dateFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
             binding.monthInput.setText(dateFormat.format(selectedDate.time))
+            Log.d(TAG, "Selected month/year: $selectedMonth/$selectedYear")
         }
 
         datePicker.show(parentFragmentManager, "monthYearPicker")
     }
 
+    // set up the color picker buttons
     private fun setupColorSelection() {
+        Log.d(TAG, "Setting up color selection")
+        // pair up each color button with its selection indicator
         val colorViews = listOf(
             binding.color1 to binding.color1Selected,
             binding.color2 to binding.color2Selected,
@@ -102,14 +122,16 @@ class AddGoalFragment : Fragment() {
             binding.color5 to binding.color5Selected
         )
 
+        // the colors they can pick from
         val colors = listOf("#FF5252", "#448AFF", "#66BB6A", "#FFC107", "#9C27B0")
 
-        // Set initial selection
+        // start with the first color selected
         binding.color1Selected.visibility = View.VISIBLE
 
+        // when they click a color, show its indicator and hide the others
         colorViews.forEachIndexed { index, (colorView, indicator) ->
             colorView.setOnClickListener {
-                // Update selection indicators
+                Log.d(TAG, "Color selected: ${colors[index]}")
                 colorViews.forEach { (_, ind) -> ind.visibility = View.GONE }
                 indicator.visibility = View.VISIBLE
                 selectedColor = colors[index]
@@ -117,41 +139,55 @@ class AddGoalFragment : Fragment() {
         }
     }
 
+    // set up the save button with all the validation
     private fun setupSaveButton() {
+        Log.d(TAG, "Setting up save button")
         binding.saveButton.setOnClickListener {
+            // get what they typed in
             val goalName = binding.goalNameInput.text.toString().trim()
             val minAmount = binding.minAmountInput.text.toString().toDoubleOrNull()
             val maxAmount = binding.maxAmountInput.text.toString().toDoubleOrNull()
             
+            Log.d(TAG, "Validating goal input - Name: $goalName, Min: $minAmount, Max: $maxAmount, Month: $selectedMonth, Year: $selectedYear")
+            
+            // check if everything is filled out right
             when {
                 goalName.isEmpty() -> {
+                    Log.d(TAG, "Validation failed: Empty goal name")
                     binding.goalNameLayout.error = "Goal name is required"
                     return@setOnClickListener
                 }
                 selectedMonth == 0 || selectedYear == 0 -> {
+                    Log.d(TAG, "Validation failed: No month/year selected")
                     binding.monthLayout.error = "Please select a month and year"
                     return@setOnClickListener
                 }
                 minAmount == null -> {
+                    Log.d(TAG, "Validation failed: Invalid minimum amount")
                     binding.minAmountLayout.error = "Please enter a valid minimum amount"
                     return@setOnClickListener
                 }
                 maxAmount == null -> {
+                    Log.d(TAG, "Validation failed: Invalid maximum amount")
                     binding.maxAmountLayout.error = "Please enter a valid maximum amount"
                     return@setOnClickListener
                 }
                 maxAmount < minAmount -> {
+                    Log.d(TAG, "Validation failed: Max amount less than min amount")
                     binding.maxAmountLayout.error = "Maximum amount must be greater than minimum amount"
                     return@setOnClickListener
                 }
                 else -> {
-                    // Clear any previous errors
+                    Log.d(TAG, "Input validation passed")
+                    // clear any error messages
                     binding.goalNameLayout.error = null
                     binding.monthLayout.error = null
                     binding.minAmountLayout.error = null
                     binding.maxAmountLayout.error = null
                     
+                    // save the goal if we have a user
                     userViewModel.currentUser.value?.let { user ->
+                        Log.d(TAG, "Saving goal for user: ${user.uid}")
                         goalViewModel.saveGoal(
                             userId = user.uid,
                             name = goalName,
@@ -167,18 +203,29 @@ class AddGoalFragment : Fragment() {
         }
     }
 
+    // watch for when the goal gets saved
     private fun observeViewModel() {
+        Log.d(TAG, "Setting up ViewModel observers")
         goalViewModel.saveSuccess.observe(viewLifecycleOwner) { success ->
-            if (success == true) {
-                Toast.makeText(requireContext(), "Goal saved successfully", Toast.LENGTH_SHORT).show()
-                findNavController().navigateUp()
-            } else if (success == false) {
-                Toast.makeText(requireContext(), "Failed to save goal", Toast.LENGTH_SHORT).show()
+            when (success) {
+                true -> {
+                    Log.d(TAG, "Goal saved successfully")
+                    Toast.makeText(requireContext(), "Goal saved successfully", Toast.LENGTH_SHORT).show()
+                    findNavController().navigateUp()
+                }
+                false -> {
+                    Log.w(TAG, "Failed to save goal")
+                    Toast.makeText(requireContext(), "Failed to save goal", Toast.LENGTH_SHORT).show()
+                }
+                null -> {
+                    Log.d(TAG, "Save operation not yet completed")
+                }
             }
         }
     }
 
     override fun onDestroyView() {
+        Log.d(TAG, "Destroying add goal view")
         super.onDestroyView()
         _binding = null
     }
