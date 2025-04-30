@@ -44,6 +44,12 @@ class WelcomeFragment : Fragment() {
         }
     }
 
+    // I used ChatGPT and Grok to help me create the fade in animations for the Welcome Fragment class
+    // the animateViewsStaggered function creates a staggered fade-in effect for UI elements
+    // it creates a list of views to animate, a 500ms fade duration, a 150ms delay between each animation
+    // it sets the alpha to 0f and the translationY to 40f to make the view invisible and set for the fade in effect.
+    // Using ChatGPT and Grok I learnt how to create the fade in transition for the application.
+
     // make everything fade in one after another for a nice effect
     private fun animateViewsStaggered() {
         // list of things to animate

@@ -19,12 +19,14 @@ import com.dreamteam.rand.ui.auth.UserViewModel
 import com.dreamteam.rand.ui.expenses.ExpenseViewModel
 import com.dreamteam.rand.data.repository.ExpenseRepository
 import java.util.Calendar
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 
 // this fragment shows all your spending goals
 // you can see how much you've spent compared to your goals and add new ones
 class GoalFragment : Fragment() {
     private val TAG = "GoalFragment"
-    
+
     // binding to access all the views
     private var _binding: FragmentGoalBinding? = null
     private val binding get() = _binding!!
@@ -38,7 +40,7 @@ class GoalFragment : Fragment() {
         val repository = GoalRepository(database.goalDao())
         GoalViewModel.Factory(repository)
     }
-    
+
     private val expenseViewModel: ExpenseViewModel by viewModels {
         val database = RandDatabase.getDatabase(requireContext())
         val repository = ExpenseRepository(database.transactionDao())
@@ -64,6 +66,65 @@ class GoalFragment : Fragment() {
         setupRecyclerView()
         setupClickListeners()
         observeViewModel()
+        setupStaggeredFadeInAnimation()
+    }
+
+    // Made use of ChatGPT and Grok to make the fade in animation for the Goal Screen.
+    // The Staggered fade-in animation fades in and slides up views sequentially.
+    // Each view starts with alpha=0 and translationY=50, then animates to alpha=1 (600ms) and translationY=0 (500ms) with a 290ms delay between views.
+    // Using Grok and ChatGPT it helped me to set the up the fade in animation and create the animator to create the transition effects.
+    // The alpha keyword sets the opacity of the view to 0 making the view invisible.
+    // The translationY keyword sets the position of the view.
+    // The animator set method manages the animation and determines how the animations flows
+    // val animators = viewsToAnimate.mapIndexed { index, view ->, this line maps each view to their animation
+    // val fadeAnimator = ObjectAnimator.ofFloat(view, View.ALPHA, 0f, 1f), this line creates the fade in animation
+    // val slideAnimator = ObjectAnimator.ofFloat(view, View.TRANSLATION_Y, 50f, 0f), this line creates the slide up animation
+    // I also asked ChatGPT and Grok how i could change the fade in duration to make it look better and more pleasing to watch.
+    // So it suggested to set the duration to different values for each view.
+    // Each duration is measured in milliseconds.
+    // Then after setting the durations they are combined to create the animation
+    // The startDelay keyword is used to control the delay between animations.
+    // The duration of the startDelay is also measured in milliseconds
+    // With the use of ChatGPT and Grok I learnt how to create the fade in animation for the Goal Screen and how to create the animator to create the transition effects.
+
+    private fun setupStaggeredFadeInAnimation() {
+        // Determine which view to animate: RecyclerView or empty state
+        val contentView = if (binding.goalsContainer.visibility == View.VISIBLE) {
+            binding.goalsRecyclerView
+        } else {
+            binding.emptyStateContainer
+        }
+
+        // List of views to animate: header section, content (RecyclerView or empty state), FAB
+        val viewsToAnimate = listOf(
+            binding.headerSection, // Header with "Your Goals" and count
+            contentView, // RecyclerView or empty state
+            binding.addGoalFab // FAB
+        )
+
+        val animatorSet = AnimatorSet()
+        val animators = viewsToAnimate.mapIndexed { index, view ->
+            // Initialize view state
+            view.alpha = 0f // Start with alpha at 0, this makes the view invisible
+            view.translationY = 50f
+
+            val fadeAnimator = ObjectAnimator.ofFloat(view, View.ALPHA, 0f, 1f)
+            fadeAnimator.duration = 600 // Duration of the fade-in effect (in milliseconds)
+
+            // Create slide-up animator
+            val slideAnimator = ObjectAnimator.ofFloat(view, View.TRANSLATION_Y, 50f, 0f)
+            slideAnimator.duration = 500 // Duration of the slide-up effect (in milliseconds)
+
+            // Combine fade and slide for each view
+            AnimatorSet().apply {
+                playTogether(fadeAnimator, slideAnimator)
+                startDelay = (index * 290).toLong() // Stagger by 290ms per view
+            }
+        }
+
+        // Play all animations together
+        animatorSet.playTogether(animators.map { it })
+        animatorSet.start()
     }
 
     // setup the toolbar with back button
