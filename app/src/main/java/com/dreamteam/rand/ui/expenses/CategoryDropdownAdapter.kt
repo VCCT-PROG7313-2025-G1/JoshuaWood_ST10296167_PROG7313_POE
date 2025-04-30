@@ -79,12 +79,19 @@ class CategoryDropdownAdapter(
         return view
     }
 
-    // Used chat to help structure the animation for the fade in
-    // Function to apply staggered fade-in animation
+    // Made use of ChatGPT and Grok to make the fade in animation for the CategoryDropDownAdapter screen.
+    // val viewsToAnimate = listOf() is used to create a list of views to animate.
+    //  viewToAnimate -iterates through views to apply fade-in animation with staggered delays
+    // the val fadeIn = AlphaAnimation is used to create a fade-in animation from invisible (alpha 0) to fully visible (alpha 1)
+    // the duration is set to 600 milliseconds (0.6 seconds)
+    // the startOffset is used to control the delay between animations
+    // the fillAfter = true is used to keep the view visible after the animation
+    // With the use of ChatGPT and Grok I learnt how to create the fade in animation for the CategoryDropDownAdapter Screen and how to create the animator to create the transition effects.
+
     private fun applyFadeInAnimation(view: View, position: Int) {
         // Create a fade-in animation (from 0 to 1 alpha)
         val fadeIn = AlphaAnimation(0f, 1f).apply {
-            duration = 300 // Duration of the fade-in effect (in milliseconds)
+            duration = 600 // Duration of the fade-in effect (in milliseconds)
             startOffset = (position * 100).toLong() // Stagger delay (100ms per item)
             fillAfter = true // Keep the view visible after animation
         }

@@ -33,6 +33,13 @@ class SignInFragment : Fragment() {
         return binding.root
     }
 
+    // I made used of ChatGPT and Grok to create the fade in animations for the Sign In Fragment class
+    //  the onViewCreated function in this Android fragment initializes the sign-in screen
+    // The setupAnimations function creates the fade in effect for UI elements
+    // It defines a 500ms fade duration, a -20-pixel upward slide and a 200ms delay between each animation
+    // Each animation is initalized at 0f alpha and 0f translationY to make the view invisible and set for the fade in effect.
+    // Using ChatGPT and Grok it  helped me created the fade in transition for the application.
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "Setting up sign in view")
