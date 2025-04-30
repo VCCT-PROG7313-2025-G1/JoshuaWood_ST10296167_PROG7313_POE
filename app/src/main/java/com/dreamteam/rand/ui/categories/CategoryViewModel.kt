@@ -39,7 +39,11 @@ class CategoryViewModel(private val repository: CategoryRepository) : ViewModel(
 
     // update the selected color
     fun setSelectedColor(color: String) {
-        _selectedColor.value = color
+        android.util.Log.d("CategoryViewModel", "Setting color to: $color")
+        // Ensure color is in proper format (#RRGGBB or #AARRGGBB)
+        val formattedColor = if (color.startsWith("#")) color else "#$color"
+        _selectedColor.value = formattedColor
+        android.util.Log.d("CategoryViewModel", "Color set to: ${_selectedColor.value}")
     }
 
     // update the selected icon
@@ -71,12 +75,15 @@ class CategoryViewModel(private val repository: CategoryRepository) : ViewModel(
             android.util.Log.d("CategoryViewModel", "Is Default: $isDefault")
             android.util.Log.d("CategoryViewModel", "=======================================================")
             
+            // Validate color format
+            val finalColor = if (color.startsWith("#")) color else "#$color"
+            
             val category = Category(
                 userId = userId,
                 name = name,
                 type = type,
                 budget = null,
-                color = color,
+                color = finalColor,
                 icon = icon,
                 isDefault = isDefault,
                 createdAt = Date().time
