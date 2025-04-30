@@ -66,7 +66,8 @@
                             android:id="@+id/previewIconContainer"
                             android:layout_width="48dp"
                             android:layout_height="48dp"
-                            android:background="@drawable/preview_circle_shape"
+                            android:background="@drawable/circle_shape"
+                            android:backgroundTint="#FF5252"
                             android:gravity="center">
 
                             <ImageView
@@ -305,7 +306,6 @@
                                     android:layout_height="60dp"
                                     app:cardCornerRadius="12dp"
                                     app:cardElevation="0dp"
-                                    app:strokeWidth="0dp"
                                     android:clickable="true"
                                     android:focusable="true"
                                     app:cardBackgroundColor="#F5F5F5">

@@ -21,4 +21,22 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
     </style>
+    
+    <!-- Card style with improved shadows -->
+    <style name="Widget.Rand.CardView" parent="Widget.MaterialComponents.CardView">
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">2dp</item>
+        <item name="cardPreventCornerOverlap">true</item>
+        <item name="cardUseCompatPadding">true</item>
+        <item name="contentPadding">0dp</item>
+    </style>
+    
+    <!-- Material Card style with improved shadows -->
+    <style name="Widget.Rand.MaterialCardView" parent="Widget.MaterialComponents.CardView">
+        <item name="cardCornerRadius">8dp</item>
+        <item name="cardElevation">2dp</item>
+        <item name="cardPreventCornerOverlap">true</item>
+        <item name="cardUseCompatPadding">true</item>
+        <item name="contentPadding">0dp</item>
+    </style>
 </resources> 
