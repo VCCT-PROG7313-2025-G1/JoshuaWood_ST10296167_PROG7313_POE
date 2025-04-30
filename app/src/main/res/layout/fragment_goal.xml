@@ -129,6 +129,7 @@
         android:contentDescription="Add goal"
         android:text="Add Goal"
         app:icon="@drawable/ic_add"
+        style="@style/Widget.Rand.FloatingActionButton"
         app:iconTint="@color/white" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

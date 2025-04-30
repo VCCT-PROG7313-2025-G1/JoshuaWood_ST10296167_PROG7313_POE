@@ -74,6 +74,7 @@
         android:layout_margin="16dp"
         android:contentDescription="Add budget category"
         app:srcCompat="@drawable/ic_add"
+        style="@style/Widget.Rand.FloatingActionButton"
         app:tint="@color/white" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout> 

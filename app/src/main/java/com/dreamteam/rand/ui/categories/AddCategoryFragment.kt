@@ -26,6 +26,7 @@ import com.dreamteam.rand.ui.auth.UserViewModel
 import com.google.android.material.card.MaterialCardView
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.graphics.drawable.GradientDrawable
 
 // this fragment lets you create a new category
 // you can pick a name, color, and icon for your category
@@ -82,6 +83,9 @@ class AddCategoryFragment : Fragment() {
         setupSaveButton()
         observeViewModel()
         setupStaggeredFadeInAnimation()
+        
+        // Initialize the preview name
+        binding.previewCategoryName.text = "Category"
     }
 
     // Made use of ChatGPT and Grok to make the fade in animation for the Add Category.
@@ -152,8 +156,13 @@ class AddCategoryFragment : Fragment() {
     // set up the preview card with the default color and icon
     private fun setupPreview() {
         Log.d(TAG, "Setting up category preview")
-        // start with the default color
-        binding.previewIconContainer.setBackgroundColor(Color.parseColor(selectedColor))
+        
+        // Create a new drawable for the preview container
+        val shape = GradientDrawable()
+        shape.shape = GradientDrawable.OVAL
+        shape.setColor(Color.parseColor(selectedColor))
+        binding.previewIconContainer.background = shape
+        
         // start with the default icon
         binding.previewIconImage.setImageResource(iconResourceMap[selectedIconName] ?: R.drawable.ic_food)
     }
@@ -185,8 +194,11 @@ class AddCategoryFragment : Fragment() {
                 indicator.visibility = View.VISIBLE
                 selectedColor = colors[index]
 
-                // update the preview with the new color
-                binding.previewIconContainer.setBackgroundColor(Color.parseColor(selectedColor))
+                // Create a new drawable for the preview container
+                val shape = GradientDrawable()
+                shape.shape = GradientDrawable.OVAL
+                shape.setColor(Color.parseColor(selectedColor))
+                binding.previewIconContainer.background = shape
             }
         }
     }
@@ -270,6 +282,9 @@ class AddCategoryFragment : Fragment() {
                 Log.d(TAG, "Category name changed: ${s?.toString()}")
                 // clear any error message when they type
                 binding.categoryNameLayout.error = null
+                
+                // Update the preview category name
+                binding.previewCategoryName.text = s?.toString()?.takeIf { it.isNotEmpty() } ?: "Category"
             }
         })
     }

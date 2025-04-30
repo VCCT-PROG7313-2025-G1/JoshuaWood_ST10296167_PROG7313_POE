@@ -50,6 +50,7 @@ class CategoryAdapter(private val onEditClick: (Category) -> Unit) :
 
         // fill in all the category details
         fun bind(category: Category, totalSpent: Double) {
+            android.util.Log.d("CategoryAdapter", "Binding category: ${category.name}, ID: ${category.id}, Color: ${category.color}")
             binding.categoryName.text = category.name
             
             // show the amount spent in south african rand
@@ -58,8 +59,10 @@ class CategoryAdapter(private val onEditClick: (Category) -> Unit) :
 
             // set the category's color
             try {
+                android.util.Log.d("CategoryAdapter", "Setting category color: ${category.color}")
                 binding.categoryColorIndicator.setBackgroundColor(Color.parseColor(category.color))
             } catch (e: Exception) {
+                android.util.Log.e("CategoryAdapter", "Error setting color: ${e.message}")
                 binding.categoryColorIndicator.setBackgroundColor(Color.GRAY)
             }
 
@@ -71,7 +74,10 @@ class CategoryAdapter(private val onEditClick: (Category) -> Unit) :
             )
 
             if (iconResId != 0) {
+                android.util.Log.d("CategoryAdapter", "Setting category icon: ${category.icon}")
                 binding.categoryIcon.setImageResource(iconResId)
+            } else {
+                android.util.Log.w("CategoryAdapter", "Icon not found: ${category.icon}")
             }
         }
     }

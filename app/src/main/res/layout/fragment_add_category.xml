@@ -66,8 +66,7 @@
                             android:id="@+id/previewIconContainer"
                             android:layout_width="48dp"
                             android:layout_height="48dp"
-                            android:background="@drawable/circle_shape"
-                            android:backgroundTint="#FF5252"
+                            android:background="@drawable/preview_circle_shape"
                             android:gravity="center">
 
                             <ImageView

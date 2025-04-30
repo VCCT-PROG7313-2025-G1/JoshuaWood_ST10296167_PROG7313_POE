@@ -10,4 +10,15 @@
         <item name="strokeWidth">1dp</item>
         <item name="cornerRadius">8dp</item>
     </style>
+    
+    <!-- FAB style with fixed corner shape -->
+    <style name="Widget.Rand.FloatingActionButton" parent="Widget.MaterialComponents.FloatingActionButton">
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.Rand.FAB</item>
+    </style>
+    
+    <!-- Custom FAB shape appearance -->
+    <style name="ShapeAppearance.Rand.FAB" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
 </resources> 
