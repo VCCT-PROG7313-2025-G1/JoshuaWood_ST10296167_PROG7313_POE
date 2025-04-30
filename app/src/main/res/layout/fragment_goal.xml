@@ -20,11 +20,12 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Goals List -->
+    <!-- Goals List and Empty State -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/goalsContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fillViewport="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
@@ -60,59 +61,61 @@
 
             </LinearLayout>
 
+            <!-- Goals RecyclerView -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/goalsRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:clipToPadding="false"
-                android:paddingBottom="80dp" />
+                android:nestedScrollingEnabled="false"
+                android:paddingBottom="100dp"
+                android:visibility="visible" />
+
+            <!-- Empty State -->
+            <LinearLayout
+                android:id="@+id/emptyStateContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="32dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:src="@drawable/ic_category"
+                    app:tint="@color/grey" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="No Goals Yet"
+                    android:textAppearance="?attr/textAppearanceHeadline6" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:text="Create your first spending goal to start tracking your progress"
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    android:textColor="?android:textColorSecondary" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/addFirstGoalBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="Add Goal"
+                    app:icon="@drawable/ic_add" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
-
-    <!-- Empty State -->
-    <LinearLayout
-        android:id="@+id/emptyStateContainer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="32dp"
-        android:visibility="gone"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <ImageView
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:src="@drawable/ic_category"
-            app:tint="@color/grey" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="No Goals Yet"
-            android:textAppearance="?attr/textAppearanceHeadline6" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:gravity="center"
-            android:text="Create your first spending goal to start tracking your progress"
-            android:textAppearance="?attr/textAppearanceBody2"
-            android:textColor="?android:textColorSecondary" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/addFirstGoalBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Add Goal"
-            app:icon="@drawable/ic_add" />
-
-    </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/addGoalFab"

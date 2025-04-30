@@ -72,7 +72,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:hint="Select Month and Year"
-                        app:endIconDrawable="@drawable/ic_settings"
+                        app:endIconDrawable="@drawable/ic_calendar"
                         app:endIconMode="custom">
 
                         <com.google.android.material.textfield.TextInputEditText

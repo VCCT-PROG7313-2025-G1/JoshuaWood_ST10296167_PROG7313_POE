@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Filter
 import android.widget.TextView
+import android.view.animation.AlphaAnimation
 import com.dreamteam.rand.R
 import com.dreamteam.rand.data.entity.Category
 import com.dreamteam.rand.data.entity.TransactionType
@@ -22,7 +23,7 @@ class CategoryDropdownAdapter(
 ) : ArrayAdapter<Category>(context, resource, categories) {
 
     private val inflater = LayoutInflater.from(context)
-    
+
     // add an "All Categories" option at the top of the list
     private val allCategoriesOption = Category(
         id = -1,
@@ -35,7 +36,7 @@ class CategoryDropdownAdapter(
         budget = 0.0,
         createdAt = System.currentTimeMillis()
     )
-    
+
     // combine the "All Categories" option with the real categories
     private val allItems = mutableListOf<Category>().apply {
         add(allCategoriesOption)
@@ -51,28 +52,45 @@ class CategoryDropdownAdapter(
     // create the view for each item in the dropdown
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val view = convertView ?: inflater.inflate(R.layout.item_dropdown_category, parent, false)
-        
+
         val category = allItems[position]
         val categoryName = view.findViewById<TextView>(R.id.categoryName)
         val colorIndicator = view.findViewById<View>(R.id.categoryColorIndicator)
-        
+
         categoryName.text = category.name
-        
+
         // make "All Categories" stand out with bold text
         if (category.id == -1L) {
             categoryName.setTypeface(null, Typeface.BOLD)
         } else {
             categoryName.setTypeface(null, Typeface.NORMAL)
         }
-        
+
         // show the category's color
         try {
             colorIndicator.setBackgroundColor(Color.parseColor(category.color))
         } catch (e: Exception) {
             colorIndicator.setBackgroundColor(Color.GRAY)
         }
-        
+
+        // Apply staggered fade-in animation
+        applyFadeInAnimation(view, position)
+
         return view
+    }
+
+    // Used chat to help structure the animation for the fade in
+    // Function to apply staggered fade-in animation
+    private fun applyFadeInAnimation(view: View, position: Int) {
+        // Create a fade-in animation (from 0 to 1 alpha)
+        val fadeIn = AlphaAnimation(0f, 1f).apply {
+            duration = 300 // Duration of the fade-in effect (in milliseconds)
+            startOffset = (position * 100).toLong() // Stagger delay (100ms per item)
+            fillAfter = true // Keep the view visible after animation
+        }
+
+        // Start the animation on the view
+        view.startAnimation(fadeIn)
     }
 
     // handle filtering the dropdown (not really used since we show all items)
@@ -90,4 +108,4 @@ class CategoryDropdownAdapter(
             }
         }
     }
-} 
+}

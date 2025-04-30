@@ -29,16 +29,18 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 
 // this fragment lets you add a new expense with all its details
 // you can pick a category, date, amount, and attach a photo of the receipt
 class AddExpenseFragment : Fragment() {
     private val TAG = "AddExpenseFragment"
-    
+
     // binding to access all the views
     private var _binding: FragmentAddExpenseBinding? = null
     private val binding get() = _binding!!
-    
+
     // viewmodels to handle user data, categories, and expenses
     private val userViewModel: UserViewModel by activityViewModels()
     private val categoryViewModel: CategoryViewModel by viewModels {
@@ -46,13 +48,13 @@ class AddExpenseFragment : Fragment() {
         val repository = CategoryRepository(database.categoryDao())
         CategoryViewModel.Factory(repository)
     }
-    
+
     private val expenseViewModel: ExpenseViewModel by viewModels {
         val database = RandDatabase.getDatabase(requireContext())
         val repository = ExpenseRepository(database.transactionDao())
         ExpenseViewModel.Factory(repository)
     }
-    
+
     // keep track of the photo path and category IDs
     private var selectedPhotoPath: String? = null
     private val categoryIdMap = mutableMapOf<String, Long>()
@@ -82,8 +84,50 @@ class AddExpenseFragment : Fragment() {
         setupSaveButton()
         observeViewModel()
         setupPhotoResultListener()
+        setupStaggeredFadeInAnimation()
     }
-    
+
+    private fun setupStaggeredFadeInAnimation() {
+        // List of views to animate: amount section, description, category, date, photo section, save button
+        val viewsToAnimate = listOf(
+            binding.amountPreview, // Amount preview TextView
+            binding.amountLayout, // Amount input TextInputLayout
+            binding.descriptionLayout, // Description input
+            binding.categoryLayout, // Category dropdown
+            binding.dateLayout, // Date input
+            binding.attachPhotoButton.parent as View, // FrameLayout containing photo button or preview
+            binding.saveButton // Save button
+        )
+
+        // Staggered fade-in animation: Fades in and slides up views (name input, preview card, color/icon pickers, save button) sequentially.
+        // Each view starts with alpha=0 and translationY=50, then animates to alpha=1 (600ms) and translationY=0 (500ms) with a 290ms delay between views.
+        val animatorSet = AnimatorSet()
+        val animators = viewsToAnimate.mapIndexed { index, view ->
+            // Initialize view state
+            view.alpha = 0f // Start with alpha at 0, this makes the view invisible
+            view.translationY = 50f // Start with a small translation to show from
+
+            // Used chat to help structure the animation for the fade in
+            // Create fade-in animator
+            val fadeAnimator = ObjectAnimator.ofFloat(view, View.ALPHA, 0f, 1f)
+            fadeAnimator.duration = 600 // Duration of the fade-in effect (in milliseconds)
+
+            // Create slide-up animator
+            val slideAnimator = ObjectAnimator.ofFloat(view, View.TRANSLATION_Y, 50f, 0f)
+            slideAnimator.duration = 500 // Duration of the slide-up effect (in milliseconds)
+
+            // Combine fade and slide for each view
+            AnimatorSet().apply {
+                playTogether(fadeAnimator, slideAnimator)
+                startDelay = (index * 290).toLong() // Stagger by 290ms per view
+            }
+        }
+
+        // Play all animations together
+        animatorSet.playTogether(animators.map { it })
+        animatorSet.start()
+    }
+
     // setup the toolbar with back button
     private fun setupToolbar() {
         Log.d(TAG, "Setting up toolbar")
@@ -92,13 +136,13 @@ class AddExpenseFragment : Fragment() {
             findNavController().navigateUp()
         }
     }
-    
+
     // let the user pick a date for the expense
     private fun setupDatePicker() {
         Log.d(TAG, "Setting up date picker")
         // start with today's date
         binding.dateInput.setText(dateFormat.format(Date()))
-        
+
         binding.dateInput.setOnClickListener {
             Log.d(TAG, "Opening date picker dialog")
             val datePickerDialog = DatePickerDialog(
@@ -107,7 +151,7 @@ class AddExpenseFragment : Fragment() {
                     calendar.set(Calendar.YEAR, year)
                     calendar.set(Calendar.MONTH, month)
                     calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-                    
+
                     binding.dateInput.setText(dateFormat.format(calendar.time))
                     expenseViewModel.setSelectedDate(calendar.timeInMillis)
                     Log.d(TAG, "Date selected: ${dateFormat.format(calendar.time)}")
@@ -116,19 +160,19 @@ class AddExpenseFragment : Fragment() {
                 calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH)
             )
-            
+
             datePickerDialog.show()
         }
     }
-    
+
     // setup the amount input with live preview of the number
     private fun setupAmountInput() {
         Log.d(TAG, "Setting up amount input")
         binding.amountInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            
+
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            
+
             override fun afterTextChanged(s: Editable?) {
                 if (s.toString().isNotEmpty() && s.toString() != ".") {
                     try {
@@ -145,7 +189,7 @@ class AddExpenseFragment : Fragment() {
             }
         })
     }
-    
+
     // setup the dropdown to pick which category the expense belongs to
     private fun setupCategoryDropdown() {
         Log.d(TAG, "Setting up category dropdown")
@@ -154,22 +198,22 @@ class AddExpenseFragment : Fragment() {
                 .observe(viewLifecycleOwner) { categories ->
                     if (categories.isNotEmpty()) {
                         val categoryNames = categories.map { it.name }.toTypedArray()
-                        
+
                         // keep track of which category name goes with which ID
                         categoryIdMap.clear()
                         categories.forEach { category ->
                             categoryIdMap[category.name] = category.id
                             Log.d(TAG, "Category in map: ${category.name}, ID: ${category.id}")
                         }
-                        
+
                         val adapter = ArrayAdapter(
                             requireContext(),
                             android.R.layout.simple_dropdown_item_1line,
                             categoryNames
                         )
-                        
+
                         binding.categoryInput.setAdapter(adapter)
-                        
+
                         // pick the first category by default
                         if (categoryNames.isNotEmpty()) {
                             val defaultCategory = categoryNames[0]
@@ -183,7 +227,7 @@ class AddExpenseFragment : Fragment() {
                     }
                 }
         }
-        
+
         // handle when user picks a different category
         binding.categoryInput.setOnItemClickListener { _, _, position, _ ->
             val selectedCategory = binding.categoryInput.adapter.getItem(position).toString()
@@ -194,7 +238,7 @@ class AddExpenseFragment : Fragment() {
             }
         }
     }
-    
+
     // setup the photo section for attaching receipt photos
     private fun setupPhotoSection() {
         Log.d(TAG, "Setting up photo section")
@@ -202,7 +246,7 @@ class AddExpenseFragment : Fragment() {
             Log.d(TAG, "Navigating to photo screen")
             findNavController().navigate(R.id.action_addExpense_to_photo)
         }
-        
+
         binding.removePhotoButton.setOnClickListener {
             Log.d(TAG, "Removing attached photo")
             selectedPhotoPath = null
@@ -210,7 +254,7 @@ class AddExpenseFragment : Fragment() {
             updatePhotoPreview()
         }
     }
-    
+
     // update the photo preview when a photo is added or removed
     private fun updatePhotoPreview() {
         Log.d(TAG, "Updating photo preview")
@@ -233,7 +277,7 @@ class AddExpenseFragment : Fragment() {
             binding.removePhotoButton.visibility = View.GONE
         }
     }
-    
+
     // listen for when a photo is taken or picked from gallery
     private fun setupPhotoResultListener() {
         Log.d(TAG, "Setting up photo result listener")
@@ -245,7 +289,7 @@ class AddExpenseFragment : Fragment() {
             updatePhotoPreview()
         }
     }
-    
+
     // setup the save button to create the expense
     private fun setupSaveButton() {
         Log.d(TAG, "Setting up save button")
@@ -256,14 +300,14 @@ class AddExpenseFragment : Fragment() {
                 Log.w(TAG, "Input validation failed")
                 return@setOnClickListener
             }
-            
+
             val amount = binding.amountInput.text.toString().toDouble()
             val description = binding.descriptionInput.text.toString().trim()
-            
+
             // Make sure we have the correct category ID by getting it directly from the map
             val categoryName = binding.categoryInput.text.toString()
             val categoryId = categoryIdMap[categoryName]
-            
+
             // Log detailed information about the expense being created
             Log.d(TAG, "------------- Creating New Expense -------------")
             Log.d(TAG, "Description: $description")
@@ -274,9 +318,9 @@ class AddExpenseFragment : Fragment() {
             Log.d(TAG, "Has Receipt Image: ${selectedPhotoPath != null}")
             Log.d(TAG, "Receipt Path: $selectedPhotoPath")
             Log.d(TAG, "------------------------------------------------")
-            
+
             Log.d(TAG, "Saving expense with category: $categoryName, ID: $categoryId")
-            
+
             // Force update the selected category in the viewmodel to ensure it's correct
             if (categoryId != null) {
                 expenseViewModel.setSelectedCategory(categoryId)
@@ -286,7 +330,7 @@ class AddExpenseFragment : Fragment() {
                 Toast.makeText(requireContext(), "Error: Could not determine category", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            
+
             userViewModel.currentUser.value?.let { user ->
                 Log.d(TAG, "Saving expense for user: ${user.uid}")
                 expenseViewModel.saveExpense(user.uid, amount, description)
@@ -296,12 +340,12 @@ class AddExpenseFragment : Fragment() {
             }
         }
     }
-    
+
     // validates all input fields before saving
     private fun validateInputs(): Boolean {
         Log.d(TAG, "Validating inputs")
         var isValid = true
-        
+
         // Validate amount
         val amountStr = binding.amountInput.text.toString()
         if (amountStr.isEmpty() || amountStr == "." || amountStr.toDoubleOrNull() == null || amountStr.toDoubleOrNull() == 0.0) {
@@ -310,7 +354,7 @@ class AddExpenseFragment : Fragment() {
         } else {
             binding.amountLayout.error = null
         }
-        
+
         // Validate description
         val description = binding.descriptionInput.text.toString().trim()
         if (description.isEmpty()) {
@@ -319,7 +363,7 @@ class AddExpenseFragment : Fragment() {
         } else {
             binding.descriptionLayout.error = null
         }
-        
+
         // Validate category
         val category = binding.categoryInput.text.toString()
         if (category.isEmpty() || !categoryIdMap.containsKey(category)) {
@@ -328,7 +372,7 @@ class AddExpenseFragment : Fragment() {
         } else {
             binding.categoryLayout.error = null
         }
-        
+
         // Validate date
         val dateStr = binding.dateInput.text.toString()
         try {
@@ -338,21 +382,21 @@ class AddExpenseFragment : Fragment() {
             binding.dateLayout.error = "Please enter a valid date"
             isValid = false
         }
-        
+
         return isValid
     }
-    
+
     private fun observeViewModel() {
         expenseViewModel.saveSuccess.observe(viewLifecycleOwner) { success ->
             if (success == true) {
                 Log.d(TAG, "✅ Expense saved successfully!")
                 Toast.makeText(requireContext(), "Expense saved successfully", Toast.LENGTH_SHORT).show()
-               // expenseViewModel.resetSaveStatus()
+                // expenseViewModel.resetSaveStatus()
                 findNavController().navigateUp()
             } else if (success == false) {
                 Log.e(TAG, "❌ Failed to save expense")
                 Toast.makeText(requireContext(), "Failed to save expense", Toast.LENGTH_SHORT).show()
-              //  expenseViewModel.resetSaveStatus()
+                // expenseViewModel.resetSaveStatus()
             }
         }
     }
@@ -361,4 +405,4 @@ class AddExpenseFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-} 
+}

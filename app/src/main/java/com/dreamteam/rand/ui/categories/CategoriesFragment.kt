@@ -22,32 +22,34 @@ import com.dreamteam.rand.ui.expenses.ExpenseViewModel
 import com.google.android.material.datepicker.MaterialDatePicker
 import java.text.SimpleDateFormat
 import java.util.*
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 
 // this fragment shows all the categories and how much was spent in each one
 // you can filter by date range and see spending stats
 class CategoriesFragment : Fragment() {
     private val TAG = "CategoriesFragment"
-    
+
     // binding to access the views
     private var _binding: FragmentCategoriesBinding? = null
     private val binding get() = _binding!!
-    
+
     // viewmodels to handle data
     private val userViewModel: UserViewModel by activityViewModels()
     private lateinit var categoryAdapter: CategoryAdapter
-    
+
     // date range for filtering
     private var startDate: Long? = null
     private var endDate: Long? = null
     private val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
-    
+
     // setup the category viewmodel with its repository
     private val categoryViewModel: CategoryViewModel by viewModels {
         val database = RandDatabase.getDatabase(requireContext())
         val repository = CategoryRepository(database.categoryDao())
         CategoryViewModel.Factory(repository)
     }
-    
+
     // setup the expense viewmodel with its repository
     private val expenseViewModel: ExpenseViewModel by viewModels {
         val database = RandDatabase.getDatabase(requireContext())
@@ -75,6 +77,51 @@ class CategoriesFragment : Fragment() {
         setupClickListeners()
         binding.dateRangeLayout.isEndIconVisible = false  // Set initial state
         observeViewModel()
+        setupStaggeredFadeInAnimation()
+    }
+
+    // Staggered fade-in animation: Fades in and slides up views (name input, preview card, color/icon pickers, save button) sequentially.
+    // Each view starts with alpha=0 and translationY=50, then animates to alpha=1 (600ms) and translationY=0 (500ms) with a 290ms delay between views.
+    private fun setupStaggeredFadeInAnimation() {
+        // Determine which view to animate: RecyclerView or empty state
+        val contentView = if (binding.categoriesRecyclerView.visibility == View.VISIBLE) {
+            binding.categoriesRecyclerView
+        } else {
+            binding.emptyStateContainer
+        }
+
+        // List of views to animate: header section, content (RecyclerView or empty state), FAB
+        val viewsToAnimate = listOf(
+            binding.headerSection,
+            contentView,
+            binding.addCategoryFab
+        )
+
+        val animatorSet = AnimatorSet()
+        val animators = viewsToAnimate.mapIndexed { index, view ->
+            // Initialize view state
+            view.alpha = 0f // Start with alpha at 0, this makes the view invisible
+            view.translationY = 50f
+
+            // Used chat to help structure the animation for the fade in
+            // Create fade-in animator
+            val fadeAnimator = ObjectAnimator.ofFloat(view, View.ALPHA, 0f, 1f)
+            fadeAnimator.duration = 600 // Duration for fade-in
+
+            // Create slide-up animator
+            val slideAnimator = ObjectAnimator.ofFloat(view, View.TRANSLATION_Y, 50f, 0f)
+            slideAnimator.duration = 500 // Duration for slide-up
+
+            // Combine fade and slide for each view
+            AnimatorSet().apply {
+                playTogether(fadeAnimator, slideAnimator)
+                startDelay = (index * 290).toLong() // Stagger by 290ms per view
+            }
+        }
+
+        // Play all animations together
+        animatorSet.playTogether(animators.map { it })
+        animatorSet.start()
     }
 
     // setup the toolbar with back button
@@ -93,7 +140,7 @@ class CategoriesFragment : Fragment() {
             Log.d(TAG, "Category clicked - ID: ${category.id}, Name: ${category.name}")
             // Navigate to edit category screen (not implemented yet)
         }
-        
+
         binding.categoriesRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = categoryAdapter
@@ -118,7 +165,7 @@ class CategoriesFragment : Fragment() {
             Log.d(TAG, "Add category FAB clicked")
             findNavController().navigate(R.id.action_categories_to_addCategory)
         }
-        
+
         binding.addFirstCategoryBtn.setOnClickListener {
             Log.d(TAG, "Add first category button clicked")
             findNavController().navigate(R.id.action_categories_to_addCategory)
@@ -208,7 +255,7 @@ class CategoriesFragment : Fragment() {
                 binding.emptyStateContainer.visibility = View.GONE
                 binding.categoriesRecyclerView.visibility = View.VISIBLE
                 binding.headerSection.visibility = View.VISIBLE
-                
+
                 binding.categoryCountText.text = categories.size.toString()
                 Log.d(TAG, "Category count updated: ${categories.size}")
                 loadCategoriesWithDateRange(categories, userId)
@@ -237,7 +284,7 @@ class CategoriesFragment : Fragment() {
                 categoryAdapter.updateCategoryTotal(category.id, totalSpent)
             }
         }
-        
+
         categoryAdapter.submitList(categories)
         Log.d(TAG, "Submitted ${categories.size} categories to adapter")
     }

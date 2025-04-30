@@ -24,16 +24,18 @@ import com.dreamteam.rand.data.repository.CategoryRepository
 import com.dreamteam.rand.databinding.FragmentAddCategoryBinding
 import com.dreamteam.rand.ui.auth.UserViewModel
 import com.google.android.material.card.MaterialCardView
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 
 // this fragment lets you create a new category
 // you can pick a name, color, and icon for your category
 class AddCategoryFragment : Fragment() {
     private val TAG = "AddCategoryFragment"
-    
+
     // binding to access the views
     private var _binding: FragmentAddCategoryBinding? = null
     private val binding get() = _binding!!
-    
+
     // grab the current user and category viewmodel
     private val userViewModel: UserViewModel by activityViewModels()
     private val categoryViewModel: CategoryViewModel by viewModels {
@@ -41,11 +43,11 @@ class AddCategoryFragment : Fragment() {
         val repository = CategoryRepository(database.categoryDao())
         CategoryViewModel.Factory(repository)
     }
-    
+
     // keep track of what the user picked
     private var selectedColor = "#FF5252" // start with red
     private var selectedIconName = "ic_food" // start with food icon
-    
+
     // map of icon names to their drawable resources
     private val iconResourceMap = mapOf(
         "ic_food" to R.drawable.ic_food,
@@ -79,6 +81,46 @@ class AddCategoryFragment : Fragment() {
         setupNameInput()
         setupSaveButton()
         observeViewModel()
+        setupStaggeredFadeInAnimation()
+    }
+
+    // Staggered fade-in animation: Fades in and slides up views (name input, preview card, color/icon pickers, save button) sequentially.
+    // Each view starts with alpha=0 and translationY=50, then animates to alpha=1 (600ms) and translationY=0 (500ms) with a 290ms delay between views.
+    private fun setupStaggeredFadeInAnimation() {
+        // List of views to animate: name input, preview card, color picker, icon picker, save button
+        val viewsToAnimate = listOf(
+            binding.categoryNameLayout,
+            binding.previewIconContainer.parent.parent as View, // CardView containing preview
+            binding.colorOptionsLayout,
+            binding.iconOptionsLayout,
+            binding.saveButton
+        )
+
+        val animatorSet = AnimatorSet()
+        val animators = viewsToAnimate.mapIndexed { index, view ->
+            // Initialize view state
+            view.alpha = 0f // Start with alpha at 0, this makes the view invisible
+            view.translationY = 50f
+
+            // Used chat to help structure the animation for the fade in
+            // Create fade-in animator
+            val fadeAnimator = ObjectAnimator.ofFloat(view, View.ALPHA, 0f, 1f)
+            fadeAnimator.duration = 600 // Duration for fade-in
+
+            // Create slide-up animator
+            val slideAnimator = ObjectAnimator.ofFloat(view, View.TRANSLATION_Y, 50f, 0f)
+            slideAnimator.duration = 500 // Duration for slide-up
+
+            // Combine fade and slide for each view
+            AnimatorSet().apply {
+                playTogether(fadeAnimator, slideAnimator)
+                startDelay = (index * 290).toLong() // Stagger by 290ms per view
+            }
+        }
+
+        // Play all animations together
+        animatorSet.playTogether(animators.map { it })
+        animatorSet.start()
     }
 
     // set up the back button in the toolbar
@@ -89,7 +131,7 @@ class AddCategoryFragment : Fragment() {
             findNavController().navigateUp()
         }
     }
-    
+
     // set up the preview card with the default color and icon
     private fun setupPreview() {
         Log.d(TAG, "Setting up category preview")
@@ -125,7 +167,7 @@ class AddCategoryFragment : Fragment() {
                 colorViews.forEach { (_, ind) -> ind.visibility = View.GONE }
                 indicator.visibility = View.VISIBLE
                 selectedColor = colors[index]
-                
+
                 // update the preview with the new color
                 binding.previewIconContainer.setBackgroundColor(Color.parseColor(selectedColor))
             }
@@ -178,7 +220,7 @@ class AddCategoryFragment : Fragment() {
         Log.d(TAG, "Selecting icon: $iconName")
         // remember which icon they picked
         selectedIconName = iconName
-        
+
         // update the card borders and icon colors
         cards.forEachIndexed { i, card ->
             if (i == index) {
@@ -192,11 +234,11 @@ class AddCategoryFragment : Fragment() {
                 icons[i].setColorFilter(ContextCompat.getColor(requireContext(), R.color.grey))
             }
         }
-        
+
         // update the preview with the new icon
         val resourceId = iconResourceMap[iconName] ?: R.drawable.ic_food
         binding.previewIconImage.setImageResource(resourceId)
-        
+
         // tell the viewmodel which icon was picked
         categoryViewModel.setSelectedIcon(iconName)
     }
@@ -220,7 +262,7 @@ class AddCategoryFragment : Fragment() {
         Log.d(TAG, "Setting up save button")
         binding.saveButton.setOnClickListener {
             val categoryName = binding.categoryNameInput.text.toString().trim()
-            
+
             // Log detailed information about the category being created
             Log.d(TAG, "------------- Creating New Category -------------")
             Log.d(TAG, "Name: $categoryName")
@@ -228,9 +270,9 @@ class AddCategoryFragment : Fragment() {
             Log.d(TAG, "Icon: $selectedIconName")
             Log.d(TAG, "Type: ${categoryViewModel.selectedType.value}")
             Log.d(TAG, "------------------------------------------------")
-            
+
             Log.d(TAG, "Attempting to save category - Name: $categoryName, Icon: $selectedIconName, Color: $selectedColor")
-            
+
             // check if they entered a name
             if (categoryName.isEmpty()) {
                 Log.d(TAG, "Validation failed: Empty category name")
@@ -239,7 +281,7 @@ class AddCategoryFragment : Fragment() {
             } else {
                 binding.categoryNameLayout.error = null
             }
-            
+
             // save the category if we have a user
             userViewModel.currentUser.value?.let { user ->
                 Log.d(TAG, "Saving category for user: ${user.uid}")
@@ -278,4 +320,4 @@ class AddCategoryFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-} 
+}

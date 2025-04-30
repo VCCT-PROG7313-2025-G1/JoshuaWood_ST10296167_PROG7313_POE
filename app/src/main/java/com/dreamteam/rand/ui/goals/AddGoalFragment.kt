@@ -19,16 +19,18 @@ import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.MaterialDatePicker
 import java.text.SimpleDateFormat
 import java.util.*
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 
 // this fragment lets you add a new spending goal
 // you can set a name, amount range, month/year, and pick a color
 class AddGoalFragment : Fragment() {
     private val TAG = "AddGoalFragment"
-    
+
     // binding to access all the views
     private var _binding: FragmentAddGoalBinding? = null
     private val binding get() = _binding!!
-    
+
     // viewmodels to handle user data and goals
     private val userViewModel: UserViewModel by activityViewModels()
     private val goalViewModel: GoalViewModel by viewModels {
@@ -36,12 +38,12 @@ class AddGoalFragment : Fragment() {
         val repository = GoalRepository(database.goalDao())
         GoalViewModel.Factory(repository)
     }
-    
+
     // keep track of what the user picked
     private var selectedColor = "#FF5252"
     private var selectedMonth = 0
     private var selectedYear = 0
-    
+
     // create the view for adding a goal
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -62,6 +64,43 @@ class AddGoalFragment : Fragment() {
         setupMonthYearPicker()
         setupSaveButton()
         observeViewModel()
+        setupStaggeredFadeInAnimation()
+    }
+
+    // Staggered fade-in animation: Fades in and slides up views (name input, preview card, color/icon pickers, save button) sequentially.
+    // Each view starts with alpha=0 and translationY=50, then animates to alpha=1 (600ms) and translationY=0 (500ms) with a 290ms delay between views.
+    private fun setupStaggeredFadeInAnimation() {
+        // List of views to animate: input card, save button
+        val viewsToAnimate = listOf(
+            binding.goalNameLayout.parent.parent as View, // MaterialCardView containing all inputs
+            binding.saveButton // Save button
+        )
+
+        val animatorSet = AnimatorSet()
+        val animators = viewsToAnimate.mapIndexed { index, view ->
+            // Initialize view state
+            view.alpha = 0f // Start with alpha at 0, this makes the view invisible
+            view.translationY = 50f //
+
+            // Used chat to help structure the animation for the fade in
+            // Create fade-in animator
+            val fadeAnimator = ObjectAnimator.ofFloat(view, View.ALPHA, 0f, 1f)
+            fadeAnimator.duration = 600 // Duration of the fade-in effect (in milliseconds)
+
+            // Create slide-up animator
+            val slideAnimator = ObjectAnimator.ofFloat(view, View.TRANSLATION_Y, 50f, 0f)
+            slideAnimator.duration = 500 // Duration of the slide-up effect (in milliseconds)
+
+            // Combine fade and slide for each view
+            AnimatorSet().apply {
+                playTogether(fadeAnimator, slideAnimator)
+                startDelay = (index * 290).toLong() // Stagger by 150ms per view
+            }
+        }
+
+        // Play all animations together
+        animatorSet.playTogether(animators.map { it })
+        animatorSet.start()
     }
 
     // setup the toolbar with back button
@@ -86,11 +125,11 @@ class AddGoalFragment : Fragment() {
     private fun showMonthYearPicker() {
         Log.d(TAG, "Showing month/year picker")
         val calendar = Calendar.getInstance()
-        
+
         // only let them pick future dates
         val constraintsBuilder = CalendarConstraints.Builder()
             .setStart(calendar.timeInMillis)
-        
+
         val datePicker = MaterialDatePicker.Builder.datePicker()
             .setTitleText("Select Month and Year")
             .setCalendarConstraints(constraintsBuilder.build())
@@ -99,11 +138,11 @@ class AddGoalFragment : Fragment() {
         datePicker.addOnPositiveButtonClickListener { selection ->
             val selectedDate = Calendar.getInstance()
             selectedDate.timeInMillis = selection
-            
+
             // get the month (1-12) and year they picked
             selectedMonth = selectedDate.get(Calendar.MONTH) + 1
             selectedYear = selectedDate.get(Calendar.YEAR)
-            
+
             // show what they picked in the input field
             val dateFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
             binding.monthInput.setText(dateFormat.format(selectedDate.time))
@@ -150,9 +189,9 @@ class AddGoalFragment : Fragment() {
             val goalName = binding.goalNameInput.text.toString().trim()
             val minAmount = binding.minAmountInput.text.toString().toDoubleOrNull()
             val maxAmount = binding.maxAmountInput.text.toString().toDoubleOrNull()
-            
+
             Log.d(TAG, "Validating goal input - Name: $goalName, Min: $minAmount, Max: $maxAmount, Month: $selectedMonth, Year: $selectedYear")
-            
+
             // check if everything is filled out right
             when {
                 goalName.isEmpty() -> {
@@ -187,7 +226,7 @@ class AddGoalFragment : Fragment() {
                     binding.monthLayout.error = null
                     binding.minAmountLayout.error = null
                     binding.maxAmountLayout.error = null
-                    
+
                     // save the goal if we have a user
                     userViewModel.currentUser.value?.let { user ->
                         Log.d(TAG, "Saving goal for user: ${user.uid}")

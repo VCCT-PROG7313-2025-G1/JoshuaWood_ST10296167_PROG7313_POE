@@ -19,12 +19,14 @@ import com.dreamteam.rand.ui.auth.UserViewModel
 import com.dreamteam.rand.ui.expenses.ExpenseViewModel
 import com.dreamteam.rand.data.repository.ExpenseRepository
 import java.util.Calendar
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 
 // this fragment shows all your spending goals
 // you can see how much you've spent compared to your goals and add new ones
 class GoalFragment : Fragment() {
     private val TAG = "GoalFragment"
-    
+
     // binding to access all the views
     private var _binding: FragmentGoalBinding? = null
     private val binding get() = _binding!!
@@ -38,7 +40,7 @@ class GoalFragment : Fragment() {
         val repository = GoalRepository(database.goalDao())
         GoalViewModel.Factory(repository)
     }
-    
+
     private val expenseViewModel: ExpenseViewModel by viewModels {
         val database = RandDatabase.getDatabase(requireContext())
         val repository = ExpenseRepository(database.transactionDao())
@@ -64,6 +66,49 @@ class GoalFragment : Fragment() {
         setupRecyclerView()
         setupClickListeners()
         observeViewModel()
+        setupStaggeredFadeInAnimation()
+    }
+
+    private fun setupStaggeredFadeInAnimation() {
+        // Determine which view to animate: RecyclerView or empty state
+        val contentView = if (binding.goalsContainer.visibility == View.VISIBLE) {
+            binding.goalsRecyclerView
+        } else {
+            binding.emptyStateContainer
+        }
+
+        // List of views to animate: header section, content (RecyclerView or empty state), FAB
+        val viewsToAnimate = listOf(
+            binding.headerSection, // Header with "Your Goals" and count
+            contentView, // RecyclerView or empty state
+            binding.addGoalFab // FAB
+        )
+
+        val animatorSet = AnimatorSet()
+        val animators = viewsToAnimate.mapIndexed { index, view ->
+            // Initialize view state
+            view.alpha = 0f // Start with alpha at 0, this makes the view invisible
+            view.translationY = 50f
+
+            // Used chat to help structure the animation for the fade in
+            // Create fade-in animator
+            val fadeAnimator = ObjectAnimator.ofFloat(view, View.ALPHA, 0f, 1f)
+            fadeAnimator.duration = 600 // Duration of the fade-in effect (in milliseconds)
+
+            // Create slide-up animator
+            val slideAnimator = ObjectAnimator.ofFloat(view, View.TRANSLATION_Y, 50f, 0f)
+            slideAnimator.duration = 500 // Duration of the slide-up effect (in milliseconds)
+
+            // Combine fade and slide for each view
+            AnimatorSet().apply {
+                playTogether(fadeAnimator, slideAnimator)
+                startDelay = (index * 290).toLong() // Stagger by 290ms per view
+            }
+        }
+
+        // Play all animations together
+        animatorSet.playTogether(animators.map { it })
+        animatorSet.start()
     }
 
     // setup the toolbar with back button
