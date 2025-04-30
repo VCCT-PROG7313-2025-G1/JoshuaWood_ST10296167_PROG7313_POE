@@ -153,18 +153,41 @@ class AddCategoryFragment : Fragment() {
         }
     }
 
+    // Update the preview icon container with the selected color
+    private fun updatePreviewColor() {
+        try {
+            Log.d(TAG, "Updating preview with color: $selectedColor")
+            
+            // Remove any existing background tint to avoid conflicts
+            binding.previewIconContainer.backgroundTintList = null
+            
+            // Create a new drawable for the preview container
+            val shape = GradientDrawable()
+            shape.shape = GradientDrawable.OVAL
+            shape.setColor(Color.parseColor(selectedColor))
+            binding.previewIconContainer.background = shape
+            
+            Log.d(TAG, "Preview color updated successfully")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating preview color: ${e.message}")
+        }
+    }
+
     // set up the preview card with the default color and icon
     private fun setupPreview() {
         Log.d(TAG, "Setting up category preview")
         
-        // Create a new drawable for the preview container
-        val shape = GradientDrawable()
-        shape.shape = GradientDrawable.OVAL
-        shape.setColor(Color.parseColor(selectedColor))
-        binding.previewIconContainer.background = shape
-        
-        // start with the default icon
-        binding.previewIconImage.setImageResource(iconResourceMap[selectedIconName] ?: R.drawable.ic_food)
+        try {
+            // Update the preview color
+            updatePreviewColor()
+            
+            // start with the default icon
+            binding.previewIconImage.setImageResource(iconResourceMap[selectedIconName] ?: R.drawable.ic_food)
+            
+            Log.d(TAG, "Preview setup complete with color: $selectedColor")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error setting up preview: ${e.message}")
+        }
     }
 
     // set up the color picker buttons
@@ -188,17 +211,20 @@ class AddCategoryFragment : Fragment() {
         // when they click a color, show its indicator and hide the others
         colorViews.forEachIndexed { index, (colorView, indicator) ->
             colorView.setOnClickListener {
-                Log.d(TAG, "Color selected: ${colors[index]}")
-                // hide all other indicators
-                colorViews.forEach { (_, ind) -> ind.visibility = View.GONE }
-                indicator.visibility = View.VISIBLE
-                selectedColor = colors[index]
+                try {
+                    Log.d(TAG, "Color selected: ${colors[index]}")
+                    // hide all other indicators
+                    colorViews.forEach { (_, ind) -> ind.visibility = View.GONE }
+                    indicator.visibility = View.VISIBLE
+                    selectedColor = colors[index]
 
-                // Create a new drawable for the preview container
-                val shape = GradientDrawable()
-                shape.shape = GradientDrawable.OVAL
-                shape.setColor(Color.parseColor(selectedColor))
-                binding.previewIconContainer.background = shape
+                    // Update the preview with the selected color
+                    updatePreviewColor()
+                    
+                    Log.d(TAG, "Color applied: ${colors[index]}")
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error applying color: ${e.message}")
+                }
             }
         }
     }

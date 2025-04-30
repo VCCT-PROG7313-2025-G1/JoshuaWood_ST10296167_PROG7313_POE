@@ -67,7 +67,6 @@
                             android:layout_width="48dp"
                             android:layout_height="48dp"
                             android:background="@drawable/circle_shape"
-                            android:backgroundTint="#FF5252"
                             android:gravity="center">
 
                             <ImageView
