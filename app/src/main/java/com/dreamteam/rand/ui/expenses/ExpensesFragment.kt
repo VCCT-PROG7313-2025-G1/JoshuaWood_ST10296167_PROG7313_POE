@@ -306,32 +306,52 @@ class ExpensesFragment : Fragment() {
     }
 
     // clears the date range filter
-    private fun clearDateRange() {
+    private fun clearDateRange(shouldReloadData: Boolean = true) {
         Log.d(TAG, "Clearing date range filter")
         startDate = null
         endDate = null
         binding.dateRangeField.setText("")
         binding.dateRangeLayout.isEndIconVisible = false
         updateClearAllButtonVisibility()
-        loadExpensesWithFilters()
+        if (shouldReloadData) {
+            loadExpensesWithFilters()
+        }
     }
 
     // clears the category filter
-    private fun clearCategoryFilter() {
+    private fun clearCategoryFilter(shouldReloadData: Boolean = true) {
         Log.d(TAG, "Clearing category filter")
         selectedCategoryId = null
         binding.categoryFilterField.setText("")
         binding.categoryFilterLayout.isEndIconVisible = false
         updateClearAllButtonVisibility()
-        loadExpensesWithFilters()
+        if (shouldReloadData) {
+            loadExpensesWithFilters()
+        }
     }
 
     // clears all active filters
     private fun clearAllFilters() {
         Log.d(TAG, "Clearing all filters")
-        clearDateRange()
-        clearCategoryFilter()
+        // Pass false to prevent individual reload
+        clearDateRange(false)
+        clearCategoryFilter(false)
+        
+        // Reset dropdown to default selection if needed
+        try {
+            // Get the default "All Categories" item which is always at position 0
+            val defaultCategory = categoryAdapter.getItem(0)
+            if (defaultCategory != null) {
+                (binding.categoryFilterField as? AutoCompleteTextView)?.setText(defaultCategory.name, false)
+                Log.d(TAG, "Reset category dropdown to: ${defaultCategory.name}")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error resetting category dropdown: ${e.message}", e)
+        }
+        
         updateClearAllButtonVisibility()
+        // Single reload after clearing all filters
+        loadExpensesWithFilters()
     }
 
     // updates the visibility of the clear all filters button

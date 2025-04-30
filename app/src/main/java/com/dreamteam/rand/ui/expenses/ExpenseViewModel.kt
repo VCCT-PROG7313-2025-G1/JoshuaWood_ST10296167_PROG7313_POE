@@ -58,7 +58,10 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
 
     // update the receipt photo uri
     fun setPhotoUri(uri: String?) {
+        android.util.Log.d("ExpenseViewModel", "Setting photo URI: $uri, currently selected category: ${_selectedCategoryId.value}")
         _photoUri.value = uri ?: ""
+        // Note: We deliberately don't reset the category selection here
+        android.util.Log.d("ExpenseViewModel", "Photo URI set, category ID remains: ${_selectedCategoryId.value}")
     }
 
     // get all expenses for a user
