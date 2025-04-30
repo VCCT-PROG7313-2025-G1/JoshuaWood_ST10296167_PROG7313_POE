@@ -209,6 +209,11 @@ class AddExpenseFragment : Fragment() {
     // setup the dropdown to pick which category the expense belongs to
     private fun setupCategoryDropdown() {
         Log.d(TAG, "Setting up category dropdown")
+        
+        // Get selected category ID directly from ViewModel
+        val selectedCategoryId = expenseViewModel.selectedCategoryId.value
+        Log.d(TAG, "Current selected category ID from ViewModel: $selectedCategoryId")
+        
         userViewModel.currentUser.value?.let { user ->
             categoryViewModel.getCategoriesByType(user.uid, TransactionType.EXPENSE)
                 .observe(viewLifecycleOwner) { categories ->
@@ -230,8 +235,25 @@ class AddExpenseFragment : Fragment() {
 
                         binding.categoryInput.setAdapter(adapter)
 
-                        // pick the first category by default
-                        if (categoryNames.isNotEmpty()) {
+                        // Check if we should restore a previous category selection
+                        if (selectedCategoryId != null) {
+                            // Find the category name corresponding to the ID
+                            val categoryNameToRestore = categories.find { it.id == selectedCategoryId }?.name
+                            if (categoryNameToRestore != null && categoryNames.contains(categoryNameToRestore)) {
+                                binding.categoryInput.setText(categoryNameToRestore, false)
+                                Log.d(TAG, "Restored category from ViewModel ID: $selectedCategoryId, Name: $categoryNameToRestore")
+                            } else {
+                                // Selected category no longer exists, use default
+                                val defaultCategory = categoryNames[0]
+                                binding.categoryInput.setText(defaultCategory, false)
+                                val id = categoryIdMap[defaultCategory]
+                                Log.d(TAG, "Selected category no longer exists, setting default: $defaultCategory with ID: $id")
+                                if (id != null) {
+                                    expenseViewModel.setSelectedCategory(id)
+                                }
+                            }
+                        } else if (categoryNames.isNotEmpty()) {
+                            // No previous selection, use first category as default
                             val defaultCategory = categoryNames[0]
                             binding.categoryInput.setText(defaultCategory, false)
                             val id = categoryIdMap[defaultCategory]
