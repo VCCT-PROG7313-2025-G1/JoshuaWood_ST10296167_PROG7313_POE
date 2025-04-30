@@ -205,12 +205,12 @@ class GoalFragment : Fragment() {
             if (goals.isEmpty()) {
                 Log.d(TAG, "No goals found, showing empty state")
                 binding.emptyStateContainer.visibility = View.VISIBLE
-                binding.goalsContainer.visibility = View.GONE
+                binding.goalsRecyclerView.visibility = View.GONE
                 binding.headerSection.visibility = View.GONE
             } else {
                 Log.d(TAG, "Showing goals list")
                 binding.emptyStateContainer.visibility = View.GONE
-                binding.goalsContainer.visibility = View.VISIBLE
+                binding.goalsRecyclerView.visibility = View.VISIBLE
                 binding.headerSection.visibility = View.VISIBLE
 
                 // update how many goals you have
