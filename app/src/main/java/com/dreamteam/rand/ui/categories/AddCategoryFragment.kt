@@ -76,6 +76,9 @@ class AddCategoryFragment : Fragment() {
         // set up all the ui stuff
         setupToolbar()
         categoryViewModel.setSelectedType(TransactionType.EXPENSE)
+        // Ensure the initial color is set in the ViewModel
+        categoryViewModel.setSelectedColor(selectedColor)
+        categoryViewModel.setSelectedIcon(selectedIconName)
         setupPreview()
         setupColorOptions()
         setupIconOptions()
@@ -220,6 +223,9 @@ class AddCategoryFragment : Fragment() {
 
                     // Update the preview with the selected color
                     updatePreviewColor()
+                    
+                    // Update the ViewModel with the selected color
+                    categoryViewModel.setSelectedColor(selectedColor)
                     
                     Log.d(TAG, "Color applied: ${colors[index]}")
                 } catch (e: Exception) {

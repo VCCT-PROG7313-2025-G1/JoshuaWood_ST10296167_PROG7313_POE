@@ -48,6 +48,29 @@ class CategoryAdapter(private val onEditClick: (Category) -> Unit) :
     inner class CategoryViewHolder(val binding: ItemCategoryBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
+        // Helper method to set category color properly
+        private fun setColorIndicator(colorHex: String) {
+            try {
+                // Ensure color has # prefix
+                val safeColorHex = if (colorHex.startsWith("#")) colorHex else "#$colorHex"
+                android.util.Log.d("CategoryAdapter", "Setting color indicator: $safeColorHex")
+                
+                val colorInt = Color.parseColor(safeColorHex)
+                val drawable = binding.root.context.getDrawable(com.dreamteam.rand.R.drawable.circle_shape)?.mutate()
+                drawable?.let {
+                    if (it is android.graphics.drawable.GradientDrawable) {
+                        it.setColor(colorInt)
+                        binding.categoryColorIndicator.background = it
+                    } else {
+                        binding.categoryColorIndicator.setBackgroundColor(colorInt)
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("CategoryAdapter", "Error setting color: ${e.message}")
+                binding.categoryColorIndicator.setBackgroundColor(Color.GRAY)
+            }
+        }
+
         // fill in all the category details
         fun bind(category: Category, totalSpent: Double) {
             android.util.Log.d("CategoryAdapter", "Binding category: ${category.name}, ID: ${category.id}, Color: ${category.color}")
@@ -58,13 +81,7 @@ class CategoryAdapter(private val onEditClick: (Category) -> Unit) :
             binding.totalSpentAmount.text = currencyFormatter.format(totalSpent)
 
             // set the category's color
-            try {
-                android.util.Log.d("CategoryAdapter", "Setting category color: ${category.color}")
-                binding.categoryColorIndicator.setBackgroundColor(Color.parseColor(category.color))
-            } catch (e: Exception) {
-                android.util.Log.e("CategoryAdapter", "Error setting color: ${e.message}")
-                binding.categoryColorIndicator.setBackgroundColor(Color.GRAY)
-            }
+            setColorIndicator(category.color)
 
             // set the category's icon
             val resources = binding.root.context.resources
