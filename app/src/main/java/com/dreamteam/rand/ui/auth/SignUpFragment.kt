@@ -36,6 +36,14 @@ class SignUpFragment : Fragment() {
         return binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        Log.d(TAG, "View created, setting up fragment")
+        setupClickListeners()
+        observeViewModel()
+        startFadeInAnimations()
+    }
+
     // used chatgpt and grok to create the signup form animations
     // creates a smooth entrance effect for all form elements
     // each field fades in with a 200ms delay between them
