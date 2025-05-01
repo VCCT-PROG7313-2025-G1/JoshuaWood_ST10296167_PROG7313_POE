@@ -44,7 +44,7 @@ class PhotoFragment : Fragment() {
     // keep track of the last photo we took
     private var latestPhotoFile: File? = null
     
-    // ask for permission to use the camera
+    // ask for permission to use the camera function from module manual
     private val requestCameraPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()) { permissionGranted->
         if (permissionGranted) {
@@ -80,7 +80,7 @@ class PhotoFragment : Fragment() {
             takePhoto()
         }
 
-        // when they click the save button
+        // when they click the save button, save the most recent photo file
         binding.savePhotoButton.setOnClickListener {
             Log.d(TAG, "Save photo button clicked")
             latestPhotoFile?.let { file ->
@@ -115,7 +115,7 @@ class PhotoFragment : Fragment() {
         }
     }
 
-    // start up the camera and show the preview
+    // start up the camera and show the preview function from module manual with minor modifications
     private fun startCamera() {
         Log.d(TAG, "Starting camera setup")
         cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
@@ -147,6 +147,8 @@ class PhotoFragment : Fragment() {
             }, ContextCompat.getMainExecutor(requireContext()))
     }
 
+    // used Claude to help modify the takePhoto() function from the module manual to
+    // save the photo to local emulator storage and then use the file path to retrieve the image
     // take a picture and save it
     private fun takePhoto() {
         Log.d(TAG, "Preparing to take photo")
@@ -188,7 +190,7 @@ class PhotoFragment : Fragment() {
         )
     }
 
-    // clean up when we're done
+    // clean up when done
     override fun onDestroyView() {
         Log.d(TAG, "Destroying photo view")
         super.onDestroyView()

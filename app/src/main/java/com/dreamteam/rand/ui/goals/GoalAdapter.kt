@@ -20,6 +20,7 @@ class GoalAdapter(private val onDeleteClick: (Goal) -> Unit) :
     ListAdapter<Goal, GoalAdapter.GoalViewHolder>(GoalDiffCallback()) {
 
     // keep track of goals and their current spending amounts
+    // Claude suggested using mutableMapOf
     private val goals = mutableMapOf<Long, Goal>()
 
     // update how much has been spent on a goal
@@ -72,12 +73,14 @@ class GoalAdapter(private val onDeleteClick: (Goal) -> Unit) :
             binding.monthYear.text = dateFormat.format(calendar.time)
 
             // show all the amounts
+            // formatting done by Claude
             binding.currentAmount.text = String.format("R %.2f", currentGoal.currentSpent)
             binding.minAmount.text = String.format("R %.2f", currentGoal.minAmount)
             binding.maxAmount.text = String.format("R %.2f", currentGoal.maxAmount)
             binding.minAmountLabel.text = String.format("R %.2f", currentGoal.minAmount)
 
             // figure out how far along we are to the minimum goal
+            // used Claude to work out how to do this
             val minProgress = when {
                 currentGoal.minAmount <= 0 -> 0
                 else -> ((currentGoal.currentSpent / currentGoal.minAmount) * 100)
@@ -87,6 +90,7 @@ class GoalAdapter(private val onDeleteClick: (Goal) -> Unit) :
             binding.minGoalProgress.progress = minProgress
 
             // figure out how far along we are to the maximum goal
+            // used Claude to work out how to do this
             val maxProgress = when {
                 currentGoal.maxAmount <= currentGoal.minAmount -> 0
                 currentGoal.currentSpent <= currentGoal.minAmount -> 0
@@ -96,7 +100,7 @@ class GoalAdapter(private val onDeleteClick: (Goal) -> Unit) :
             }
             binding.maxGoalProgress.progress = maxProgress
 
-            // show if we're spending too much or too little
+            // show a user if they are spending too little, are on track, or too much
             val context = binding.root.context
             when {
                 currentGoal.currentSpent < currentGoal.minAmount -> {

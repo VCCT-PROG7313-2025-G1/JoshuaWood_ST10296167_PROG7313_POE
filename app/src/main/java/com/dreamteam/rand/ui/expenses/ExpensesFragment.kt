@@ -33,10 +33,11 @@ import android.animation.ObjectAnimator
 class ExpensesFragment : Fragment() {
     private val TAG = "ExpensesFragment"
 
+    // binding to access all the views
     private var _binding: FragmentExpensesBinding? = null
     private val binding get() = _binding!!
 
-    private val userViewModel: UserViewModel by activityViewModels()
+    // adapters to handle user data, expenses and categories
     private lateinit var expenseAdapter: ExpenseAdapter
     private lateinit var categoryAdapter: CategoryDropdownAdapter
 
@@ -44,6 +45,8 @@ class ExpensesFragment : Fragment() {
     private var endDate: Long? = null
     private var selectedCategoryId: Long? = null
     private val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
+
+    private val userViewModel: UserViewModel by activityViewModels()
 
     private val categoryViewModel: CategoryViewModel by viewModels {
         val database = RandDatabase.getDatabase(requireContext())
@@ -83,25 +86,9 @@ class ExpensesFragment : Fragment() {
         setupStaggeredFadeInAnimation()
     }
 
-
-    // Made use of ChatGPT and Grok to make the fade in animation for the Expense screen.
-    // The Staggered fade-in animation fades in and slides up views sequentially.
-    // Each view starts with alpha=0 and translationY=50, then animates to alpha=1 (600ms) and translationY=0 (500ms) with a 290ms delay between views.
-    // Using Grok and ChatGPT it helped me to set the up the fade in animation and create the animator to create the transition effects.
-    // The alpha keyword sets the opacity of the view to 0 making the view invisible.
-    // The translationY keyword sets the position of the view.
-    // The animator set method manages the animation and determines how the animations flows
-    // val animators = viewsToAnimate.mapIndexed { index, view ->, this line maps each view to their animation
-    // val fadeAnimator = ObjectAnimator.ofFloat(view, View.ALPHA, 0f, 1f), this line creates the fade in animation
-    // val slideAnimator = ObjectAnimator.ofFloat(view, View.TRANSLATION_Y, 50f, 0f), this line creates the slide up animation
-    // I also asked ChatGPT and Grok how i could change the fade in duration to make it look better and more pleasing to watch.
-    // So it suggested to set the duration to different values for each view.
-    // Each duration is measured in milliseconds.
-    // Then after setting the durations they are combined to create the animation
-    // The startDelay keyword is used to control the delay between animations.
-    // The duration of the startDelay is also measured in milliseconds
-    // With the use of ChatGPT and Grok I learnt how to create the fade in animation for the Expense Screen and how to create the animator to create the transition effects.
-
+    // used chatgpt and grok to create the expense item animations
+    // creates a smooth entrance effect for each expense item
+    // each element fades in and slides up with a 290ms delay between them
     private fun setupStaggeredFadeInAnimation() {
         // Determine which view to animate: RecyclerView or empty state
         val contentView = if (binding.expensesRecyclerView.visibility == View.VISIBLE) {
@@ -166,7 +153,7 @@ class ExpensesFragment : Fragment() {
             }
         )
 
-        // Set receipt click listener
+        // set receipt click listener
         expenseAdapter.setOnReceiptClickListener { receiptUri ->
             Log.d(TAG, "Receipt clicked - URI: $receiptUri")
             showReceiptImage(receiptUri)
@@ -336,8 +323,7 @@ class ExpensesFragment : Fragment() {
         // Pass false to prevent individual reload
         clearDateRange(false)
         clearCategoryFilter(false)
-        
-        // Reset dropdown to default selection if needed
+
         try {
             // Get the default "All Categories" item which is always at position 0
             val defaultCategory = categoryAdapter.getItem(0)
