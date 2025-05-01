@@ -1,54 +1,66 @@
 # Data Layer Documentation
 
-This directory contains all the data-related components of the Rand application, following a clean architecture pattern with Room Database as the local storage solution.
+This directory contains all the data-related components of the Rand application, following clean architecture principles with Room Database for local storage.
 
 ## Directory Structure
 
 ```
 data/
-├── dao/                 # Data Access Objects (DAOs) for database operations
-├── entity/             # Room database entities
-├── repository/         # Repository classes that handle data operations
-├── AppDatabase.kt      # Database configuration and setup
-├── Converters.kt       # Type converters for Room database
-├── RandDatabase.kt     # Main database class
-└── RandDatabaseCallback.kt  # Database callback for initialization
+├── dao/                # Data Access Objects
+├── entity/            # Database entities
+├── repository/        # Repository implementations
+└── RandDatabase.kt    # Main database class
 ```
 
 ## Components
 
-### Database
-- `RandDatabase.kt`: Main database class that:
-  - Defines all entities
-  - Provides access to DAOs
-  - Handles database versioning (currently version 3)
-  - Implements singleton pattern for database instance
-
 ### Entities
-Located in `entity/` directory:
-- `User`: User account information
-- `Transaction`: Financial transactions (income/expenses)
+- `User`: User profile and preferences
+- `Transaction`: Financial transactions
 - `Category`: Transaction categories
 - `Goal`: Financial goals
-- `Achievement`: User achievements
-- `Budget`: Budget plans
-- `BudgetCategory`: Budget category mappings
 
-### Data Access Objects (DAOs)
-Located in `dao/` directory:
+### DAOs
 - `UserDao`: User-related database operations
 - `TransactionDao`: Transaction-related database operations
 - `CategoryDao`: Category-related database operations
 - `GoalDao`: Goal-related database operations
-- `AchievementDao`: Achievement-related database operations
-- `BudgetDao`: Budget-related database operations
 
-### Repositories
-Located in `repository/` directory:
-- `UserRepository`: Handles user operations (registration, login, settings)
-- `ExpenseRepository`: Manages expense-related operations
-- `GoalRepository`: Manages goal-related operations
-- `CategoryRepository`: Manages category-related operations
+## Architecture
+
+The data layer follows these key principles:
+
+1. **Room Database**
+   - SQLite abstraction layer
+   - Type-safe queries
+   - Reactive updates with Flow
+
+2. **Repository Pattern**
+   - Abstracts data sources
+   - Handles business logic
+   - Provides clean API for ViewModels
+
+3. **Entity Relationships**
+   - Foreign key constraints
+   - Cascading operations
+   - Indexed queries
+
+## Best Practices
+
+1. **Database Operations**
+   - Use suspend functions for async operations
+   - Implement proper error handling
+   - Follow transaction best practices
+
+2. **Data Access**
+   - Use Flow for reactive updates
+   - Implement proper indexing
+   - Optimize query performance
+
+3. **Entity Design**
+   - Use proper data types
+   - Implement relationships
+   - Follow naming conventions
 
 ## Usage
 

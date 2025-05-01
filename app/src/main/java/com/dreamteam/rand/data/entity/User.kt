@@ -5,8 +5,9 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.util.UUID
 
-// user profile table - stores all user preferences and progress
-// ai note: could be enhanced with personalized financial insights
+// used chatgpt to help design the user entity structure
+// helped with field organization and default values
+// assisted with indexing strategy for email uniqueness
 @Entity(
     tableName = "users",
     indices = [Index(value = ["email"], unique = true)]

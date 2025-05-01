@@ -5,6 +5,10 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+// used chatgpt to help design the transaction entity structure
+// helped with foreign key relationships and indexing strategy
+// assisted with enum design for transaction types
+
 // transaction types - either money in or money out
 enum class TransactionType {
     EXPENSE, INCOME

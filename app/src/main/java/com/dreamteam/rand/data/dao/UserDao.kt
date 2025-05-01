@@ -4,7 +4,9 @@ import androidx.room.*
 import com.dreamteam.rand.data.entity.User
 import kotlinx.coroutines.flow.Flow
 
-// handles all user database operations
+// used chatgpt to help design the user database operations
+// helped with authentication queries and user preferences management
+// assisted with progress tracking and settings updates
 @Dao
 interface UserDao {
     // get user by their unique id

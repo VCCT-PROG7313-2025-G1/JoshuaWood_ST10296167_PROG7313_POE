@@ -14,10 +14,7 @@ import com.dreamteam.rand.data.entity.*
         User::class,
         Transaction::class,
         Category::class,
-        Goal::class,
-        Achievement::class,
-        Budget::class,
-        BudgetCategory::class
+        Goal::class
     ],
     version = 3,  // changed from 1 to 3 after 2 db schema changes
     exportSchema = false
@@ -32,10 +29,6 @@ abstract class RandDatabase : RoomDatabase() {
     abstract fun categoryDao(): CategoryDao
     // get access to goal operations
     abstract fun goalDao(): GoalDao
-    // get access to achievement operations
-    abstract fun achievementDao(): AchievementDao
-    // get access to budget operations
-    abstract fun budgetDao(): BudgetDao
 
     companion object {
         @Volatile

@@ -36,24 +36,9 @@ class SignUpFragment : Fragment() {
         return binding.root
     }
 
-    // I used ChatGPT and Grok to help me create the fade in animations for the Sign Up Fragment class
-    //  the startFadeInAnimations function creates a sequential fade-in effect for UI elements
-    // It defines a 500ms fade duration, a -20-pixel upward slide and a 200ms delay between each animation
-    // the animations are initialized at 0f alpha and 0f translationY to make the view invisible and set for the fade in effect.
-    // this creates the smooth cascading effect in the sign up screen.
-    // The objectAnimator is used to help create these effects.
-    // Using Grok and ChatGPT it helped me created the fade in transition for the application and taught me how to create these effects.
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        Log.d(TAG, "Setting up sign up view")
-        // set up the buttons and make everything fade in nicely
-        setupClickListeners()
-        observeViewModel()
-        startFadeInAnimations()
-    }
-
-    // make everything fade in one after another for a nice effect
+    // used chatgpt and grok to create the signup form animations
+    // creates a smooth entrance effect for all form elements
+    // each field fades in with a 200ms delay between them
     private fun startFadeInAnimations() {
         Log.d(TAG, "Starting fade-in animations")
         // make the logo fade in first
