@@ -6,7 +6,6 @@ import com.dreamteam.rand.data.entity.Goal
 import kotlinx.coroutines.flow.Flow
 
 // handles all goal database operations
-// ai note: could suggest goal adjustments based on spending patterns
 @Dao
 interface GoalDao {
     // get all goals sorted by date

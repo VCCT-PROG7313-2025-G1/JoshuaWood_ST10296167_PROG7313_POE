@@ -33,10 +33,11 @@ import android.animation.ObjectAnimator
 class ExpensesFragment : Fragment() {
     private val TAG = "ExpensesFragment"
 
+    // binding to access all the views
     private var _binding: FragmentExpensesBinding? = null
     private val binding get() = _binding!!
 
-    private val userViewModel: UserViewModel by activityViewModels()
+    // adapters to handle user data, expenses and categories
     private lateinit var expenseAdapter: ExpenseAdapter
     private lateinit var categoryAdapter: CategoryDropdownAdapter
 
@@ -44,6 +45,8 @@ class ExpensesFragment : Fragment() {
     private var endDate: Long? = null
     private var selectedCategoryId: Long? = null
     private val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
+
+    private val userViewModel: UserViewModel by activityViewModels()
 
     private val categoryViewModel: CategoryViewModel by viewModels {
         val database = RandDatabase.getDatabase(requireContext())
@@ -150,7 +153,7 @@ class ExpensesFragment : Fragment() {
             }
         )
 
-        // Set receipt click listener
+        // set receipt click listener
         expenseAdapter.setOnReceiptClickListener { receiptUri ->
             Log.d(TAG, "Receipt clicked - URI: $receiptUri")
             showReceiptImage(receiptUri)
@@ -320,8 +323,7 @@ class ExpensesFragment : Fragment() {
         // Pass false to prevent individual reload
         clearDateRange(false)
         clearCategoryFilter(false)
-        
-        // Reset dropdown to default selection if needed
+
         try {
             // Get the default "All Categories" item which is always at position 0
             val defaultCategory = categoryAdapter.getItem(0)

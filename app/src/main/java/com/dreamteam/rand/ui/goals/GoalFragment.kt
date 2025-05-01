@@ -137,6 +137,7 @@ class GoalFragment : Fragment() {
     }
 
     // ask the user if they really want to delete a goal
+    // used ChatGPT to help explain how to structure a confirmation dialog for deleting a goal
     private fun showDeleteConfirmationDialog(goal: Goal) {
         Log.d(TAG, "Showing delete confirmation dialog for goal: ${goal.name}")
         androidx.appcompat.app.AlertDialog.Builder(requireContext())
@@ -183,6 +184,7 @@ class GoalFragment : Fragment() {
     }
 
     // load all goals and their spending amounts
+    // used ChatGPT to help me understand how to do this
     private fun loadGoals(userId: String) {
         Log.d(TAG, "Loading goals for user: $userId")
         goalViewModel.getAllGoalsOrdered(userId).observe(viewLifecycleOwner) { goals ->

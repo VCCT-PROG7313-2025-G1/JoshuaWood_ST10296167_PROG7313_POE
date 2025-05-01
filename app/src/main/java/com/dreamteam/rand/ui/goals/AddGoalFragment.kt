@@ -141,6 +141,7 @@ class AddGoalFragment : Fragment() {
             selectedDate.timeInMillis = selection
 
             // get the month (1-12) and year they picked
+            // ChatGPT suggested ignoring the day and just getting the month and year
             selectedMonth = selectedDate.get(Calendar.MONTH) + 1
             selectedYear = selectedDate.get(Calendar.YEAR)
 
@@ -247,6 +248,7 @@ class AddGoalFragment : Fragment() {
     }
 
     // watch for when the goal gets saved
+    // ChatGPT suggested using requireContext() instead of context for fragment classes
     private fun observeViewModel() {
         Log.d(TAG, "Setting up ViewModel observers")
         goalViewModel.saveSuccess.observe(viewLifecycleOwner) { success ->
