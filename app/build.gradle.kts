@@ -81,6 +81,10 @@ dependencies {
     // PhotoView for image zooming
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
     
+    // Glide for image loading
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+    
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
