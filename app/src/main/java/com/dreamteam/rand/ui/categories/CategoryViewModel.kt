@@ -54,11 +54,14 @@ class CategoryViewModel(private val repository: CategoryRepository) : ViewModel(
     // get all categories for a user
     fun getCategories(userId: String) = repository.getCategories(userId).asLiveData()
 
-    // get categories filtered by type (expense or income)
-    fun getCategoriesByType(userId: String, type: TransactionType) = 
-        repository.getCategoriesByType(userId, type).asLiveData()
+    // ai declaration: here we used claude to design the reactive data flow
+    // for category type filtering and synchronization
+    fun getCategoriesByType(userId: String, type: TransactionType): LiveData<List<Category>> {
+        return repository.getCategoriesByType(userId, type).asLiveData()
+    }
 
-    // save a new category with the current selections
+    // ai declaration: here we used gpt to implement the category saving system
+    // with coroutines and repository integration
     fun saveCategory(userId: String, name: String, isDefault: Boolean = false) {
         viewModelScope.launch {
             val type = _selectedType.value ?: TransactionType.EXPENSE

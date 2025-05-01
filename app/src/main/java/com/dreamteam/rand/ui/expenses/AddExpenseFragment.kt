@@ -87,9 +87,8 @@ class AddExpenseFragment : Fragment() {
         setupStaggeredFadeInAnimation()
     }
 
-    // used chatgpt and grok to create the expense form animations
-    // creates a smooth entrance effect for all form elements
-    // each field fades in and slides up with a 290ms delay between them
+    // ai declaration: here we used chatgpt to create the staggered fade-in animations
+    // that make form elements appear one after another for a smooth entrance effect
     private fun setupStaggeredFadeInAnimation() {
         // List of views to animate: amount section, description, category, date, photo section, save button
         val viewsToAnimate = listOf(
@@ -138,7 +137,8 @@ class AddExpenseFragment : Fragment() {
         }
     }
 
-    // let the user pick a date for the expense
+    // ai declaration: here we used gpt to implement date picker dialog integration
+    // with proper date formatting and calendar selection
     private fun setupDatePicker() {
         Log.d(TAG, "Setting up date picker")
         // start with today's date
@@ -262,7 +262,8 @@ class AddExpenseFragment : Fragment() {
         }
     }
 
-    // setup the photo section for attaching receipt photos
+    // ai declaration: here we used claude to design the photo attachment system
+    // for handling receipt photos and image preview functionality
     private fun setupPhotoSection() {
         Log.d(TAG, "Setting up photo section")
         binding.attachPhotoButton.setOnClickListener {

@@ -71,7 +71,8 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
     fun getExpensesByCategory(userId: String, categoryId: Long) = 
         repository.getExpensesByCategory(userId, categoryId).asLiveData()
 
-    // get expenses filtered by category and date range
+    // ai declaration: here we used claude to design the category filtering system
+    // with date range support for detailed expense analysis
     fun getExpensesByCategoryAndDateRange(
         userId: String,
         categoryId: Long,
@@ -132,7 +133,8 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
         }
     }
 
-    // save a new expense
+    // ai declaration: here we used gpt to design the expense saving logic 
+    // with proper error handling and async repository operations
     fun saveExpense(userId: String, amount: Double, description: String) {
         viewModelScope.launch {
             // use direct category ID if available, otherwise fall back to LiveData value
@@ -200,7 +202,8 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
         }
     }
 
-    // get the total amount spent this month
+    // ai declaration: here we used chatgpt to implement date filtering for transactions
+    // using coroutines and flow transformation
     fun fetchTotalMonthlyExpenses(userId: String) {
         viewModelScope.launch {
             val total = repository.getTotalExpensesForMonth(userId)
