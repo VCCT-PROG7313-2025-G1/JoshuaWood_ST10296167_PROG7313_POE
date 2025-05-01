@@ -147,6 +147,8 @@ class PhotoFragment : Fragment() {
             }, ContextCompat.getMainExecutor(requireContext()))
     }
 
+    // used Claude to help modify the takePhoto() function from the module manual to
+    // save the photo to local emulator storage and then use the file path to retrieve the image
     // take a picture and save it
     private fun takePhoto() {
         Log.d(TAG, "Preparing to take photo")

@@ -56,15 +56,7 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    // Made use of ChatGPT and Grok to make the fade in animation for the Profile screen.
-    // val viewsToAnimate = listOf() is used to create a list of views to animate.
-    //  viewToAnimate -iterates through views to apply fade-in animation with staggered delays
-    // the val fadeIn = AlphaAnimation is used to create a fade-in animation from invisible (alpha 0) to fully visible (alpha 1)
-    // the duration is set to 600 milliseconds (0.6 seconds)
-    // the startOffset is used to control the delay between animations
-    // the fillAfter = true is used to keep the view visible after the animation
-    // With the use of ChatGPT and Grok I learnt how to create the fade in animation for the Profile Screen and how to create the animator to create the transition effects.
-
+    // made use of ChatGPT and Grok to help make the fade in animation for the Profile screen.
     private fun applyStaggeredFadeInAnimation() {
         // List of views to animate
         val viewsToAnimate = listOf(
