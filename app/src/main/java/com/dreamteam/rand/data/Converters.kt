@@ -1,3 +1,9 @@
+/**
+ * AI Declaration:
+ * This file was created with assistance from ChatGPT to implement type converters
+ * for Room database, ensuring proper serialization of custom types like Date and TransactionType.
+ */
+
 package com.dreamteam.rand.data
 
 import androidx.room.TypeConverter

@@ -4,7 +4,9 @@ import androidx.room.*
 import com.dreamteam.rand.data.entity.Transaction
 import kotlinx.coroutines.flow.Flow
 
-// handles all transaction database operations
+// used chatgpt to help design the transaction database operations
+// helped optimize queries for date ranges and category filtering
+// assisted with flow integration for reactive updates
 @Dao
 interface TransactionDao {
     // get all transactions for a user, newest first

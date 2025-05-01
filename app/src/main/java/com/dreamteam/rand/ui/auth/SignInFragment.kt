@@ -49,7 +49,9 @@ class SignInFragment : Fragment() {
         observeViewModel()
     }
 
-    // make everything fade in one after another for a nice effect
+    // made use of chatgpt and grok to help create the fade-in animations
+    // the animations create a smooth entrance effect with staggered timing
+    // each ui element fades in and slides up with a 200ms delay between them
     private fun setupAnimations() {
         Log.d(TAG, "Setting up animations")
         // how long each animation takes and how far things move
