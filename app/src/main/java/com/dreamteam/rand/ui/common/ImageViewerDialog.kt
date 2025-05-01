@@ -3,14 +3,16 @@ package com.dreamteam.rand.ui.common
 import android.app.Dialog
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
-import com.dreamteam.rand.R
+import com.bumptech.glide.Glide
 import com.dreamteam.rand.databinding.DialogImageViewerBinding
+import java.io.File
 
 class ImageViewerDialog : DialogFragment() {
     private var _binding: DialogImageViewerBinding? = null
@@ -20,6 +22,7 @@ class ImageViewerDialog : DialogFragment() {
     
     companion object {
         private const val ARG_IMAGE_URI = "image_uri"
+        private const val TAG = "ImageViewerDialog"
         
         fun newInstance(imageUri: String): ImageViewerDialog {
             val fragment = ImageViewerDialog()
@@ -36,6 +39,7 @@ class ImageViewerDialog : DialogFragment() {
         
         arguments?.let {
             imageUri = it.getString(ARG_IMAGE_URI)
+            Log.d(TAG, "Received image URI: $imageUri")
         }
     }
     
@@ -57,26 +61,42 @@ class ImageViewerDialog : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        // Set close button click listener
         binding.closeButton.setOnClickListener {
             dismiss()
         }
         
-        // Load the image
         try {
             imageUri?.let { uri ->
-                binding.imageView.setImageURI(Uri.parse(uri))
+                Log.d(TAG, "Loading image from URI: $uri")
+                
+                // Try loading as a file first
+                val file = File(uri)
+                if (file.exists()) {
+                    Log.d(TAG, "Loading from file: ${file.absolutePath}")
+                    Glide.with(requireContext())
+                        .load(file)
+                        .into(binding.imageView)
+                } else {
+                    // Try loading as URI
+                    Log.d(TAG, "Loading from URI")
+                    Glide.with(requireContext())
+                        .load(Uri.parse(uri))
+                        .into(binding.imageView)
+                }
             } ?: run {
+                Log.e(TAG, "No image URI provided")
                 showError("No image URI provided")
                 dismiss()
             }
         } catch (e: Exception) {
+            Log.e(TAG, "Error loading image", e)
             showError("Failed to load image: ${e.message}")
             dismiss()
         }
     }
     
     private fun showError(message: String) {
+        Log.e(TAG, message)
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
     
