@@ -13,6 +13,11 @@ A budget tracking application developed by The Dream Team for PROG7313 at Varsit
 - [Abdul Davids](https://github.com/abduldavids)
 - [Nicholas Phillips](https://github.com/)
 
+### Usage
+
+Check out our Youtube video here:
+
+[![Play](https://img.youtube.com/vi/HluchMIJ9Hc/0.jpg)](https://www.youtube.com/watch?v=HluchMIJ9Hc)
 
 ## Overview
 
@@ -56,12 +61,6 @@ Rand is a budget tracking application that allows users to track their expenses,
 3. Sync Gradle files
 4. Build and run the application
 
-
-### Usage
-
-Check out our Youtube video here:
-
-[![Play](https://img.youtube.com/vi/HluchMIJ9Hc/0.jpg)](https://www.youtube.com/watch?v=HluchMIJ9Hc)
 
 ## Project Structure
 
