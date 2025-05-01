@@ -176,7 +176,7 @@ The project follows the MVVM (Model-View-ViewModel) architecture pattern:
 
 ## License
 
-This project is licensed under the terms of the [LICENSE](LICENSE.md) file included in the repository.
+This project is licensed under the terms of the [LICENSE](LICENSE) file included in the repository.
 
 
 
