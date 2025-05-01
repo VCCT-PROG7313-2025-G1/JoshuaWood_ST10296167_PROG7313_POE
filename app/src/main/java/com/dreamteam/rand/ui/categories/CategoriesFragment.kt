@@ -80,8 +80,9 @@ class CategoriesFragment : Fragment() {
         setupStaggeredFadeInAnimation()
     }
 
-    // ai declaration: here we used chatgpt to create the staggered animation effects
-    // for a smooth, professional entry transition
+    // used chatgpt and grok to create the category list animations
+    // creates a smooth entrance effect for the category list and filters
+    // each element fades in and slides up with a 290ms delay between them
     private fun setupStaggeredFadeInAnimation() {
         // Determine which view to animate: RecyclerView or empty state
         val contentView = if (binding.categoriesRecyclerView.visibility == View.VISIBLE) {

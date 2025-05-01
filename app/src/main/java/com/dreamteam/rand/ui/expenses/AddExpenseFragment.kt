@@ -87,8 +87,9 @@ class AddExpenseFragment : Fragment() {
         setupStaggeredFadeInAnimation()
     }
 
-    // ai declaration: here we used chatgpt to create the staggered fade-in animations
-    // that make form elements appear one after another for a smooth entrance effect
+    // used chatgpt and grok to create the expense form animations
+    // creates a smooth entrance effect for all form elements
+    // each field fades in and slides up with a 290ms delay between them
     private fun setupStaggeredFadeInAnimation() {
         // List of views to animate: amount section, description, category, date, photo section, save button
         val viewsToAnimate = listOf(

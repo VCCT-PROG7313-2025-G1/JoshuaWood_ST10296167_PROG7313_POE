@@ -83,8 +83,9 @@ class ExpensesFragment : Fragment() {
         setupStaggeredFadeInAnimation()
     }
 
-    // ai declaration: here we used chatgpt to create staggered animation effects
-    // with sequential fade-in and slide-up transitions for a modern UI
+    // used chatgpt and grok to create the expense item animations
+    // creates a smooth entrance effect for each expense item
+    // each element fades in and slides up with a 290ms delay between them
     private fun setupStaggeredFadeInAnimation() {
         // Determine which view to animate: RecyclerView or empty state
         val contentView = if (binding.expensesRecyclerView.visibility == View.VISIBLE) {
