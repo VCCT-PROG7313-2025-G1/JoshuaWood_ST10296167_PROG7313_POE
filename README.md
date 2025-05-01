@@ -9,9 +9,9 @@
 A budget tracking application developed by The Dream Team for PROG7313 at Varsity College Cape Town.
 
 **Team Members:**
-- [Joshua Wood](https://github.com/)
+- [Joshua Wood](https://github.com/joshuawood13)
 - [Abdul Davids](https://github.com/abduldavids)
-- [Nicholas Phillips](https://github.com/)
+- [Nicholas Phillips](https://github.com/nicholasphillipsST10263496)
 
 Check out our Youtube video here:
 
