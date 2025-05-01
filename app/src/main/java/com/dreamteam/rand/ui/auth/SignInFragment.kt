@@ -33,9 +33,13 @@ class SignInFragment : Fragment() {
         return binding.root
     }
 
-    // used chatgpt and grok to create the sign in screen animations
-    // creates a smooth entrance effect for the screen
-    // each element fades in and slides up with a 290ms delay between them
+    // I made used of ChatGPT and Grok to create the fade in animations for the Sign In Fragment class
+    //  the onViewCreated function in this Android fragment initializes the sign-in screen
+    // The setupAnimations function creates the fade in effect for UI elements
+    // It defines a 500ms fade duration, a -20-pixel upward slide and a 200ms delay between each animation
+    // Each animation is initalized at 0f alpha and 0f translationY to make the view invisible and set for the fade in effect.
+    // Using ChatGPT and Grok it  helped me created the fade in transition for the application.
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "Setting up sign in view")
@@ -63,8 +67,7 @@ class SignInFragment : Fragment() {
             binding.emailLayout to staggerDelay * 3,
             binding.passwordLayout to staggerDelay * 4,
             binding.signInButton to staggerDelay * 5,
-            binding.forgotPasswordText to staggerDelay * 6,
-            binding.signUpPromptLayout to staggerDelay * 7
+            binding.signUpPromptLayout to staggerDelay * 6
         )
 
         // make each thing fade in and slide up
@@ -105,11 +108,6 @@ class SignInFragment : Fragment() {
             } else {
                 Log.w(TAG, "Login validation failed")
             }
-        }
-
-        binding.forgotPasswordText.setOnClickListener {
-            Log.d(TAG, "Navigating to forgot password screen")
-            findNavController().navigate(R.id.action_signIn_to_forgotPassword)
         }
 
         binding.signUpText.setOnClickListener {

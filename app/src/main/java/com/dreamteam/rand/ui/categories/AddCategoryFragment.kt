@@ -76,7 +76,7 @@ class AddCategoryFragment : Fragment() {
         // set up all the ui stuff
         setupToolbar()
         categoryViewModel.setSelectedType(TransactionType.EXPENSE)
-        // ensure the initial color is set in the ViewModel
+        // Ensure the initial color is set in the ViewModel
         categoryViewModel.setSelectedColor(selectedColor)
         categoryViewModel.setSelectedIcon(selectedIconName)
         setupPreview()
@@ -87,13 +87,29 @@ class AddCategoryFragment : Fragment() {
         observeViewModel()
         setupStaggeredFadeInAnimation()
         
-        // initialize the preview name
+        // Initialize the preview name
         binding.previewCategoryName.text = "Category"
     }
 
-    // used chatgpt and grok to create the add category animations
-    // creates a smooth entrance effect for the category items
-    // each element fades in and slides up with a 290ms delay between them
+    // Made use of ChatGPT and Grok to make the fade in animation for the Add Category.
+    // The Staggered fade-in animation fades in and slides up views sequentially.
+    // Each view starts with alpha=0 and translationY=50, then animates to alpha=1 (600ms) and translationY=0 (500ms) with a 290ms delay between views.
+    // Using Grok and ChatGPT it helped me to set the up the fade in animation and create the animator to create the transition effects.
+    // The alpha keyword sets the opacity of the view to 0 making the view invisible.
+    // The translationY keyword sets the position of the view.
+    // The animator set method manages the animation and determines how the animations flows
+    // val animators = viewsToAnimate.mapIndexed { index, view ->, this line maps each view to their animation
+    // val fadeAnimator = ObjectAnimator.ofFloat(view, View.ALPHA, 0f, 1f), this line creates the fade in animation
+    // val slideAnimator = ObjectAnimator.ofFloat(view, View.TRANSLATION_Y, 50f, 0f), this line creates the slide up animation
+    // I also asked ChatGPT and Grok how i could change the fade in duration to make it look better and more pleasing to watch.
+    // So it suggested to set the duration to different values for each view.
+    // Each duration is measured in milliseconds.
+    // Then after setting the durations they are combined to create the animation
+    // The startDelay keyword is used to control the delay between animations.
+    // The duration of the startDelay is also measured in milliseconds
+    // With the use of ChatGPT and Grok I learnt how to create the fade in animation for the Add Category Screen and how to create the animator to create the transition effects.
+
+
      private fun setupStaggeredFadeInAnimation() {
         // List of views to animate: name input, preview card, color picker, icon picker, save button
         val viewsToAnimate = listOf(
@@ -177,7 +193,8 @@ class AddCategoryFragment : Fragment() {
         }
     }
 
-    // set up the color picker buttons
+    // ai declaration: here we used chatgpt to create the color picker with custom swatches
+    // and live preview of selected colors
     private fun setupColorOptions() {
         Log.d(TAG, "Setting up color options")
         // pair up each color button with its selection indicator
@@ -219,7 +236,8 @@ class AddCategoryFragment : Fragment() {
         }
     }
 
-    // set up the icon picker buttons
+    // ai declaration: here we used claude to implement the icon selection system
+    // with grid display and dynamic icon loading
     private fun setupIconOptions() {
         Log.d(TAG, "Setting up icon options")
         // get all the icon cards and their images
@@ -305,7 +323,8 @@ class AddCategoryFragment : Fragment() {
         })
     }
 
-    // set up the save button with validation
+    // ai declaration: here we used gpt to design the category validation and save logic
+    // with proper error handling and user feedback
     private fun setupSaveButton() {
         Log.d(TAG, "Setting up save button")
         binding.saveButton.setOnClickListener {
@@ -321,13 +340,9 @@ class AddCategoryFragment : Fragment() {
 
             Log.d(TAG, "Attempting to save category - Name: $categoryName, Icon: $selectedIconName, Color: $selectedColor")
 
-            // check if they entered a name
-            if (categoryName.isEmpty()) {
-                Log.d(TAG, "Validation failed: Empty category name")
-                binding.categoryNameLayout.error = "Category name is required"
+            // Validate the inputs before saving
+            if (!validateInputs()) {
                 return@setOnClickListener
-            } else {
-                binding.categoryNameLayout.error = null
             }
 
             // save the category if we have a user
@@ -367,5 +382,18 @@ class AddCategoryFragment : Fragment() {
         Log.d(TAG, "Destroying add category view")
         super.onDestroyView()
         _binding = null
+    }
+
+    // ai declaration: here we used gpt to design the category validation logic
+    // for ensuring proper input before saving
+    private fun validateInputs(): Boolean {
+        val categoryName = binding.categoryNameInput.text.toString().trim()
+        
+        if (categoryName.isEmpty()) {
+            binding.categoryNameLayout.error = "Category name is required"
+            return false
+        }
+        
+        return true
     }
 }

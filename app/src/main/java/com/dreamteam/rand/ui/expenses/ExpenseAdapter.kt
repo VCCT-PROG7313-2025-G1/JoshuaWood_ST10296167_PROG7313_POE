@@ -24,10 +24,17 @@ class ExpenseAdapter(
     private val categoryMap: MutableMap<Long, Category> = mutableMapOf()
 ) : ListAdapter<Transaction, ExpenseAdapter.ExpenseViewHolder>(ExpenseDiffCallback()) {
 
+    // ai declaration: here we used gpt to help with the expense view binding 
+    // and dynamic category lookup for displaying transactions
+    override fun onBindViewHolder(holder: ExpenseViewHolder, position: Int) {
+        holder.bind(getItem(position), onItemClick, categoryMap, onReceiptClick)
+    }
+
     // handle clicks on receipt images
     private var onReceiptClick: ((String) -> Unit)? = null
 
-    // set what happens when a receipt is clicked
+    // ai declaration: here we used claude to create the receipt image handling
+    // with click listeners for viewing receipt photos
     fun setOnReceiptClickListener(listener: (String) -> Unit) {
         onReceiptClick = listener
     }
@@ -60,11 +67,6 @@ class ExpenseAdapter(
             false
         )
         return ExpenseViewHolder(binding)
-    }
-
-    // fill in the expense info when it's shown
-    override fun onBindViewHolder(holder: ExpenseViewHolder, position: Int) {
-        holder.bind(getItem(position), onItemClick, categoryMap, onReceiptClick)
     }
 
     // this class holds all the views for a single expense

@@ -33,11 +33,10 @@ import android.animation.ObjectAnimator
 class ExpensesFragment : Fragment() {
     private val TAG = "ExpensesFragment"
 
-    // binding to access all the views
     private var _binding: FragmentExpensesBinding? = null
     private val binding get() = _binding!!
 
-    // adapters to handle user data, expenses and categories
+    private val userViewModel: UserViewModel by activityViewModels()
     private lateinit var expenseAdapter: ExpenseAdapter
     private lateinit var categoryAdapter: CategoryDropdownAdapter
 
@@ -45,8 +44,6 @@ class ExpensesFragment : Fragment() {
     private var endDate: Long? = null
     private var selectedCategoryId: Long? = null
     private val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
-
-    private val userViewModel: UserViewModel by activityViewModels()
 
     private val categoryViewModel: CategoryViewModel by viewModels {
         val database = RandDatabase.getDatabase(requireContext())
@@ -86,9 +83,8 @@ class ExpensesFragment : Fragment() {
         setupStaggeredFadeInAnimation()
     }
 
-    // used chatgpt and grok to create the expense item animations
-    // creates a smooth entrance effect for each expense item
-    // each element fades in and slides up with a 290ms delay between them
+    // ai declaration: here we used chatgpt to create staggered animation effects
+    // with sequential fade-in and slide-up transitions for a modern UI
     private fun setupStaggeredFadeInAnimation() {
         // Determine which view to animate: RecyclerView or empty state
         val contentView = if (binding.expensesRecyclerView.visibility == View.VISIBLE) {
@@ -153,7 +149,7 @@ class ExpensesFragment : Fragment() {
             }
         )
 
-        // set receipt click listener
+        // Set receipt click listener
         expenseAdapter.setOnReceiptClickListener { receiptUri ->
             Log.d(TAG, "Receipt clicked - URI: $receiptUri")
             showReceiptImage(receiptUri)
@@ -200,7 +196,8 @@ class ExpensesFragment : Fragment() {
         }
     }
 
-    // sets up the category dropdown with available categories
+    // ai declaration: here we used claude to implement the category dropdown system
+    // with dynamic filtering and live updates
     private fun setupCategoryDropdown(categories: List<Category>) {
         Log.d(TAG, "Setting up category dropdown with ${categories.size} categories")
         if (categories.isEmpty()) {
@@ -253,7 +250,8 @@ class ExpensesFragment : Fragment() {
         }
     }
 
-    // shows the date range picker dialog
+    // ai declaration: here we used gpt to create the date range selection
+    // with material date picker and filter integration
     private fun showDateRangePicker() {
         Log.d(TAG, "Showing date range picker")
         val dateRangePicker = MaterialDatePicker.Builder.dateRangePicker()
@@ -323,7 +321,8 @@ class ExpensesFragment : Fragment() {
         // Pass false to prevent individual reload
         clearDateRange(false)
         clearCategoryFilter(false)
-
+        
+        // Reset dropdown to default selection if needed
         try {
             // Get the default "All Categories" item which is always at position 0
             val defaultCategory = categoryAdapter.getItem(0)
@@ -470,6 +469,8 @@ class ExpensesFragment : Fragment() {
         }
     }
 
+    // ai declaration: here we used gpt to implement the receipt image viewer
+    // with full-screen display and image scaling
     private fun showReceiptImage(receiptUri: String) {
         Log.d(TAG, "Attempting to show receipt image: $receiptUri")
         try {

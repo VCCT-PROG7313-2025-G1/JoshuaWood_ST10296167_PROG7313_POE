@@ -80,9 +80,8 @@ class CategoriesFragment : Fragment() {
         setupStaggeredFadeInAnimation()
     }
 
-    // used chatgpt and grok to create the category list animations
-    // creates a smooth entrance effect for the category list and filters
-    // each element fades in and slides up with a 290ms delay between them
+    // ai declaration: here we used chatgpt to create the staggered animation effects
+    // for a smooth, professional entry transition
     private fun setupStaggeredFadeInAnimation() {
         // Determine which view to animate: RecyclerView or empty state
         val contentView = if (binding.categoriesRecyclerView.visibility == View.VISIBLE) {
@@ -184,7 +183,8 @@ class CategoriesFragment : Fragment() {
         }
     }
 
-    // show the date picker dialog to select a date range
+    // ai declaration: here we used claude to implement the date range filtering system
+    // for category expenses over specific time periods
     private fun showDateRangePicker() {
         Log.d(TAG, "Showing date range picker")
         val dateRangePicker = MaterialDatePicker.Builder.dateRangePicker()
@@ -264,7 +264,8 @@ class CategoriesFragment : Fragment() {
         }
     }
 
-    // load categories with their spending totals for the selected date range
+    // ai declaration: here we used gpt to build the category loading system
+    // with expense totals calculation and dynamic list updates
     private fun loadCategoriesWithDateRange(categories: List<Category> = categoryAdapter.currentList, userId: String? = userViewModel.currentUser.value?.uid) {
         if (userId == null) {
             Log.w(TAG, "Cannot load categories with date range: no user ID")

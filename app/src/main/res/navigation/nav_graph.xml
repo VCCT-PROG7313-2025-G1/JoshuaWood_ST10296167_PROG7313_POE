@@ -26,9 +26,6 @@
             app:popUpTo="@id/welcomeFragment"
             app:popUpToInclusive="true" />
         <action
-            android:id="@+id/action_signIn_to_forgotPassword"
-            app:destination="@id/forgotPasswordFragment" />
-        <action
             android:id="@+id/action_signIn_to_signUp"
             app:destination="@id/signUpFragment" />
     </fragment>
@@ -43,11 +40,6 @@
             app:popUpTo="@id/welcomeFragment"
             app:popUpToInclusive="true" />
     </fragment>
-
-    <fragment
-        android:id="@+id/forgotPasswordFragment"
-        android:name="com.dreamteam.rand.ui.auth.ForgotPasswordFragment"
-        android:label="ForgotPasswordFragment" />
 
     <fragment
         android:id="@+id/dashboardFragment"

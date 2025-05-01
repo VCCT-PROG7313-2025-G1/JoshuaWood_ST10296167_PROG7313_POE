@@ -69,24 +69,13 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/forgotPasswordButton"
-        style="@style/Widget.Rand.Button.TextButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Forgot Password?"
-        android:textColor="@color/primary"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/passwordLayout" />
-
-    <com.google.android.material.button.MaterialButton
         android:id="@+id/signInButton"
         style="@style/Widget.Rand.Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:text="Sign In"
-        app:layout_constraintTop_toBottomOf="@+id/forgotPasswordButton" />
+        app:layout_constraintTop_toBottomOf="@+id/passwordLayout" />
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -19,7 +19,8 @@ class CategoryAdapter(private val onEditClick: (Category) -> Unit) :
     // keep track of how much was spent in each category
     private val categoryTotals = mutableMapOf<Long, Double>()
 
-    // update how much was spent in a category and refresh its display
+    // ai declaration: here we used gpt to implement the dynamic category total updates
+    // that refresh specific items when expense data changes
     fun updateCategoryTotal(categoryId: Long, total: Double) {
         categoryTotals[categoryId] = total
         // Find the position of the category and notify the change
@@ -44,11 +45,13 @@ class CategoryAdapter(private val onEditClick: (Category) -> Unit) :
         holder.bind(category, categoryTotals[category.id] ?: 0.0)
     }
 
-    // this class holds all the views for a single category
+    // ai declaration: here we used claude to create the category view binding
+    // with custom color indicators and dynamic icons
     inner class CategoryViewHolder(val binding: ItemCategoryBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        // Helper method to set category color properly
+        // ai declaration: here we used gpt to implement the color indicator drawing
+        // that converts hex colors to drawable backgrounds
         private fun setColorIndicator(colorHex: String) {
             try {
                 // Ensure color has # prefix
