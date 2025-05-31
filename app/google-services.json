@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "175935784302",
+    "project_id": "randapp-51f73",
+    "storage_bucket": "randapp-51f73.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:175935784302:android:9d8fb513db65f0ee23ad7f",
+        "android_client_info": {
+          "package_name": "com.dreamteam.rand"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0vOhQVnp4kJC-H38sPF7x5kdihZkcZiY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
