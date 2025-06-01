@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.tasks.await
@@ -21,6 +21,9 @@ class CategoryRepository(
 ) {
     private val TAG = "CategoryRepository"
     private val syncedUsers = mutableSetOf<String>() // Track which users we've synced for
+    
+    // Allow setting the coroutineScope from ViewModel
+    lateinit var coroutineScope: CoroutineScope
 
     // get all categories for a user
     fun getCategories(userId: String): Flow<List<Category>> {
@@ -34,7 +37,7 @@ class CategoryRepository(
         
         // Only sync from Firebase if we haven't synced for this user yet
         if (!syncedUsers.contains(userId)) {
-            GlobalScope.launch(Dispatchers.IO) {
+            coroutineScope.launch(Dispatchers.IO) {
                 try {
                     // Get all categories for this user from Firebase
                     val documents = categoryFirebase.categoriesCollection

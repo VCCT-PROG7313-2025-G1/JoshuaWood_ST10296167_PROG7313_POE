@@ -32,6 +32,11 @@ class CategoryViewModel(private val repository: CategoryRepository) : ViewModel(
     private val _saveSuccess = MutableLiveData<Boolean>()
     val saveSuccess: LiveData<Boolean> = _saveSuccess
 
+    init {
+        // Pass viewModelScope to repository
+        repository.coroutineScope = viewModelScope
+    }
+
     // update the selected category type
     fun setSelectedType(type: TransactionType) {
         _selectedType.value = type
