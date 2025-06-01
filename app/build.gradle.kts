@@ -79,6 +79,8 @@ dependencies {
     
     // Gson
     implementation(libs.gson)
+
+    implementation(libs.guava)
     
     // PhotoView for image zooming
     implementation("com.github.chrisbanes:PhotoView:2.3.0")

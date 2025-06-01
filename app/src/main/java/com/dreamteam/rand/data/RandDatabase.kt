@@ -37,14 +37,23 @@ abstract class RandDatabase : RoomDatabase() {
         // get or create database instance
         fun getDatabase(context: Context): RandDatabase {
             return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
+                val builder = Room.databaseBuilder(
                     context.applicationContext,
                     RandDatabase::class.java,
                     "rand_database"
                 )
-                .addCallback(RandDatabaseCallback())
-                .fallbackToDestructiveMigration() // This will recreate tables if no migration found
-                .build()
+                .fallbackToDestructiveMigration()
+                
+                val instance = builder.build()
+                
+                // Initialize callback with DAOs after database is built
+                builder.addCallback(RandDatabaseCallback(
+                    instance.userDao(),
+                    instance.transactionDao(),
+                    instance.categoryDao(),
+                    instance.goalDao()
+                ))
+                
                 INSTANCE = instance
                 instance
             }
