@@ -24,6 +24,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import com.dreamteam.rand.data.firebase.CategoryFirebase
 
 // this fragment shows all the categories and how much was spent in each one
 // you can filter by date range and see spending stats
@@ -46,7 +47,9 @@ class CategoriesFragment : Fragment() {
     // setup the category viewmodel with its repository
     private val categoryViewModel: CategoryViewModel by viewModels {
         val database = RandDatabase.getDatabase(requireContext())
-        val repository = CategoryRepository(database.categoryDao())
+        val categoryDao = database.categoryDao()
+        val categoryFirebase = CategoryFirebase()
+        val repository = CategoryRepository(categoryDao, categoryFirebase)
         CategoryViewModel.Factory(repository)
     }
 

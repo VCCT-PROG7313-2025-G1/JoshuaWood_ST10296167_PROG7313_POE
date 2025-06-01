@@ -61,7 +61,7 @@ class CategoryViewModel(private val repository: CategoryRepository) : ViewModel(
     }
 
     // ai declaration: here we used gpt to implement the category saving system
-    // with coroutines and repository integration
+    // with coroutines and repository integration and Firebase support
     fun saveCategory(userId: String, name: String, isDefault: Boolean = false) {
         viewModelScope.launch {
             val type = _selectedType.value ?: TransactionType.EXPENSE
@@ -135,4 +135,4 @@ class CategoryViewModel(private val repository: CategoryRepository) : ViewModel(
             throw IllegalArgumentException("Unknown ViewModel class")
         }
     }
-} 
+}

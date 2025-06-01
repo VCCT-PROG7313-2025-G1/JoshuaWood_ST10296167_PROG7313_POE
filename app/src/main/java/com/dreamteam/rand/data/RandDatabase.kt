@@ -37,25 +37,35 @@ abstract class RandDatabase : RoomDatabase() {
         // get or create database instance
         fun getDatabase(context: Context): RandDatabase {
             return INSTANCE ?: synchronized(this) {
-                val builder = Room.databaseBuilder(
+                val db = Room.databaseBuilder(
                     context.applicationContext,
                     RandDatabase::class.java,
                     "rand_database"
                 )
                 .fallbackToDestructiveMigration()
+                .addCallback(object : RoomDatabase.Callback() {
+                    override fun onCreate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                        super.onCreate(db)
+                        // Database was just created, initialize it
+                        INSTANCE?.let { database ->
+                            RandDatabaseCallback.createCallback(database)
+                                .onCreate(db)
+                        }
+                    }
+
+                    override fun onOpen(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                        super.onOpen(db)
+                        // Database was opened, sync with Firebase
+                        INSTANCE?.let { database ->
+                            RandDatabaseCallback.createCallback(database)
+                                .onOpen(db)
+                        }
+                    }
+                })
+                .build()
                 
-                val instance = builder.build()
-                
-                // Initialize callback with DAOs after database is built
-                builder.addCallback(RandDatabaseCallback(
-                    instance.userDao(),
-                    instance.transactionDao(),
-                    instance.categoryDao(),
-                    instance.goalDao()
-                ))
-                
-                INSTANCE = instance
-                instance
+                INSTANCE = db
+                db
             }
         }
     }
