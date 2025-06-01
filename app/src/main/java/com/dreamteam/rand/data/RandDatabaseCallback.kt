@@ -18,6 +18,7 @@ class RandDatabaseCallback private constructor(
     private val TAG = "RandDatabaseCallback"
     private val userFirebase = UserFirebase()
     private val categoryFirebase = CategoryFirebase()
+    private val goalFirebase = GoalFirebase()
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     // called when database is first created
@@ -50,7 +51,7 @@ class RandDatabaseCallback private constructor(
         try {
             Log.d(TAG, "Starting Firebase data sync (initial: $isInitialSync)")
 
-            // Sync users first since categories depend on user IDs
+            // Sync users first since other data depends on user IDs
             userFirebase.getAllUsers().collect { users ->
                 users.forEach { user ->
                     try {
@@ -63,8 +64,9 @@ class RandDatabaseCallback private constructor(
                             userDao.updateUser(user)
                         }
 
-                        // After user is synced, sync their categories
+                        // After user is synced, sync their categories and goals
                         syncUserCategories(user.uid, isInitialSync)
+                        syncUserGoals(user.uid, isInitialSync)
                     } catch (e: Exception) {
                         Log.e(TAG, "Error syncing user: ${user.email}", e)
                     }
@@ -99,6 +101,31 @@ class RandDatabaseCallback private constructor(
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error syncing categories for user: $userId", e)
+            throw e
+        }
+    }
+
+    private suspend fun syncUserGoals(userId: String, isInitialSync: Boolean) {
+        try {
+            Log.d(TAG, "Syncing goals for user: $userId")
+            
+            // Only perform full sync if it's initial or cache is empty
+            val shouldFullSync = isInitialSync || goalDao.getGoalCount(userId) == 0
+            
+            if (shouldFullSync) {
+                Log.d(TAG, "Performing full goals sync")
+                goalFirebase.getAllGoals().collect { goals ->
+                    val userGoals = goals.filter { it.userId == userId }
+                    if (userGoals.isNotEmpty()) {
+                        Log.d(TAG, "Syncing ${userGoals.size} goals for user $userId")
+                        goalDao.syncGoals(userId, userGoals)
+                    }
+                }
+            } else {
+                Log.d(TAG, "Skipping full sync - goals already cached")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error syncing goals for user: $userId", e)
             throw e
         }
     }

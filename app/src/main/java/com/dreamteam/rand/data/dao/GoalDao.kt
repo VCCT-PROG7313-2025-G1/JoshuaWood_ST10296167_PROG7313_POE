@@ -20,27 +20,21 @@ interface GoalDao {
     @Query("SELECT * FROM goals WHERE id = :id")
     suspend fun getGoal(id: Long): Goal?
 
-    // add a new goal
-    @Insert
+    // add a new goal or replace if exists
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertGoal(goal: Goal): Long
+
+    // add multiple goals with conflict resolution
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertGoals(goals: List<Goal>)
+
+    // update a goal
+    @Update
+    suspend fun updateGoal(goal: Goal)
 
     // remove a goal
     @Delete
     suspend fun deleteGoal(goal: Goal)
-
-    // update how much has been spent and recalculate status
-    @Query("""
-        UPDATE goals 
-        SET currentSpent = :newAmount,
-            spendingStatus = CASE
-                WHEN :newAmount < minAmount THEN 'BELOW_MINIMUM'
-                WHEN :newAmount > maxAmount THEN 'OVER_BUDGET'
-                ELSE 'ON_TRACK'
-            END,
-            createdAt = createdAt
-        WHERE id = :goalId
-    """)
-    suspend fun updateSpentAmount(goalId: Long, newAmount: Double)
 
     // get goals for a specific month and year
     @Query("SELECT * FROM goals WHERE userId = :userId AND month = :month AND year = :year ORDER BY createdAt DESC")
@@ -49,4 +43,19 @@ interface GoalDao {
     // get a goal by its id
     @Query("SELECT * FROM goals WHERE id = :goalId")
     fun getGoalById(goalId: Long): LiveData<Goal>
+
+    // Clear all goals for a user (used during sync)
+    @Query("DELETE FROM goals WHERE userId = :userId")
+    suspend fun deleteAllUserGoals(userId: String)
+
+    // Get goal count for a user (used to check if sync needed)
+    @Query("SELECT COUNT(*) FROM goals WHERE userId = :userId")
+    suspend fun getGoalCount(userId: String): Int
+
+    // Transaction to sync goals from Firebase to Room
+    @Transaction
+    suspend fun syncGoals(userId: String, goals: List<Goal>) {
+        deleteAllUserGoals(userId)
+        insertGoals(goals)
+    }
 }
