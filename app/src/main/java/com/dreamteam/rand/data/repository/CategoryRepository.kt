@@ -11,8 +11,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
-import com.google.firebase.firestore.Query
-import kotlinx.coroutines.tasks.await
 
 // handles all category-related operations
 class CategoryRepository(
@@ -20,92 +18,49 @@ class CategoryRepository(
     private val categoryFirebase: CategoryFirebase = CategoryFirebase()
 ) {
     private val TAG = "CategoryRepository"
-    private val syncedUsers = mutableSetOf<String>() // Track which users we've synced for
     
     // Allow setting the coroutineScope from ViewModel
     lateinit var coroutineScope: CoroutineScope
 
-    // get all categories for a user
+    // Get all categories for a user - use local cache first
     fun getCategories(userId: String): Flow<List<Category>> {
-        Log.d(TAG, "Getting categories for user: $userId")
+        Log.d(TAG, "Getting categories for user: $userId from local cache")
         return categoryDao.getCategories(userId)
     }
     
-    // get categories of a specific type (income/expense)
+    // Get categories by type - use local cache first
     fun getCategoriesByType(userId: String, type: TransactionType): Flow<List<Category>> {
-        Log.d(TAG, "Getting categories for user: $userId, type: $type")
-        
-        // Only sync from Firebase if we haven't synced for this user yet
-        if (!syncedUsers.contains(userId)) {
-            coroutineScope.launch(Dispatchers.IO) {
-                try {
-                    // Get all categories for this user from Firebase
-                    val documents = categoryFirebase.categoriesCollection
-                        .whereEqualTo("userId", userId)
-                        .whereEqualTo("type", type.toString())
-                        .get()
-                        .await()
-                    
-                    val categories = documents.documents.mapNotNull { 
-                        it.toObject(Category::class.java) 
-                    }
-                    
-                    Log.d(TAG, "Got ${categories.size} categories from Firebase for user $userId and type $type")
-                    
-                    // Cache them in Room
-                    try {
-                        categories.forEach { category ->
-                            Log.d(TAG, "Caching category: ${category.name}")
-                            categoryDao.insertCategory(category)
-                        }
-                        // Mark this user as synced after successful caching
-                        syncedUsers.add(userId)
-                    } catch (e: Exception) {
-                        Log.d(TAG, "Some categories already cached")
-                    }
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error syncing categories from Firebase", e)
-                }
-            }
-        } else {
-            Log.d(TAG, "Using cached categories for user: $userId")
-        }
-        
-        // Return the Flow from Room which will update as cache is populated
+        Log.d(TAG, "Getting categories for user: $userId, type: $type from local cache")
         return categoryDao.getCategoriesByType(userId, type.toString())
     }
     
-    // get a specific category
+    // Get a specific category - use local cache first
     suspend fun getCategory(id: Long): Category? {
         return categoryDao.getCategory(id)
     }
     
-    // add a new category
+    // Insert a new category into both Firebase and local cache
     suspend fun insertCategory(category: Category): Long = withContext(Dispatchers.IO) {
         try {
-            Log.d(TAG, "Inserting category in repository: $category")
+            Log.d(TAG, "Inserting new category: ${category.name}")
             
-            // First insert into Firebase and get the generated ID
+            // Insert into Firebase first to get the ID
             val firestoreId = categoryFirebase.insertCategory(category)
             if (firestoreId <= 0) {
                 Log.e(TAG, "Failed to insert category in Firebase")
                 return@withContext -1L
             }
             
-            // Create a new category with the Firebase ID
+            // Create category with Firebase ID
             val categoryWithId = category.copy(id = firestoreId)
             
-            // Then cache in Room with the same ID
-            val roomResult = categoryDao.insertCategory(categoryWithId)
-            if (roomResult <= 0) {
-                Log.e(TAG, "Failed to cache category in Room")
-                return@withContext -1L
+            // Cache in Room
+            try {
+                categoryDao.insertCategory(categoryWithId)
+                Log.d(TAG, "Category cached successfully with ID: $firestoreId")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to cache category in Room", e)
             }
-            
-            Log.d(TAG, "Category inserted successfully with ID: $firestoreId")
-            
-            // Clear the sync flag for this user to force a refresh after adding a new category
-            syncedUsers.remove(category.userId)
             
             return@withContext firestoreId
             
@@ -115,7 +70,7 @@ class CategoryRepository(
         }
     }
     
-    // update a category
+    // Update both Firebase and local cache
     suspend fun updateCategory(category: Category) = withContext(Dispatchers.IO) {
         try {
             // Update Firebase first
@@ -124,11 +79,8 @@ class CategoryRepository(
                 Log.w(TAG, "Failed to update category in Firebase")
             }
             
-            // Then update local cache
+            // Update local cache
             categoryDao.updateCategory(category)
-            
-            // Clear the sync flag for this user to force a refresh after updating
-            syncedUsers.remove(category.userId)
             
         } catch (e: Exception) {
             Log.e(TAG, "Error updating category", e)
@@ -136,7 +88,7 @@ class CategoryRepository(
         }
     }
     
-    // remove a category
+    // Delete from both Firebase and local cache
     suspend fun deleteCategory(category: Category) = withContext(Dispatchers.IO) {
         try {
             // Delete from Firebase first
@@ -145,11 +97,8 @@ class CategoryRepository(
                 Log.w(TAG, "Failed to delete category from Firebase")
             }
             
-            // Then remove from local cache
+            // Delete from local cache
             categoryDao.deleteCategory(category)
-            
-            // Clear the sync flag for this user to force a refresh after deleting
-            syncedUsers.remove(category.userId)
             
         } catch (e: Exception) {
             Log.e(TAG, "Error deleting category", e)
@@ -157,13 +106,8 @@ class CategoryRepository(
         }
     }
     
-    // get system default categories
+    // Get system default categories from local cache
     fun getDefaultCategories(userId: String): Flow<List<Category>> {
         return categoryDao.getDefaultCategories(userId)
-    }
-    
-    // Force a resync with Firebase for a user
-    suspend fun forceSync(userId: String) {
-        syncedUsers.remove(userId)
     }
 }

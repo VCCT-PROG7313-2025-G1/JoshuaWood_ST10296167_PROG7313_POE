@@ -4,9 +4,9 @@ import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.dreamteam.rand.data.dao.*
 import com.dreamteam.rand.data.firebase.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.first
+import android.util.Log
 
 // handles database setup and initialization
 class RandDatabaseCallback private constructor(
@@ -15,68 +15,95 @@ class RandDatabaseCallback private constructor(
     private val categoryDao: CategoryDao,
     private val goalDao: GoalDao
 ) : RoomDatabase.Callback() {
-
+    private val TAG = "RandDatabaseCallback"
     private val userFirebase = UserFirebase()
     private val categoryFirebase = CategoryFirebase()
-    
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
     // called when database is first created
     override fun onCreate(db: SupportSQLiteDatabase) {
         super.onCreate(db)
-        // Initialize default data
-        CoroutineScope(Dispatchers.IO).launch {
-            syncDataFromFirebase()
+        Log.d(TAG, "Database created - performing initial sync")
+        scope.launch {
+            try {
+                syncDataFromFirebase(isInitialSync = true)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error during initial sync", e)
+            }
         }
     }
 
     // called when database is opened
     override fun onOpen(db: SupportSQLiteDatabase) {
         super.onOpen(db)
-        // Sync data from Firebase when database is opened
-        CoroutineScope(Dispatchers.IO).launch {
-            syncDataFromFirebase()
+        Log.d(TAG, "Database opened - checking sync status")
+        scope.launch {
+            try {
+                syncDataFromFirebase(isInitialSync = false)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error during database open sync", e)
+            }
         }
     }
 
-    private suspend fun syncDataFromFirebase() {
+    private suspend fun syncDataFromFirebase(isInitialSync: Boolean) = withContext(Dispatchers.IO) {
         try {
-            android.util.Log.d(TAG, "Starting Firebase data sync")
-            
-            // Sync all users
+            Log.d(TAG, "Starting Firebase data sync (initial: $isInitialSync)")
+
+            // Sync users first since categories depend on user IDs
             userFirebase.getAllUsers().collect { users ->
                 users.forEach { user ->
-                    val localUser = userDao.getUserByUid(user.uid)
-                    if (localUser == null || localUser != user) {
-                        userDao.insertUser(user)
+                    try {
+                        val localUser = userDao.getUserByUid(user.uid)
+                        if (localUser == null) {
+                            Log.d(TAG, "Inserting new user: ${user.email}")
+                            userDao.insertUser(user)
+                        } else if (localUser != user) {
+                            Log.d(TAG, "Updating existing user: ${user.email}")
+                            userDao.updateUser(user)
+                        }
+
+                        // After user is synced, sync their categories
+                        syncUserCategories(user.uid, isInitialSync)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error syncing user: ${user.email}", e)
                     }
                 }
             }
-            
-            // Sync all categories
-            android.util.Log.d(TAG, "Syncing categories from Firebase")
-            categoryFirebase.getAllCategories().collect { categories ->
-                android.util.Log.d(TAG, "Received ${categories.size} categories from Firebase")
-                categories.forEach { category ->
-                    val localCategory = categoryDao.getCategory(category.id)
-                    if (localCategory == null || localCategory != category) {
-                        android.util.Log.d(TAG, "Inserting/updating category: ${category.name}")
-                        categoryDao.insertCategory(category)
-                    }
-                }
-            }
-            
-            // TODO: Add similar sync logic for transactions and goals
-            // when those Firebase handlers are implemented
-            
+
+            Log.d(TAG, "Firebase sync completed successfully")
         } catch (e: Exception) {
-            // Log error but don't crash the app
-            android.util.Log.e(TAG, "Error syncing data from Firebase", e)
-            e.printStackTrace()
+            Log.e(TAG, "Error during Firebase sync", e)
+            throw e
+        }
+    }
+
+    private suspend fun syncUserCategories(userId: String, isInitialSync: Boolean) {
+        try {
+            Log.d(TAG, "Syncing categories for user: $userId")
+            
+            // Only perform full sync if it's initial or cache is empty
+            val shouldFullSync = isInitialSync || categoryDao.getCategoryCount(userId) == 0
+            
+            if (shouldFullSync) {
+                Log.d(TAG, "Performing full category sync")
+                val firebaseCategories = categoryFirebase.getAllCategories().first()
+                val userCategories = firebaseCategories.filter { it.userId == userId }
+                
+                if (userCategories.isNotEmpty()) {
+                    Log.d(TAG, "Syncing ${userCategories.size} categories for user $userId")
+                    categoryDao.syncCategories(userId, userCategories)
+                }
+            } else {
+                Log.d(TAG, "Skipping full sync - categories already cached")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error syncing categories for user: $userId", e)
+            throw e
         }
     }
 
     companion object {
-        private const val TAG = "RandDatabaseCallback"
-        
         fun createCallback(database: RandDatabase): RandDatabaseCallback {
             return RandDatabaseCallback(
                 userDao = database.userDao(),

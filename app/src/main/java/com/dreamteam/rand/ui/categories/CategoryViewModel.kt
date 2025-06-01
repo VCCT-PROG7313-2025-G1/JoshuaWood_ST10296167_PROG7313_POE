@@ -32,6 +32,10 @@ class CategoryViewModel(private val repository: CategoryRepository) : ViewModel(
     private val _saveSuccess = MutableLiveData<Boolean>()
     val saveSuccess: LiveData<Boolean> = _saveSuccess
 
+    // Track if initial sync is complete
+    private val _initialSyncComplete = MutableLiveData<Boolean>(false)
+    val initialSyncComplete: LiveData<Boolean> = _initialSyncComplete
+
     init {
         // Pass viewModelScope to repository
         repository.coroutineScope = viewModelScope
@@ -56,11 +60,10 @@ class CategoryViewModel(private val repository: CategoryRepository) : ViewModel(
         _selectedIcon.value = icon
     }
 
-    // get all categories for a user
+    // get all categories for a user - uses local cache
     fun getCategories(userId: String) = repository.getCategories(userId).asLiveData()
 
-    // ai declaration: here we used claude to design the reactive data flow
-    // for category type filtering and synchronization
+    // get categories by type - uses local cache
     fun getCategoriesByType(userId: String, type: TransactionType): LiveData<List<Category>> {
         return repository.getCategoriesByType(userId, type).asLiveData()
     }
@@ -123,6 +126,11 @@ class CategoryViewModel(private val repository: CategoryRepository) : ViewModel(
         viewModelScope.launch {
             repository.deleteCategory(category)
         }
+    }
+
+    // mark initial sync as complete
+    fun markInitialSyncComplete() {
+        _initialSyncComplete.value = true
     }
 
     // reset the save status after showing success/failure

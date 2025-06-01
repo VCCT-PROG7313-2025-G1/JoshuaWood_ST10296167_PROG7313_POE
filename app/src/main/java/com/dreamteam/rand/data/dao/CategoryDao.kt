@@ -19,9 +19,13 @@ interface CategoryDao {
     @Query("SELECT * FROM categories WHERE id = :id")
     suspend fun getCategory(id: Long): Category?
 
-    // add a new category
-    @Insert
+    // add a new category or replace if exists
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCategory(category: Category): Long
+
+    // add multiple categories with conflict resolution
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCategories(categories: List<Category>)
 
     // update a category
     @Update
@@ -38,4 +42,17 @@ interface CategoryDao {
         AND isDefault = 1
     """)
     fun getDefaultCategories(userId: String): Flow<List<Category>>
-} 
+
+    @Transaction
+    @Query("DELETE FROM categories WHERE userId = :userId")
+    suspend fun deleteAllUserCategories(userId: String)
+
+    @Transaction
+    suspend fun syncCategories(userId: String, categories: List<Category>) {
+        deleteAllUserCategories(userId)
+        insertCategories(categories)
+    }
+
+    @Query("SELECT COUNT(*) FROM categories WHERE userId = :userId")
+    suspend fun getCategoryCount(userId: String): Int
+}
