@@ -65,11 +65,22 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
     }
 
     // get all expenses for a user
-    fun getExpenses(userId: String) = repository.getExpenses(userId).asLiveData()
+    fun getExpenses(userId: String): LiveData<List<Transaction>> {
+        // Sync first, then get from local cache
+        viewModelScope.launch {
+            repository.syncExpenses(userId)
+        }
+        return repository.getExpenses(userId).asLiveData()
+    }
 
     // get expenses filtered by category
-    fun getExpensesByCategory(userId: String, categoryId: Long) = 
-        repository.getExpensesByCategory(userId, categoryId).asLiveData()
+    fun getExpensesByCategory(userId: String, categoryId: Long): LiveData<List<Transaction>> {
+        // Sync first, then get from local cache
+        viewModelScope.launch {
+            repository.syncExpenses(userId)
+        }
+        return repository.getExpensesByCategory(userId, categoryId).asLiveData()
+    }
 
     // ai declaration: here we used claude to design the category filtering system
     // with date range support for detailed expense analysis
@@ -93,6 +104,10 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
         startDate: Long?,
         endDate: Long?
     ): LiveData<List<Transaction>> {
+        // Sync first, then get from local cache
+        viewModelScope.launch {
+            repository.syncExpenses(userId)
+        }
         return repository.getExpensesByDateRange(userId, startDate, endDate).asLiveData()
     }
 

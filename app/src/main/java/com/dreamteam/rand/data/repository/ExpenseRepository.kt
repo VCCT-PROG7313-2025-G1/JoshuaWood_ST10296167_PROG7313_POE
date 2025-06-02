@@ -3,6 +3,7 @@ package com.dreamteam.rand.data.repository
 import com.dreamteam.rand.data.dao.TransactionDao
 import com.dreamteam.rand.data.entity.Transaction
 import com.dreamteam.rand.data.entity.TransactionType
+import com.dreamteam.rand.data.firebase.TransactionFirebase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -10,8 +11,11 @@ import kotlinx.coroutines.flow.first
 import java.util.Calendar
 
 // handles all expense-related operations
-class ExpenseRepository(private val transactionDao: TransactionDao) {
-    // get all expenses for a user
+class ExpenseRepository(
+    private val transactionDao: TransactionDao,
+    private val transactionFirebase: TransactionFirebase = TransactionFirebase()
+) {
+    // get all expenses for a user - uses local cache by default
     fun getExpenses(userId: String): Flow<List<Transaction>> {
         return transactionDao.getTransactions(userId)
     }
@@ -117,7 +121,7 @@ class ExpenseRepository(private val transactionDao: TransactionDao) {
         return transactions.sumOf { it.amount }
     }
 
-    // add a new expense
+    // insert a new expense - now includes Firebase
     suspend fun insertExpense(
         userId: String,
         amount: Double,
@@ -137,11 +141,21 @@ class ExpenseRepository(private val transactionDao: TransactionDao) {
             createdAt = System.currentTimeMillis()
         )
         
-        android.util.Log.d("ExpenseRepository", "Inserting expense in repository:")
+        android.util.Log.d("ExpenseRepository", "Inserting expense:")
         android.util.Log.d("ExpenseRepository", "Transaction: $transaction")
-        android.util.Log.d("ExpenseRepository", "Transaction date: ${java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date(date))}")
         
-        val result = transactionDao.insertTransaction(transaction)
+        // Insert into Firebase first
+        val firestoreId = transactionFirebase.insertTransaction(transaction)
+        if (firestoreId <= 0) {
+            android.util.Log.e("ExpenseRepository", "Failed to insert transaction in Firebase")
+            return -1L
+        }
+        
+        // Create transaction with Firebase ID
+        val transactionWithId = transaction.copy(id = firestoreId)
+        
+        // Cache in Room
+        val result = transactionDao.insertTransaction(transactionWithId)
         
         if (result > 0) {
             android.util.Log.d("ExpenseRepository", "Transaction inserted with ID: $result")
@@ -150,6 +164,31 @@ class ExpenseRepository(private val transactionDao: TransactionDao) {
         }
         
         return result
+    }
+
+    // sync expenses from Firebase to Room - only called during initial sync or when cache is empty
+    suspend fun syncExpenses(userId: String) {
+        android.util.Log.d("ExpenseRepository", "Starting expenses sync for user: $userId")
+        
+        try {
+            // Only sync if cache is empty to avoid unnecessary network calls
+            if (transactionDao.getTransactionCount(userId) == 0) {
+                transactionFirebase.getAllTransactions().collect { transactions ->
+                    val userTransactions = transactions.filter { it.userId == userId }
+                    if (userTransactions.isNotEmpty()) {
+                        android.util.Log.d("ExpenseRepository", "Syncing ${userTransactions.size} expenses for user $userId")
+                        transactionDao.syncTransactions(userId, userTransactions)
+                    } else {
+                        android.util.Log.d("ExpenseRepository", "No expenses found for user $userId in Firebase")
+                    }
+                }
+            } else {
+                android.util.Log.d("ExpenseRepository", "Skipping sync - expenses already cached")
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("ExpenseRepository", "Error syncing expenses: ${e.message}", e)
+            // Don't throw - let the app continue with cached data
+        }
     }
 
     // update an existing expense

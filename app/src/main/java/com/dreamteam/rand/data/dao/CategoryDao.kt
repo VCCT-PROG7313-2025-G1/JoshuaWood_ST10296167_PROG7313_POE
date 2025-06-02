@@ -1,5 +1,6 @@
 package com.dreamteam.rand.data.dao
 
+import android.util.Log
 import androidx.room.*
 import com.dreamteam.rand.data.entity.Category
 import kotlinx.coroutines.flow.Flow
@@ -49,8 +50,13 @@ interface CategoryDao {
 
     @Transaction
     suspend fun syncCategories(userId: String, categories: List<Category>) {
+        Log.d("CategoryDao", "Starting category sync for user $userId with ${categories.size} categories")
         deleteAllUserCategories(userId)
+        Log.d("CategoryDao", "Deleted existing categories for user $userId")
         insertCategories(categories)
+        Log.d("CategoryDao", "Inserted ${categories.size} categories for user $userId")
+        val count = getCategoryCount(userId)
+        Log.d("CategoryDao", "Final category count for user $userId: $count")
     }
 
     @Query("SELECT COUNT(*) FROM categories WHERE userId = :userId")
