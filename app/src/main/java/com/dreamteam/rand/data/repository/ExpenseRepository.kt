@@ -1,8 +1,12 @@
 package com.dreamteam.rand.data.repository
 
+import com.dreamteam.rand.RandApplication
+import com.dreamteam.rand.data.RandDatabase
+import com.dreamteam.rand.data.dao.GoalDao
 import com.dreamteam.rand.data.dao.TransactionDao
 import com.dreamteam.rand.data.entity.Transaction
 import com.dreamteam.rand.data.entity.TransactionType
+import com.dreamteam.rand.data.firebase.GoalFirebase
 import com.dreamteam.rand.data.firebase.TransactionFirebase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -13,7 +17,9 @@ import java.util.Calendar
 // handles all expense-related operations
 class ExpenseRepository(
     private val transactionDao: TransactionDao,
-    private val transactionFirebase: TransactionFirebase = TransactionFirebase()
+    private val transactionFirebase: TransactionFirebase = TransactionFirebase(),
+    private val goalDao: GoalDao = RandDatabase.getDatabase(RandApplication.instance).goalDao(),
+    private val goalFirebase: GoalFirebase = GoalFirebase()
 ) {
     // get all expenses for a user - uses local cache by default
     fun getExpenses(userId: String): Flow<List<Transaction>> {
@@ -121,7 +127,7 @@ class ExpenseRepository(
         return transactions.sumOf { it.amount }
     }
 
-    // insert a new expense - now includes Firebase
+    // insert a new expense - now includes Firebase and goal updates
     suspend fun insertExpense(
         userId: String,
         amount: Double,
@@ -159,11 +165,52 @@ class ExpenseRepository(
         
         if (result > 0) {
             android.util.Log.d("ExpenseRepository", "Transaction inserted with ID: $result")
+            // After successful insert, update related goals
+            updateRelatedGoals(userId, transactionWithId)
         } else {
             android.util.Log.e("ExpenseRepository", "Failed to insert transaction")
         }
         
         return result
+    }
+
+    // Update goals after adding an expense
+    private suspend fun updateRelatedGoals(userId: String, transaction: Transaction) {
+        try {
+            android.util.Log.d("ExpenseRepository", "Updating goals for new expense: ${transaction.id}")
+            
+            // Get date components from transaction
+            val date = java.util.Date(transaction.date)
+            val expenseMonth = date.month + 1  // Convert 0-based month to 1-based
+            val expenseYear = date.year + 1900 // Convert years since 1900 to actual year
+            
+            // Get goals for this month/year
+            val goals = goalDao.getGoals(userId).first().filter { goal ->
+                goal.month == expenseMonth && goal.year == expenseYear
+            }
+            
+            if (goals.isEmpty()) {
+                android.util.Log.d("ExpenseRepository", "No goals found for month $expenseMonth/$expenseYear")
+                return
+            }
+            
+            android.util.Log.d("ExpenseRepository", "Found ${goals.size} goals for month $expenseMonth/$expenseYear")
+            
+            // Update each matching goal by adding the new expense amount
+            goals.forEach { goal ->
+                try {
+                    val newTotal = goal.currentSpent + transaction.amount
+                    android.util.Log.d("ExpenseRepository", "Updating goal ${goal.id} spent amount from ${goal.currentSpent} to $newTotal")
+                    val updatedGoal = goal.copy(currentSpent = newTotal)
+                    goalDao.updateGoal(updatedGoal)
+                    goalFirebase.updateGoal(updatedGoal)
+                } catch (e: Exception) {
+                    android.util.Log.e("ExpenseRepository", "Error updating goal ${goal.id}: ${e.message}", e)
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("ExpenseRepository", "Error updating goals: ${e.message}", e)
+        }
     }
 
     // sync expenses from Firebase to Room - only called during initial sync or when cache is empty

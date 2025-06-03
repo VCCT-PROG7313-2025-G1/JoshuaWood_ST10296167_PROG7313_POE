@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import com.dreamteam.rand.data.RandDatabase
 import com.dreamteam.rand.data.entity.Transaction
 import com.dreamteam.rand.data.entity.TransactionType
 import com.dreamteam.rand.data.repository.ExpenseRepository
@@ -233,6 +234,13 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
 
     // factory class to create the viewmodel with its dependencies
     class Factory(private val repository: ExpenseRepository) : ViewModelProvider.Factory {
+        constructor(database: RandDatabase) : this(
+            ExpenseRepository(
+                transactionDao = database.transactionDao(),
+                goalDao = database.goalDao()
+            )
+        )
+
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(ExpenseViewModel::class.java)) {

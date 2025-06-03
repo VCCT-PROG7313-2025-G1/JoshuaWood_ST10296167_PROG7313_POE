@@ -71,7 +71,7 @@ class RandDatabaseCallback private constructor(
                         syncUserTransactions(user.uid, isInitialSync)
                         
                         // After all data is synced, update goal amounts
-                        syncGoalAmounts(user.uid)
+//                        syncGoalAmounts(user.uid)
                     } catch (e: Exception) {
                         Log.e(TAG, "Error syncing user: ${user.email}", e)
                     }

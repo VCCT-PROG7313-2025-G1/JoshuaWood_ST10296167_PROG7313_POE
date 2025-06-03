@@ -12,6 +12,9 @@ class RandApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         
+        // Set instance
+        instance = this
+        
         // Initialize Firebase
         FirebaseApp.initializeApp(this)
 
@@ -21,5 +24,10 @@ class RandApplication : Application() {
             RandDatabase::class.java,
             "rand_database"
         ).build()
+    }
+
+    companion object {
+        lateinit var instance: RandApplication
+            private set
     }
 }
