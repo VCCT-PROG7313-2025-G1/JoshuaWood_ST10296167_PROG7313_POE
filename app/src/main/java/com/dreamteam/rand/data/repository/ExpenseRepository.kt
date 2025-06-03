@@ -82,37 +82,63 @@ class ExpenseRepository(
                 endDate = endDate
             ) ?: 0.0
         } else {
-            // Get total for all time if no date range is specified
+
             val calendar = Calendar.getInstance()
-            val endDate = calendar.timeInMillis
-            calendar.set(1970, 0, 1, 0, 0, 0)
-            val startDate = calendar.timeInMillis
+
+            // Start of the month
+            calendar.set(Calendar.DAY_OF_MONTH, 1)
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            calendar.set(Calendar.MILLISECOND, 0)
+            val defaultStartDate = calendar.timeInMillis
+
+            // End of the month
+            calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+            calendar.set(Calendar.HOUR_OF_DAY, 23)
+            calendar.set(Calendar.MINUTE, 59)
+            calendar.set(Calendar.SECOND, 59)
+            calendar.set(Calendar.MILLISECOND, 999)
+            val defaultEndDate = calendar.timeInMillis
             
             transactionDao.getTotalAmountByTypeAndDateRange(
                 userId = userId,
                 type = TransactionType.EXPENSE.name,
-                startDate = startDate,
-                endDate = endDate
+                startDate = defaultStartDate,
+                endDate = defaultEndDate
             ) ?: 0.0
         }
-    }
-
-    // get total expenses for a category in a date range
+    }    // get total expenses for a category in a date range
     suspend fun getTotalExpensesByCategoryAndDateRange(
         userId: String,
         categoryId: Long,
         startDate: Long?,
         endDate: Long?
     ): Double {
-        // If we have a date range, use it, otherwise calculate for all time
+        // If we have a date range, use it, otherwise use current month
         val (actualStartDate, actualEndDate) = if (startDate != null && endDate != null) {
             Pair(startDate, endDate)
         } else {
+
             val calendar = Calendar.getInstance()
-            val end = calendar.timeInMillis
-            calendar.set(1970, 0, 1, 0, 0, 0)
-            val start = calendar.timeInMillis
-            Pair(start, end)
+            
+            // Start of the month
+            calendar.set(Calendar.DAY_OF_MONTH, 1)
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            calendar.set(Calendar.MILLISECOND, 0)
+            val defaultStartDate = calendar.timeInMillis
+
+            // End of the month
+            calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+            calendar.set(Calendar.HOUR_OF_DAY, 23)
+            calendar.set(Calendar.MINUTE, 59)
+            calendar.set(Calendar.SECOND, 59)
+            calendar.set(Calendar.MILLISECOND, 999)
+            val defaultEndDate = calendar.timeInMillis
+            
+            Pair(defaultStartDate, defaultEndDate)
         }
         
         // Get all transactions for this category in the date range
