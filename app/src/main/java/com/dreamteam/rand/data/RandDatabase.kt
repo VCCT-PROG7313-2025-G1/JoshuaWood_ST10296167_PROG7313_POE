@@ -42,28 +42,9 @@ abstract class RandDatabase : RoomDatabase() {
                     RandDatabase::class.java,
                     "rand_database"
                 )
+                .addCallback(RandDatabaseCallback())
                 .fallbackToDestructiveMigration()
-                .addCallback(object : RoomDatabase.Callback() {
-                    override fun onCreate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
-                        super.onCreate(db)
-                        // Database was just created, initialize it
-                        INSTANCE?.let { database ->
-                            RandDatabaseCallback.createCallback(database)
-                                .onCreate(db)
-                        }
-                    }
-
-                    override fun onOpen(db: androidx.sqlite.db.SupportSQLiteDatabase) {
-                        super.onOpen(db)
-                        // Database was opened, sync with Firebase
-                        INSTANCE?.let { database ->
-                            RandDatabaseCallback.createCallback(database)
-                                .onOpen(db)
-                        }
-                    }
-                })
                 .build()
-                
                 INSTANCE = db
                 db
             }

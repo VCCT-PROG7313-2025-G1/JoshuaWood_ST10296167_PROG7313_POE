@@ -2,6 +2,7 @@ package com.dreamteam.rand.ui.auth
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -10,12 +11,14 @@ import com.dreamteam.rand.data.RandDatabase
 import com.dreamteam.rand.data.entity.User
 import com.dreamteam.rand.data.repository.UserRepository
 import com.dreamteam.rand.data.firebase.UserFirebase
+import com.dreamteam.rand.data.repository.FirebaseRepository
 import kotlinx.coroutines.launch
 
 // handles all the user stuff like signing in, signing up, and keeping track of who's logged in
 class UserViewModel(application: Application) : AndroidViewModel(application) {
     // grab the stuff we need to work with users
     private val userRepository: UserRepository
+    private val firebaseRepository: FirebaseRepository
     // keep track of who's logged in
     private val _currentUser = MutableLiveData<User?>()
     val currentUser: LiveData<User?> = _currentUser
@@ -23,15 +26,23 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     // keep track of any errors that happen
     private val _error = MutableLiveData<String>()
     val error: LiveData<String> = _error
+
+    // keep track of sync state
+    private val _syncCompleted = MutableLiveData<Boolean>()
+    val syncCompleted: LiveData<Boolean> get() = _syncCompleted
     
     // store some stuff on the device so we remember who's logged in
     private val sharedPreferences = application.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
 
     init {
-        val userDao = RandDatabase.getDatabase(application).userDao()
+        val db = RandDatabase.getDatabase(application)
+        val userDao = db.userDao()
+        val transactionDao = db.transactionDao()
+        val categoryDao = db.categoryDao()
+        val goalDao = db.goalDao()
         val userFirebase = UserFirebase()
         userRepository = UserRepository(userDao, userFirebase)
-        
+        firebaseRepository = FirebaseRepository(userDao, transactionDao, categoryDao, goalDao)
         // check if someone was already logged in
         checkForSavedUser()
     }
@@ -75,10 +86,26 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     // let someone sign in to their account
     fun loginUser(email: String, password: String) {
         viewModelScope.launch {
+            // reset sync flag
+            _syncCompleted.value = false
+
             val result = userRepository.loginUser(email, password)
             result.onSuccess { user ->
-                _currentUser.value = user
+               // _currentUser.value = user
                 saveUserToPreferences(user)
+
+                try{
+                    firebaseRepository.syncAllUserData(user.uid)
+                    _currentUser.value = user
+                    _syncCompleted.postValue(true)
+                } catch (e: Exception){
+                    Log.e("UserViewModel", "Sync failed: ${e.message}")
+                    // Decide: do you want to proceed without sync or show error?
+                    _error.value = "Data sync failed: ${e.message}"
+                }
+                // sync firebase data
+//                firebaseRepository.syncAllUserData(user.uid)
+//                _syncCompleted.postValue(true)
             }.onFailure { exception ->
                 _error.value = exception.message
             }
@@ -163,6 +190,10 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
         }
+    }
+
+    fun clearSyncFlag() {
+        _syncCompleted.value = false
     }
 
     // sign them out

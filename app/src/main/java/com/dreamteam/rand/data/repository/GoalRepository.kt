@@ -122,26 +122,26 @@ class GoalRepository(
     }
 
     // sync goals from Firebase to Room
-    suspend fun syncGoals(userId: String) = withContext(Dispatchers.IO) {
-        try {
-            Log.d(TAG, "Starting goals sync for user: $userId")
-            
-            // Only sync if cache is empty
-            if (goalDao.getGoalCount(userId) == 0) {
-                goalFirebase.getAllGoals().collect { goals ->
-                    val userGoals = goals.filter { it.userId == userId }
-                    if (userGoals.isNotEmpty()) {
-                        Log.d(TAG, "Syncing ${userGoals.size} goals for user $userId")
-                        goalDao.syncGoals(userId, userGoals)
-                    }
-                }
-            } else {
-                Log.d(TAG, "Skipping sync - goals already cached")
-            }
-            
-        } catch (e: Exception) {
-            Log.e(TAG, "Error syncing goals", e)
-            throw e
-        }
-    }
+//    suspend fun syncGoals(userId: String) = withContext(Dispatchers.IO) {
+//        try {
+//            Log.d(TAG, "Starting goals sync for user: $userId")
+//
+//            // Only sync if cache is empty
+//            if (goalDao.getGoalCount(userId) == 0) {
+//                goalFirebase.getAllGoals().collect { goals ->
+//                    val userGoals = goals.filter { it.userId == userId }
+//                    if (userGoals.isNotEmpty()) {
+//                        Log.d(TAG, "Syncing ${userGoals.size} goals for user $userId")
+//                        goalDao.syncGoals(userId, userGoals)
+//                    }
+//                }
+//            } else {
+//                Log.d(TAG, "Skipping sync - goals already cached")
+//            }
+//
+//        } catch (e: Exception) {
+//            Log.e(TAG, "Error syncing goals", e)
+//            throw e
+//        }
+//    }
 }

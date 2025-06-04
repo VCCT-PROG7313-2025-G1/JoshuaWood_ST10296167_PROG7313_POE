@@ -38,7 +38,7 @@ class UserRepository(
                 }
                 
                 // Then cache in Room
-                userDao.insertUser(user)
+                userDao.upsertUser(user)
                 
                 Result.success(user)
             } catch (e: Exception) {
@@ -67,7 +67,7 @@ class UserRepository(
                 val firestoreUser = userFirebase.authenticateUser(email, password)
                 if (firestoreUser != null) {
                     Log.d(TAG, "Found user in Firebase, updating cache")
-                    userDao.insertUser(firestoreUser)
+                    userDao.upsertUser(firestoreUser)
                     return@withContext Result.success(firestoreUser)
                 }
 

@@ -25,6 +25,10 @@ interface UserDao {
     @Query("SELECT * FROM users")
     fun getAllUsers(): Flow<List<User>>
 
+    // upsert operation - insert if new, update if exists
+    @Upsert
+    suspend fun upsertUser(user: User)
+
     // add a new user
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertUser(user: User)

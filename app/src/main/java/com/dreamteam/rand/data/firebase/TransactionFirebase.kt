@@ -7,6 +7,7 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.Source
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 
 class TransactionFirebase {
@@ -14,40 +15,38 @@ class TransactionFirebase {
     private val db = FirebaseFirestore.getInstance()
     private val transactionsCollection = db.collection("transactions")
 
-    // Get all transactions - used only for initial sync
-    fun getAllTransactions(): Flow<List<Transaction>> = flow {
+    // Get all transactions for syncing
+    fun getAllTransactions(userId: String): Flow<List<Transaction>> = flow {
+        Log.d(TAG, "Getting transactions for userId=$userId from Firestore")
+        val snapshot = transactionsCollection
+            .whereEqualTo("userId", userId)
+            .orderBy("id", Query.Direction.ASCENDING)
+            .get(Source.SERVER)
+            .await()
+
+        val transactions = snapshot.documents.mapNotNull { it.toObject(Transaction::class.java) }
+        Log.d(TAG, "Retrieved ${transactions.size} transactions from Firestore")
+        emit(transactions)
+        }.catch { e ->
+        Log.e(TAG, "Error getting transactions: ${e.message}", e)
+        // Try cache if server fails
         try {
-            Log.d(TAG, "Getting all transactions from Firestore")
-            val snapshot = transactionsCollection
+            val cacheSnapshot = transactionsCollection
+                .whereEqualTo("userId", userId)
                 .orderBy("id", Query.Direction.ASCENDING)
-                .get(Source.SERVER)
+                .get(Source.CACHE)
                 .await()
 
-            val transactions = snapshot.documents.mapNotNull { 
-                it.toObject(Transaction::class.java) 
-            }.filter { it.userId.isNotEmpty() }
-            
-            Log.d(TAG, "Retrieved ${transactions.size} transactions from Firestore")
-            emit(transactions)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error getting transactions: ${e.message}", e)
-            // Try cache if server fails
-            try {
-                val cacheSnapshot = transactionsCollection
-                    .orderBy("id", Query.Direction.ASCENDING)
-                    .get(Source.CACHE)
-                    .await()
-                
-                val transactions = cacheSnapshot.documents.mapNotNull { 
-                    it.toObject(Transaction::class.java) 
-                }.filter { it.userId.isNotEmpty() }
-                
-                Log.d(TAG, "Retrieved ${transactions.size} transactions from cache")
-                emit(transactions)
-            } catch (e2: Exception) {
-                Log.e(TAG, "Cache retrieval also failed: ${e2.message}", e2)
-                emit(emptyList())
+
+            val transactions = cacheSnapshot.documents.mapNotNull {
+                it.toObject(Transaction::class.java)
             }
+
+            Log.d(TAG, "Retrieved ${transactions.size} transactions from cache")
+            emit(transactions)
+        } catch (e2: Exception) {
+            Log.e(TAG, "Cache retrieval also failed: ${e2.message}", e2)
+            emit(emptyList())
         }
     }
 

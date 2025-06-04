@@ -24,6 +24,9 @@ interface CategoryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCategory(category: Category): Long
 
+    @Upsert
+    suspend fun upsertCategory(category: Category)
+
     // add multiple categories with conflict resolution
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCategories(categories: List<Category>)

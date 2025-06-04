@@ -68,18 +68,18 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
     // get all expenses for a user
     fun getExpenses(userId: String): LiveData<List<Transaction>> {
         // Sync first, then get from local cache
-        viewModelScope.launch {
-            repository.syncExpenses(userId)
-        }
+//        viewModelScope.launch {
+//            repository.syncExpenses(userId)
+//        }
         return repository.getExpenses(userId).asLiveData()
     }
 
     // get expenses filtered by category
     fun getExpensesByCategory(userId: String, categoryId: Long): LiveData<List<Transaction>> {
         // Sync first, then get from local cache
-        viewModelScope.launch {
-            repository.syncExpenses(userId)
-        }
+//        viewModelScope.launch {
+//            repository.syncExpenses(userId)
+//        }
         return repository.getExpensesByCategory(userId, categoryId).asLiveData()
     }
 
@@ -106,9 +106,9 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
         endDate: Long?
     ): LiveData<List<Transaction>> {
         // Sync first, then get from local cache
-        viewModelScope.launch {
-            repository.syncExpenses(userId)
-        }
+//        viewModelScope.launch {
+//            repository.syncExpenses(userId)
+//        }
         return repository.getExpensesByDateRange(userId, startDate, endDate).asLiveData()
     }
 

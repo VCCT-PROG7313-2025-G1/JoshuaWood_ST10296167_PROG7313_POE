@@ -24,6 +24,9 @@ interface GoalDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertGoal(goal: Goal): Long
 
+    @Upsert
+    suspend fun upsertGoal(goal: Goal)
+
     // add multiple goals with conflict resolution
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertGoals(goals: List<Goal>)
