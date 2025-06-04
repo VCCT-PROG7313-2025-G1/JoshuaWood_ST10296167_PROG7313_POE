@@ -1,5 +1,6 @@
 package com.dreamteam.rand.ui.goals
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -10,9 +11,8 @@ import com.dreamteam.rand.data.entity.Goal
 import com.dreamteam.rand.data.repository.GoalRepository
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
-import java.util.Locale
 import java.util.Calendar
-import java.util.Date
+import java.util.Locale
 
 // this viewmodel handles all the goal-related data and operations
 // it keeps track of goals, their progress, and manages saving/updating them
@@ -36,6 +36,11 @@ class GoalViewModel(private val repository: GoalRepository) : ViewModel() {
     private val _totalSaved = MutableLiveData<String>()
     val totalSaved: LiveData<String> = _totalSaved
 
+    init {
+        // Pass viewModelScope to repository
+        repository.coroutineScope = viewModelScope
+    }
+
     // update which month is selected
     fun setSelectedMonth(month: Int) {
         _selectedMonth.value = month
@@ -51,33 +56,19 @@ class GoalViewModel(private val repository: GoalRepository) : ViewModel() {
         _selectedColor.value = color
     }
 
-    // get all goals for a user
-    fun getGoals(userId: String): LiveData<List<Goal>> {
-        return repository.getGoals(userId).asLiveData<List<Goal>>()
-    }
+    // get goals for a user - uses local cache first
+    fun getGoals(userId: String) = repository.getGoals(userId).asLiveData()
 
-    // get goals filtered by month and year
-    fun getGoalsByMonthAndYear(userId: String, month: Int, year: Int): LiveData<List<Goal>> {
-        return repository.getGoalsByMonthAndYear(userId, month, year)
-    }
+    // get goals by month and year - uses local cache first
+    fun getGoalsByMonthAndYear(userId: String, month: Int, year: Int) = 
+        repository.getGoalsByMonthAndYear(userId, month, year)
 
-    // get all goals ordered by year and month
+    // get all goals ordered by date - uses local cache first
     fun getAllGoalsOrdered(userId: String): LiveData<List<Goal>> {
         return repository.getAllGoalsOrdered(userId)
     }
 
-    // get the total amount saved for goals
-    fun fetchTotalSaved(userId: String) {
-        viewModelScope.launch {
-            // get all goals and sum up their current spent amounts
-            val goals = repository.getGoals(userId).asLiveData<List<Goal>>().value ?: emptyList()
-            val total = goals.sumOf { it.currentSpent }
-            val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("en", "ZA"))
-            _totalSaved.postValue(currencyFormatter.format(total))
-        }
-    }
-
-    // save a new goal
+    // save a new goal to Firebase and cache
     fun saveGoal(
         userId: String,
         name: String,
@@ -88,43 +79,65 @@ class GoalViewModel(private val repository: GoalRepository) : ViewModel() {
         color: String
     ) {
         viewModelScope.launch {
-            val goal = Goal(
-                userId = userId,
-                name = name,
-                month = month,
-                year = year,
-                minAmount = minAmount,
-                maxAmount = maxAmount,
-                color = color,
-                currentSpent = 0.0,
-                createdAt = System.currentTimeMillis()
-            )
-            val result = repository.insertGoal(goal)
-            _saveSuccess.postValue(result > 0)
-            
-            // update total saved
-            fetchTotalSaved(userId)
+            try {
+                Log.d("GoalViewModel", "Saving new goal: $name")
+                val goal = Goal(
+                    userId = userId,
+                    name = name,
+                    month = month,
+                    year = year,
+                    minAmount = minAmount,
+                    maxAmount = maxAmount,
+                    color = color,
+                    currentSpent = 0.0,
+                    createdAt = System.currentTimeMillis()
+                )
+                val result = repository.insertGoal(goal)
+                _saveSuccess.postValue(result > 0)
+                
+                // update total saved if successful
+                if (result > 0) {
+                    fetchTotalSaved(userId)
+                }
+            } catch (e: Exception) {
+                Log.e("GoalViewModel", "Error saving goal", e)
+                _saveSuccess.postValue(false)
+            }
         }
     }
 
-    // update an existing goal
-    fun updateGoal(goal: Goal) {
+    // update an existing goal's spending amount in Firebase and cache
+    fun updateGoalSpending(goalId: Long, newAmount: Double) {
         viewModelScope.launch {
-            repository.insertGoal(goal)
-            _saveSuccess.value = true
-            
-            // update total saved
-            fetchTotalSaved(goal.userId)
+            try {
+                repository.updateSpentAmount(goalId, newAmount)
+                // Note: total saved will be updated via observer
+            } catch (e: Exception) {
+                Log.e("GoalViewModel", "Error updating goal spending", e)
+            }
         }
     }
 
-    // delete a goal
+    // delete a goal from Firebase and cache
     fun deleteGoal(goal: Goal) {
         viewModelScope.launch {
-            repository.deleteGoal(goal)
-            
-            // update total saved
-            fetchTotalSaved(goal.userId)
+            try {
+                repository.deleteGoal(goal)
+                fetchTotalSaved(goal.userId)
+            } catch (e: Exception) {
+                Log.e("GoalViewModel", "Error deleting goal", e)
+            }
+        }
+    }
+
+    // get the total amount saved for goals from cache
+    fun fetchTotalSaved(userId: String) {
+        viewModelScope.launch {
+            // get all goals and sum up their current spent amounts
+            val goals = repository.getGoals(userId).asLiveData().value ?: emptyList()
+            val total = goals.sumOf { it.currentSpent }
+            val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("en", "ZA"))
+            _totalSaved.postValue(currencyFormatter.format(total))
         }
     }
 

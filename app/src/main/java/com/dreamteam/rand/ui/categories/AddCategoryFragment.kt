@@ -27,6 +27,7 @@ import com.google.android.material.card.MaterialCardView
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.graphics.drawable.GradientDrawable
+import com.dreamteam.rand.data.firebase.CategoryFirebase
 
 // this fragment lets you create a new category
 // you can pick a name, color, and icon for your category
@@ -41,7 +42,9 @@ class AddCategoryFragment : Fragment() {
     private val userViewModel: UserViewModel by activityViewModels()
     private val categoryViewModel: CategoryViewModel by viewModels {
         val database = RandDatabase.getDatabase(requireContext())
-        val repository = CategoryRepository(database.categoryDao())
+        val categoryDao = database.categoryDao()
+        val categoryFirebase = CategoryFirebase()
+        val repository = CategoryRepository(categoryDao, categoryFirebase)
         CategoryViewModel.Factory(repository)
     }
 

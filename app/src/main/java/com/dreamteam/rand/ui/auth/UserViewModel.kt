@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.dreamteam.rand.data.RandDatabase
 import com.dreamteam.rand.data.entity.User
 import com.dreamteam.rand.data.repository.UserRepository
+import com.dreamteam.rand.data.firebase.UserFirebase
 import kotlinx.coroutines.launch
 
 // handles all the user stuff like signing in, signing up, and keeping track of who's logged in
@@ -28,7 +29,8 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         val userDao = RandDatabase.getDatabase(application).userDao()
-        userRepository = UserRepository(userDao)
+        val userFirebase = UserFirebase()
+        userRepository = UserRepository(userDao, userFirebase)
         
         // check if someone was already logged in
         checkForSavedUser()
@@ -168,4 +170,4 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         _currentUser.value = null
         clearUserPreferences()
     }
-} 
+}

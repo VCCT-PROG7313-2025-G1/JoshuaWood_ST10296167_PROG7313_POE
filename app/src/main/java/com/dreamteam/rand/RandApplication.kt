@@ -3,6 +3,7 @@ package com.dreamteam.rand
 import android.app.Application
 import androidx.room.Room
 import com.dreamteam.rand.data.RandDatabase
+import com.google.firebase.FirebaseApp
 
 class RandApplication : Application() {
     lateinit var database: RandDatabase
@@ -10,10 +11,23 @@ class RandApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        
+        // Set instance
+        instance = this
+        
+        // Initialize Firebase
+        FirebaseApp.initializeApp(this)
+
+        // Initialize Room database
         database = Room.databaseBuilder(
             applicationContext,
             RandDatabase::class.java,
             "rand_database"
         ).build()
     }
-} 
+
+    companion object {
+        lateinit var instance: RandApplication
+            private set
+    }
+}

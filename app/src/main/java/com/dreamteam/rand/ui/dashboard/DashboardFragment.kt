@@ -25,6 +25,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.core.view.GravityCompat
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import kotlinx.coroutines.launch
 
 class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -199,14 +200,7 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
                 findViewById<TextView>(R.id.navHeaderEmail).text = user.email
             }
 
-            // Load categories for the expense adapter
-            categoryViewModel.getCategoriesByType(user.uid, TransactionType.EXPENSE)
-                .observe(viewLifecycleOwner) { categories ->
-                    android.util.Log.d("DashboardFragment", "Loaded ${categories.size} categories for adapter")
-                    expenseAdapter.updateCategoryMap(categories)
-                }
-
-            // Load recent expenses
+            // Get expenses and sync with Firebase
             expenseViewModel.getExpenses(user.uid).observe(viewLifecycleOwner) { expenses ->
                 android.util.Log.d("DashboardFragment", "Loaded ${expenses.size} expenses for dashboard")
                 if (expenses.isEmpty()) {
@@ -227,10 +221,19 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
 
                     expenseAdapter.submitList(recentExpenses)
                 }
+                
+                // Update total monthly expenses after syncing
+                expenseViewModel.fetchTotalMonthlyExpenses(user.uid)
             }
 
-            // Update total monthly expenses
-            expenseViewModel.fetchTotalMonthlyExpenses(user.uid)
+            // Load categories for the expense adapter
+            categoryViewModel.getCategoriesByType(user.uid, TransactionType.EXPENSE)
+                .observe(viewLifecycleOwner) { categories ->
+                    android.util.Log.d("DashboardFragment", "Loaded ${categories.size} categories for adapter")
+                    expenseAdapter.updateCategoryMap(categories)
+                }
+
+            // Observe total monthly expenses
             expenseViewModel.totalMonthlyExpenses.observe(viewLifecycleOwner) { total ->
                 updateBalance(total)
             }

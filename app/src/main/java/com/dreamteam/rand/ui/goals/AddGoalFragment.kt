@@ -7,8 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.dreamteam.rand.R
 import com.dreamteam.rand.data.RandDatabase
@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import com.dreamteam.rand.data.firebase.GoalFirebase
 
 // this fragment lets you add a new spending goal
 // you can set a name, amount range, month/year, and pick a color
@@ -35,7 +36,9 @@ class AddGoalFragment : Fragment() {
     private val userViewModel: UserViewModel by activityViewModels()
     private val goalViewModel: GoalViewModel by viewModels {
         val database = RandDatabase.getDatabase(requireContext())
-        val repository = GoalRepository(database.goalDao())
+        val goalDao = database.goalDao()
+        val goalFirebase = GoalFirebase()
+        val repository = GoalRepository(goalDao)
         GoalViewModel.Factory(repository)
     }
 
@@ -179,6 +182,7 @@ class AddGoalFragment : Fragment() {
                 colorViews.forEach { (_, ind) -> ind.visibility = View.GONE }
                 indicator.visibility = View.VISIBLE
                 selectedColor = colors[index]
+                goalViewModel.setSelectedColor(selectedColor)
             }
         }
     }
@@ -217,21 +221,13 @@ class AddGoalFragment : Fragment() {
                     return@setOnClickListener
                 }
                 maxAmount < minAmount -> {
-                    Log.d(TAG, "Validation failed: Max amount less than min amount")
-                    binding.maxAmountLayout.error = "Maximum amount must be greater than minimum amount"
+                    Log.d(TAG, "Validation failed: Maximum less than minimum")
+                    binding.maxAmountLayout.error = "Maximum amount must be greater than minimum"
                     return@setOnClickListener
                 }
                 else -> {
-                    Log.d(TAG, "Input validation passed")
-                    // clear any error messages
-                    binding.goalNameLayout.error = null
-                    binding.monthLayout.error = null
-                    binding.minAmountLayout.error = null
-                    binding.maxAmountLayout.error = null
-
-                    // save the goal if we have a user
                     userViewModel.currentUser.value?.let { user ->
-                        Log.d(TAG, "Saving goal for user: ${user.uid}")
+                        Log.d(TAG, "All validation passed, saving goal for user: ${user.uid}")
                         goalViewModel.saveGoal(
                             userId = user.uid,
                             name = goalName,
@@ -241,6 +237,9 @@ class AddGoalFragment : Fragment() {
                             maxAmount = maxAmount,
                             color = selectedColor
                         )
+                    } ?: run {
+                        Log.w(TAG, "Cannot save goal: No user logged in")
+                        Toast.makeText(requireContext(), "Please sign in to add goals", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -254,16 +253,16 @@ class AddGoalFragment : Fragment() {
         goalViewModel.saveSuccess.observe(viewLifecycleOwner) { success ->
             when (success) {
                 true -> {
-                    Log.d(TAG, "Goal saved successfully")
+                    Log.d(TAG, "✅ Goal saved successfully!")
                     Toast.makeText(requireContext(), "Goal saved successfully", Toast.LENGTH_SHORT).show()
                     findNavController().navigateUp()
                 }
                 false -> {
-                    Log.w(TAG, "Failed to save goal")
+                    Log.e(TAG, "❌ Failed to save goal")
                     Toast.makeText(requireContext(), "Failed to save goal", Toast.LENGTH_SHORT).show()
                 }
                 null -> {
-                    Log.d(TAG, "Save operation not yet completed")
+                    // still saving, do nothing
                 }
             }
         }

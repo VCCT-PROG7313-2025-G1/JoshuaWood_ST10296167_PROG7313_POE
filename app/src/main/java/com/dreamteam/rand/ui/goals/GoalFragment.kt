@@ -21,6 +21,7 @@ import com.dreamteam.rand.data.repository.ExpenseRepository
 import java.util.Calendar
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import com.dreamteam.rand.data.firebase.GoalFirebase
 
 // this fragment shows all your spending goals
 // you can see how much you've spent compared to your goals and add new ones
@@ -37,7 +38,9 @@ class GoalFragment : Fragment() {
 
     private val goalViewModel: GoalViewModel by viewModels {
         val database = RandDatabase.getDatabase(requireContext())
-        val repository = GoalRepository(database.goalDao())
+        val goalDao = database.goalDao()
+        val goalFirebase = GoalFirebase()
+        val repository = GoalRepository(goalDao, goalFirebase)  // Pass the Firebase instance
         GoalViewModel.Factory(repository)
     }
 
@@ -214,7 +217,15 @@ class GoalFragment : Fragment() {
                     ).observe(viewLifecycleOwner) { expenses ->
                         val totalSpent = expenses.sumOf { it.amount }
                         Log.d(TAG, "Goal ${goal.name} total spent: $totalSpent (${expenses.size} expenses)")
-                        goalAdapter.updateGoalExpenses(goal.copy(currentSpent = totalSpent))
+                        
+                        // Only update if the spent amount has changed
+                        if (totalSpent != goal.currentSpent) {
+                            // Update UI immediately
+                            val updatedGoal = goal.copy(currentSpent = totalSpent)
+                            goalAdapter.updateGoalExpenses(updatedGoal)
+                            // Then sync with Firebase
+                            goalViewModel.updateGoalSpending(goal.id, totalSpent)
+                        }
                     }
                 }
 

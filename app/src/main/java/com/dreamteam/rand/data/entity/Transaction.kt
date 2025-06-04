@@ -40,12 +40,25 @@ enum class TransactionType {
 data class Transaction(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val userId: String,           // who made the transaction
-    val amount: Double,           // how much money
-    val type: TransactionType,    // in or out
-    val categoryId: Long?,        // what kind of transaction
-    val description: String,      // what was it for
-    val date: Long,              // when did it happen
-    val receiptUri: String?,     // proof of purchase
-    val createdAt: Long          // when was it recorded
-) 
+    val userId: String = "", // Empty string for no-arg constructor
+    val amount: Double = 0.0,
+    val type: TransactionType = TransactionType.EXPENSE,
+    val categoryId: Long? = null,
+    val description: String = "",
+    val date: Long = 0,
+    val receiptUri: String? = null,
+    val createdAt: Long = 0
+) {
+    // No-argument constructor for Firebase
+    constructor() : this(
+        id = 0,
+        userId = "",
+        amount = 0.0,
+        type = TransactionType.EXPENSE,
+        categoryId = null,
+        description = "",
+        date = 0,
+        receiptUri = null,
+        createdAt = 0
+    )
+}

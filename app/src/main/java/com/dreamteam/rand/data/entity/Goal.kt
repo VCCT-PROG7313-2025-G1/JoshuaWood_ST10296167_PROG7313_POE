@@ -33,7 +33,21 @@ data class Goal(
         else GoalSpendingStatus.ON_TRACK,
     val color: String,            // ui color for the goal
     val createdAt: Long           // when goal was created
-)
+) {
+    // No-argument constructor required for Firestore
+    constructor() : this(
+        id = 0,
+        userId = "",
+        name = "",
+        month = 1,
+        year = 2025,
+        minAmount = 0.0,
+        maxAmount = 0.0,
+        currentSpent = 0.0,
+        color = "#FF5252",
+        createdAt = System.currentTimeMillis()
+    )
+}
 
 // tracks if spending is under, over, or within target range
 enum class GoalSpendingStatus {

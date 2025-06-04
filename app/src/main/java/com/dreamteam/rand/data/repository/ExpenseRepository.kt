@@ -1,8 +1,13 @@
 package com.dreamteam.rand.data.repository
 
+import com.dreamteam.rand.RandApplication
+import com.dreamteam.rand.data.RandDatabase
+import com.dreamteam.rand.data.dao.GoalDao
 import com.dreamteam.rand.data.dao.TransactionDao
 import com.dreamteam.rand.data.entity.Transaction
 import com.dreamteam.rand.data.entity.TransactionType
+import com.dreamteam.rand.data.firebase.GoalFirebase
+import com.dreamteam.rand.data.firebase.TransactionFirebase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -10,8 +15,13 @@ import kotlinx.coroutines.flow.first
 import java.util.Calendar
 
 // handles all expense-related operations
-class ExpenseRepository(private val transactionDao: TransactionDao) {
-    // get all expenses for a user
+class ExpenseRepository(
+    private val transactionDao: TransactionDao,
+    private val transactionFirebase: TransactionFirebase = TransactionFirebase(),
+    private val goalDao: GoalDao = RandDatabase.getDatabase(RandApplication.instance).goalDao(),
+    private val goalFirebase: GoalFirebase = GoalFirebase()
+) {
+    // get all expenses for a user - uses local cache by default
     fun getExpenses(userId: String): Flow<List<Transaction>> {
         return transactionDao.getTransactions(userId)
     }
@@ -72,37 +82,63 @@ class ExpenseRepository(private val transactionDao: TransactionDao) {
                 endDate = endDate
             ) ?: 0.0
         } else {
-            // Get total for all time if no date range is specified
+
             val calendar = Calendar.getInstance()
-            val endDate = calendar.timeInMillis
-            calendar.set(1970, 0, 1, 0, 0, 0)
-            val startDate = calendar.timeInMillis
+
+            // Start of the month
+            calendar.set(Calendar.DAY_OF_MONTH, 1)
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            calendar.set(Calendar.MILLISECOND, 0)
+            val defaultStartDate = calendar.timeInMillis
+
+            // End of the month
+            calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+            calendar.set(Calendar.HOUR_OF_DAY, 23)
+            calendar.set(Calendar.MINUTE, 59)
+            calendar.set(Calendar.SECOND, 59)
+            calendar.set(Calendar.MILLISECOND, 999)
+            val defaultEndDate = calendar.timeInMillis
             
             transactionDao.getTotalAmountByTypeAndDateRange(
                 userId = userId,
                 type = TransactionType.EXPENSE.name,
-                startDate = startDate,
-                endDate = endDate
+                startDate = defaultStartDate,
+                endDate = defaultEndDate
             ) ?: 0.0
         }
-    }
-
-    // get total expenses for a category in a date range
+    }    // get total expenses for a category in a date range
     suspend fun getTotalExpensesByCategoryAndDateRange(
         userId: String,
         categoryId: Long,
         startDate: Long?,
         endDate: Long?
     ): Double {
-        // If we have a date range, use it, otherwise calculate for all time
+        // If we have a date range, use it, otherwise use current month
         val (actualStartDate, actualEndDate) = if (startDate != null && endDate != null) {
             Pair(startDate, endDate)
         } else {
+
             val calendar = Calendar.getInstance()
-            val end = calendar.timeInMillis
-            calendar.set(1970, 0, 1, 0, 0, 0)
-            val start = calendar.timeInMillis
-            Pair(start, end)
+            
+            // Start of the month
+            calendar.set(Calendar.DAY_OF_MONTH, 1)
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            calendar.set(Calendar.MILLISECOND, 0)
+            val defaultStartDate = calendar.timeInMillis
+
+            // End of the month
+            calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+            calendar.set(Calendar.HOUR_OF_DAY, 23)
+            calendar.set(Calendar.MINUTE, 59)
+            calendar.set(Calendar.SECOND, 59)
+            calendar.set(Calendar.MILLISECOND, 999)
+            val defaultEndDate = calendar.timeInMillis
+            
+            Pair(defaultStartDate, defaultEndDate)
         }
         
         // Get all transactions for this category in the date range
@@ -117,7 +153,7 @@ class ExpenseRepository(private val transactionDao: TransactionDao) {
         return transactions.sumOf { it.amount }
     }
 
-    // add a new expense
+    // insert a new expense - now includes Firebase and goal updates
     suspend fun insertExpense(
         userId: String,
         amount: Double,
@@ -137,19 +173,95 @@ class ExpenseRepository(private val transactionDao: TransactionDao) {
             createdAt = System.currentTimeMillis()
         )
         
-        android.util.Log.d("ExpenseRepository", "Inserting expense in repository:")
+        android.util.Log.d("ExpenseRepository", "Inserting expense:")
         android.util.Log.d("ExpenseRepository", "Transaction: $transaction")
-        android.util.Log.d("ExpenseRepository", "Transaction date: ${java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date(date))}")
         
-        val result = transactionDao.insertTransaction(transaction)
+        // Insert into Firebase first
+        val firestoreId = transactionFirebase.insertTransaction(transaction)
+        if (firestoreId <= 0) {
+            android.util.Log.e("ExpenseRepository", "Failed to insert transaction in Firebase")
+            return -1L
+        }
+        
+        // Create transaction with Firebase ID
+        val transactionWithId = transaction.copy(id = firestoreId)
+        
+        // Cache in Room
+        val result = transactionDao.insertTransaction(transactionWithId)
         
         if (result > 0) {
             android.util.Log.d("ExpenseRepository", "Transaction inserted with ID: $result")
+            // After successful insert, update related goals
+            updateRelatedGoals(userId, transactionWithId)
         } else {
             android.util.Log.e("ExpenseRepository", "Failed to insert transaction")
         }
         
         return result
+    }
+
+    // Update goals after adding an expense
+    private suspend fun updateRelatedGoals(userId: String, transaction: Transaction) {
+        try {
+            android.util.Log.d("ExpenseRepository", "Updating goals for new expense: ${transaction.id}")
+            
+            // Get date components from transaction
+            val date = java.util.Date(transaction.date)
+            val expenseMonth = date.month + 1  // Convert 0-based month to 1-based
+            val expenseYear = date.year + 1900 // Convert years since 1900 to actual year
+            
+            // Get goals for this month/year
+            val goals = goalDao.getGoals(userId).first().filter { goal ->
+                goal.month == expenseMonth && goal.year == expenseYear
+            }
+            
+            if (goals.isEmpty()) {
+                android.util.Log.d("ExpenseRepository", "No goals found for month $expenseMonth/$expenseYear")
+                return
+            }
+            
+            android.util.Log.d("ExpenseRepository", "Found ${goals.size} goals for month $expenseMonth/$expenseYear")
+            
+            // Update each matching goal by adding the new expense amount
+            goals.forEach { goal ->
+                try {
+                    val newTotal = goal.currentSpent + transaction.amount
+                    android.util.Log.d("ExpenseRepository", "Updating goal ${goal.id} spent amount from ${goal.currentSpent} to $newTotal")
+                    val updatedGoal = goal.copy(currentSpent = newTotal)
+                    goalDao.updateGoal(updatedGoal)
+                    goalFirebase.updateGoal(updatedGoal)
+                } catch (e: Exception) {
+                    android.util.Log.e("ExpenseRepository", "Error updating goal ${goal.id}: ${e.message}", e)
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("ExpenseRepository", "Error updating goals: ${e.message}", e)
+        }
+    }
+
+    // sync expenses from Firebase to Room - only called during initial sync or when cache is empty
+    suspend fun syncExpenses(userId: String) {
+        android.util.Log.d("ExpenseRepository", "Starting expenses sync for user: $userId")
+        
+        try {
+            // Only sync if cache is empty to avoid unnecessary network calls
+            if (transactionDao.getTransactionCount(userId) == 0) {
+                transactionFirebase.getAllTransactions().collect { transactions ->
+                    val userTransactions = transactions.filter { it.userId == userId }
+                    if (userTransactions.isNotEmpty()) {
+                        android.util.Log.d("ExpenseRepository", "Syncing ${userTransactions.size} expenses for user $userId")
+                        transactionDao.syncTransactions(userId, userTransactions)
+                    } else {
+                        android.util.Log.d("ExpenseRepository", "No expenses found for user $userId in Firebase")
+                    }
+                }
+            } else {
+                android.util.Log.d("ExpenseRepository", "Skipping sync - expenses already cached")
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("ExpenseRepository", "Error syncing expenses: ${e.message}", e)
+            // Don't throw - let the app continue with cached data
+        }
     }
 
     // update an existing expense

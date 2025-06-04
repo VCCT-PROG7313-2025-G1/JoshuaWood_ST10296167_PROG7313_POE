@@ -69,4 +69,23 @@ interface TransactionDao {
         AND strftime('%Y', datetime(date/1000, 'unixepoch')) = :year
     """)
     fun getExpensesByMonthAndYear(userId: String, month: String, year: String): Flow<List<Transaction>>
+
+    // Bulk insert transactions
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTransactions(transactions: List<Transaction>)
+
+    // Delete all transactions for a user
+    @Query("DELETE FROM transactions WHERE userId = :userId")
+    suspend fun deleteTransactionsForUser(userId: String)
+
+    // sync transactions from Firebase - using bulk operations
+    @androidx.room.Transaction
+    suspend fun syncTransactions(userId: String, transactions: List<Transaction>) {
+        deleteTransactionsForUser(userId)
+        insertTransactions(transactions)
+    }
+
+    // Get count of transactions for a user
+    @Query("SELECT COUNT(*) FROM transactions WHERE userId = :userId")
+    suspend fun getTransactionCount(userId: String): Int
 }

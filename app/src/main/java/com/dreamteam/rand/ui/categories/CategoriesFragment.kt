@@ -24,6 +24,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import com.dreamteam.rand.data.firebase.CategoryFirebase
 
 // this fragment shows all the categories and how much was spent in each one
 // you can filter by date range and see spending stats
@@ -46,7 +47,9 @@ class CategoriesFragment : Fragment() {
     // setup the category viewmodel with its repository
     private val categoryViewModel: CategoryViewModel by viewModels {
         val database = RandDatabase.getDatabase(requireContext())
-        val repository = CategoryRepository(database.categoryDao())
+        val categoryDao = database.categoryDao()
+        val categoryFirebase = CategoryFirebase()
+        val repository = CategoryRepository(categoryDao, categoryFirebase)
         CategoryViewModel.Factory(repository)
     }
 
@@ -242,40 +245,35 @@ class CategoriesFragment : Fragment() {
 
     // load all categories for a user
     private fun loadCategories(userId: String, type: TransactionType) {
-        Log.d(TAG, "Loading categories for user: $userId, type: $type")
+        Log.d(TAG, "Loading categories from local cache for user: $userId, type: $type")
         categoryViewModel.getCategoriesByType(userId, type).observe(viewLifecycleOwner) { categories ->
-            Log.d(TAG, "Loaded ${categories.size} categories")
+            Log.d(TAG, "Loaded ${categories.size} categories from cache")
             if (categories.isEmpty()) {
-                Log.d(TAG, "No categories found, showing empty state")
-                // Show empty state
+                Log.d(TAG, "No categories in cache, showing empty state")
                 binding.emptyStateContainer.visibility = View.VISIBLE
                 binding.categoriesRecyclerView.visibility = View.GONE
                 binding.headerSection.visibility = View.GONE
             } else {
-                Log.d(TAG, "Showing categories list")
-                // Show categories
+                Log.d(TAG, "Showing cached categories")
                 binding.emptyStateContainer.visibility = View.GONE
                 binding.categoriesRecyclerView.visibility = View.VISIBLE
                 binding.headerSection.visibility = View.VISIBLE
 
                 binding.categoryCountText.text = categories.size.toString()
-                Log.d(TAG, "Category count updated: ${categories.size}")
                 loadCategoriesWithDateRange(categories, userId)
             }
         }
     }
 
-    // ai declaration: here we used gpt to build the category loading system
-    // with expense totals calculation and dynamic list updates
     private fun loadCategoriesWithDateRange(categories: List<Category> = categoryAdapter.currentList, userId: String? = userViewModel.currentUser.value?.uid) {
         if (userId == null) {
-            Log.w(TAG, "Cannot load categories with date range: no user ID")
+            Log.w(TAG, "Cannot load category totals: no user ID")
             return
         }
 
-        Log.d(TAG, "Loading categories with date range for user: $userId")
+        Log.d(TAG, "Loading category totals for date range")
         categories.forEach { category ->
-            Log.d(TAG, "Loading expenses for category: ${category.name} (ID: ${category.id})")
+            Log.d(TAG, "Loading expenses for category: ${category.name} from local cache")
             expenseViewModel.getExpensesByCategoryAndDateRange(
                 userId = userId,
                 categoryId = category.id,
@@ -283,13 +281,12 @@ class CategoriesFragment : Fragment() {
                 endDate = endDate
             ).observe(viewLifecycleOwner) { expenses ->
                 val totalSpent = expenses.sumOf { it.amount }
-                Log.d(TAG, "Category ${category.name} total spent: $totalSpent (${expenses.size} expenses)")
+                Log.d(TAG, "Category ${category.name} total from cache: $totalSpent")
                 categoryAdapter.updateCategoryTotal(category.id, totalSpent)
             }
         }
 
         categoryAdapter.submitList(categories)
-        Log.d(TAG, "Submitted ${categories.size} categories to adapter")
     }
 
     // clean up when the view is destroyed
