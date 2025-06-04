@@ -9,6 +9,8 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flow
 
 class GoalFirebase {
     private val TAG = "GoalFirebase"
@@ -46,45 +48,36 @@ class GoalFirebase {
         }
     }
 
-    fun getAllGoals(): Flow<List<Goal>> = callbackFlow {
-        Log.d(TAG, "Setting up goals listener")
-        val registration = goalsCollection
+    fun getAllGoals(userId: String): Flow<List<Goal>> = flow {
+        Log.d(TAG, "Getting goals for userId=$userId from Firestore")
+        val snapshot = goalsCollection
+            .whereEqualTo("userId", userId)
             .orderBy("id", Query.Direction.ASCENDING)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    Log.e(TAG, "Error listening to goals: ${error.message}", error)
-                    try {
-                        val cacheSnapshot = goalsCollection
-                            .orderBy("id", Query.Direction.ASCENDING)
-                            .get(Source.CACHE)
-                            .result
-                        val goals = cacheSnapshot?.documents?.mapNotNull { 
-                            it.toObject(Goal::class.java) 
-                        }?.filter { it.userId.isNotEmpty() } ?: emptyList()
-                        Log.d(TAG, "Retrieved ${goals.size} goals from cache")
-                        trySend(goals)
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Cache retrieval also failed: ${e.message}", e)
-                        trySend(emptyList())
-                    }
-                    return@addSnapshotListener
-                }
-                
-                val goals = snapshot?.documents?.mapNotNull { 
-                    it.toObject(Goal::class.java) 
-                }?.filter { it.userId.isNotEmpty() } ?: emptyList()
-                
-                Log.d(TAG, "Retrieved ${goals.size} goals from Firestore")
-                goals.forEach { goal ->
-                    Log.d(TAG, "Goal: ${goal.name}, ID: ${goal.id}, UserID: ${goal.userId}")
-                }
-                
-                trySend(goals)
+            .get(Source.SERVER)
+            .await()
+
+        val goals = snapshot.documents.mapNotNull { it.toObject(Goal::class.java) }
+        Log.d(TAG, "Retrieved ${goals.size} goals from Firestore")
+        emit(goals)
+    }.catch { e ->
+        Log.e(TAG, "Error getting goals: ${e.message}", e)
+        // Try cache if server fails
+        try {
+            val cacheSnapshot = goalsCollection
+                .whereEqualTo("userId", userId)
+                .orderBy("id", Query.Direction.ASCENDING)
+                .get(Source.CACHE)
+                .await()
+
+            val goals = cacheSnapshot.documents.mapNotNull {
+                it.toObject(Goal::class.java)
             }
-        
-        awaitClose { 
-            Log.d(TAG, "Removing goals listener")
-            registration.remove() 
+
+            Log.d(TAG, "Retrieved ${goals.size} goals from cache")
+            emit(goals)
+        } catch (e2: Exception) {
+            Log.e(TAG, "Cache retrieval also failed: ${e2.message}", e2)
+            emit(emptyList())
         }
     }
 

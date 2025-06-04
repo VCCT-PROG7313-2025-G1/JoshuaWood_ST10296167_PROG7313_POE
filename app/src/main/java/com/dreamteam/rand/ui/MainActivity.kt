@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
@@ -20,6 +21,8 @@ class MainActivity : AppCompatActivity() {
     
     // grab the shared viewmodel that knows if someone's logged in
     private val userViewModel: UserViewModel by viewModels()
+
+    private var syncObserver: Observer<Boolean>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,18 +67,29 @@ class MainActivity : AppCompatActivity() {
         // figure out which login screen they're on and send them to the right place
         when (currentDestId) {
             R.id.signInFragment -> {
-                try {
-                    Log.d("MainActivity", "Navigating from signIn to dashboard")
-                    navController.navigate(R.id.action_signIn_to_dashboard)
-                } catch (e: Exception) {
-                    Log.e("MainActivity", "Navigation error from signIn to dashboard: ${e.message}")
-                    // If navigation fails, try a safer approach with a simple navigate call
-                    try {
-                        navController.navigate(R.id.dashboardFragment)
-                    } catch (e2: Exception) {
-                        Log.e("MainActivity", "Critical navigation error: ${e2.message}")
+                if (syncObserver != null) {
+                    userViewModel.syncCompleted.removeObserver(syncObserver!!)
+                    syncObserver = null
+                }
+                syncObserver = Observer<Boolean> { isSynced ->
+                    if (isSynced == true) {
+                        Log.d("MainActivity", "Sync complete. Navigating from signIn to dashboard")
+                        userViewModel.clearSyncFlag() // prevent double nav
+                        userViewModel.syncCompleted.removeObserver(syncObserver!!)
+                        syncObserver = null
+                        try {
+                            navController.navigate(R.id.action_signIn_to_dashboard)
+                        } catch (e: Exception) {
+                            Log.e("MainActivity", "Navigation error: ${e.message}")
+                            try {
+                                navController.navigate(R.id.dashboardFragment)
+                            } catch (e2: Exception) {
+                                Log.e("MainActivity", "Fallback navigation error: ${e2.message}")
+                            }
+                        }
                     }
                 }
+                userViewModel.syncCompleted.observe(this, syncObserver!!)
             }
             R.id.signUpFragment -> {
                 try {
@@ -148,5 +162,12 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController
         return navController.navigateUp() || super.onSupportNavigateUp()
+    }
+
+    override fun onDestroy() {
+        syncObserver?.also {
+            userViewModel.syncCompleted.removeObserver(it)
+        }
+        super.onDestroy()
     }
 } 

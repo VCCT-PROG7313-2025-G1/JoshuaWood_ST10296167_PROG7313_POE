@@ -240,29 +240,29 @@ class ExpenseRepository(
     }
 
     // sync expenses from Firebase to Room - only called during initial sync or when cache is empty
-    suspend fun syncExpenses(userId: String) {
-        android.util.Log.d("ExpenseRepository", "Starting expenses sync for user: $userId")
-        
-        try {
-            // Only sync if cache is empty to avoid unnecessary network calls
-            if (transactionDao.getTransactionCount(userId) == 0) {
-                transactionFirebase.getAllTransactions().collect { transactions ->
-                    val userTransactions = transactions.filter { it.userId == userId }
-                    if (userTransactions.isNotEmpty()) {
-                        android.util.Log.d("ExpenseRepository", "Syncing ${userTransactions.size} expenses for user $userId")
-                        transactionDao.syncTransactions(userId, userTransactions)
-                    } else {
-                        android.util.Log.d("ExpenseRepository", "No expenses found for user $userId in Firebase")
-                    }
-                }
-            } else {
-                android.util.Log.d("ExpenseRepository", "Skipping sync - expenses already cached")
-            }
-        } catch (e: Exception) {
-            android.util.Log.e("ExpenseRepository", "Error syncing expenses: ${e.message}", e)
-            // Don't throw - let the app continue with cached data
-        }
-    }
+//    suspend fun syncExpenses(userId: String) {
+//        android.util.Log.d("ExpenseRepository", "Starting expenses sync for user: $userId")
+//
+//        try {
+//            // Only sync if cache is empty to avoid unnecessary network calls
+//            if (transactionDao.getTransactionCount(userId) == 0) {
+//                transactionFirebase.getAllTransactions().collect { transactions ->
+//                    val userTransactions = transactions.filter { it.userId == userId }
+//                    if (userTransactions.isNotEmpty()) {
+//                        android.util.Log.d("ExpenseRepository", "Syncing ${userTransactions.size} expenses for user $userId")
+//                        transactionDao.syncTransactions(userId, userTransactions)
+//                    } else {
+//                        android.util.Log.d("ExpenseRepository", "No expenses found for user $userId in Firebase")
+//                    }
+//                }
+//            } else {
+//                android.util.Log.d("ExpenseRepository", "Skipping sync - expenses already cached")
+//            }
+//        } catch (e: Exception) {
+//            android.util.Log.e("ExpenseRepository", "Error syncing expenses: ${e.message}", e)
+//            // Don't throw - let the app continue with cached data
+//        }
+//    }
 
     // update an existing expense
     suspend fun updateExpense(expense: Transaction) {

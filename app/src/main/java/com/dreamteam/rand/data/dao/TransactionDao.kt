@@ -44,6 +44,9 @@ interface TransactionDao {
     @Insert
     suspend fun insertTransaction(transaction: Transaction): Long
 
+    @Upsert
+    suspend fun upsertTransaction(transaction: Transaction)
+
     // update an existing transaction
     @Update
     suspend fun updateTransaction(transaction: Transaction)

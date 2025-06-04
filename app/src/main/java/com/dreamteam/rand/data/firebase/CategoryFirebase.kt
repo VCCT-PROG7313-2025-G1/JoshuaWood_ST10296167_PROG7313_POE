@@ -9,6 +9,8 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flow
 
 class CategoryFirebase {
     private val TAG = "CategoryFirebase"
@@ -47,46 +49,36 @@ class CategoryFirebase {
         }
     }
 
-    fun getAllCategories(): Flow<List<Category>> = callbackFlow {
-        Log.d(TAG, "Setting up categories listener")
-        val registration = categoriesCollection
+    fun getAllCategories(userId: String): Flow<List<Category>> = flow {
+        Log.d(TAG, "Getting categories for userId=$userId from Firestore")
+        val snapshot = categoriesCollection
+            .whereEqualTo("userId", userId)
             .orderBy("id", Query.Direction.ASCENDING)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    Log.e(TAG, "Error listening to categories: ${error.message}", error)
-                    // Try to get from cache if server fails
-                    try {
-                        val cacheSnapshot = categoriesCollection
-                            .orderBy("id", Query.Direction.ASCENDING)
-                            .get(Source.CACHE)
-                            .result
-                        val categories = cacheSnapshot?.documents?.mapNotNull { 
-                            it.toObject(Category::class.java) 
-                        }?.filter { it.userId.isNotEmpty() } ?: emptyList()
-                        Log.d(TAG, "Retrieved ${categories.size} categories from cache")
-                        trySend(categories)
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Cache retrieval also failed: ${e.message}", e)
-                        trySend(emptyList())
-                    }
-                    return@addSnapshotListener
-                }
-                
-                val categories = snapshot?.documents?.mapNotNull { 
-                    it.toObject(Category::class.java) 
-                }?.filter { it.userId.isNotEmpty() } ?: emptyList()
-                
-                Log.d(TAG, "Retrieved ${categories.size} categories from Firestore")
-                categories.forEach { category ->
-                    Log.d(TAG, "Category: ${category.name}, ID: ${category.id}, UserID: ${category.userId}")
-                }
-                
-                trySend(categories)
+            .get(Source.SERVER)
+            .await()
+
+        val categories = snapshot.documents.mapNotNull { it.toObject(Category::class.java) }
+        Log.d(TAG, "Retrieved ${categories.size} categories from Firestore")
+        emit(categories)
+    }.catch { e ->
+        Log.e(TAG, "Error getting categories: ${e.message}", e)
+        // Try cache if server fails
+        try {
+            val cacheSnapshot = categoriesCollection
+                .whereEqualTo("userId", userId)
+                .orderBy("id", Query.Direction.ASCENDING)
+                .get(Source.CACHE)
+                .await()
+
+            val categories = cacheSnapshot.documents.mapNotNull {
+                it.toObject(Category::class.java)
             }
-        
-        awaitClose { 
-            Log.d(TAG, "Removing categories listener")
-            registration.remove() 
+
+            Log.d(TAG, "Retrieved ${categories.size} categories from cache")
+            emit(categories)
+        } catch (e2: Exception) {
+            Log.e(TAG, "Cache retrieval also failed: ${e2.message}", e2)
+            emit(emptyList())
         }
     }
 
