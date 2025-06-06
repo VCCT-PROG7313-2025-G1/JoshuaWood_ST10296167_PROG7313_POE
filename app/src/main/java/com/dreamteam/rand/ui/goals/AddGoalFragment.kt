@@ -255,11 +255,15 @@ class AddGoalFragment : Fragment() {
                 true -> {
                     Log.d(TAG, "✅ Goal saved successfully!")
                     Toast.makeText(requireContext(), "Goal saved successfully", Toast.LENGTH_SHORT).show()
+                    // give user xp
+                    userViewModel.updateUserProgress(15)
+                    goalViewModel.resetSaveStatus()
                     findNavController().navigateUp()
                 }
                 false -> {
                     Log.e(TAG, "❌ Failed to save goal")
                     Toast.makeText(requireContext(), "Failed to save goal", Toast.LENGTH_SHORT).show()
+                    goalViewModel.resetSaveStatus()
                 }
                 null -> {
                     // still saving, do nothing

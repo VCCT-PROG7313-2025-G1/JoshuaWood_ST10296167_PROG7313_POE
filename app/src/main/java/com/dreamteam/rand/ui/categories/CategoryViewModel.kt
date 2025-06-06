@@ -29,8 +29,8 @@ class CategoryViewModel(private val repository: CategoryRepository) : ViewModel(
     val selectedIcon: LiveData<String> = _selectedIcon
 
     // let the UI know if saving was successful
-    private val _saveSuccess = MutableLiveData<Boolean>()
-    val saveSuccess: LiveData<Boolean> = _saveSuccess
+    private val _saveSuccess = MutableLiveData<Boolean?>()
+    val saveSuccess: LiveData<Boolean?> = _saveSuccess
 
     // Track if initial sync is complete
     private val _initialSyncComplete = MutableLiveData<Boolean>(false)
@@ -135,7 +135,7 @@ class CategoryViewModel(private val repository: CategoryRepository) : ViewModel(
 
     // reset the save status after showing success/failure
     fun resetSaveStatus() {
-        _saveSuccess.value = false
+        _saveSuccess.value = null
     }
 
     // factory class to create the viewmodel with its dependencies

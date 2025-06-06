@@ -413,15 +413,23 @@ class AddExpenseFragment : Fragment() {
 
     private fun observeViewModel() {
         expenseViewModel.saveSuccess.observe(viewLifecycleOwner) { success ->
-            if (success == true) {
-                Log.d(TAG, "✅ Expense saved successfully!")
-                Toast.makeText(requireContext(), "Expense saved successfully", Toast.LENGTH_SHORT).show()
-                // expenseViewModel.resetSaveStatus()
-                findNavController().navigateUp()
-            } else if (success == false) {
-                Log.e(TAG, "❌ Failed to save expense")
-                Toast.makeText(requireContext(), "Failed to save expense", Toast.LENGTH_SHORT).show()
-                // expenseViewModel.resetSaveStatus()
+            when (success) {
+                true -> {
+                    Log.d(TAG, "✅ Expense saved successfully!")
+                    Toast.makeText(requireContext(), "Expense saved successfully", Toast.LENGTH_SHORT).show()
+                    // give user xp
+                    userViewModel.updateUserProgress(20)
+                    expenseViewModel.resetSaveStatus()
+                    findNavController().navigateUp()
+                }
+                false -> {
+                    Log.e(TAG, "❌ Failed to save expense")
+                    Toast.makeText(requireContext(), "Failed to save expense", Toast.LENGTH_SHORT).show()
+                     expenseViewModel.resetSaveStatus()
+                }
+                null-> {
+
+                }
             }
         }
     }

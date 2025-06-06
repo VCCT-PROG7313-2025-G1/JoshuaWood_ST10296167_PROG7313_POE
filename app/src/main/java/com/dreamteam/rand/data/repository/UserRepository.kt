@@ -108,15 +108,14 @@ class UserRepository(
     suspend fun updateUserProgress(uid: String, level: Int, xp: Int): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
-                // Update local cache first
-                userDao.updateUserProgress(uid, level, xp)
-                
-                // Then update Firebase
+                // update Firebase
                 val firestoreSuccess = userFirebase.updateUserProgress(uid, level, xp)
                 if (!firestoreSuccess) {
                     Log.w(TAG, "Failed to update progress in Firebase")
                 }
-                
+                // then local cache
+                userDao.updateUserProgress(uid, level, xp)
+
                 Result.success(Unit)
             } catch (e: Exception) {
                 Result.failure(e)

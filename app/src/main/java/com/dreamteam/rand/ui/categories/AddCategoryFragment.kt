@@ -351,11 +351,15 @@ class AddCategoryFragment : Fragment() {
                 true -> {
                     Log.d(TAG, "✅ Category saved successfully!")
                     Toast.makeText(requireContext(), "Category saved successfully", Toast.LENGTH_SHORT).show()
+                    // give user xp
+                    userViewModel.updateUserProgress(10)
                     findNavController().navigateUp()
+                    categoryViewModel.resetSaveStatus()
                 }
                 false -> {
                     Log.e(TAG, "❌ Failed to save category")
                     Toast.makeText(requireContext(), "Failed to save category", Toast.LENGTH_SHORT).show()
+                    categoryViewModel.resetSaveStatus()
                 }
                 null -> {
                     // still saving, do nothing
