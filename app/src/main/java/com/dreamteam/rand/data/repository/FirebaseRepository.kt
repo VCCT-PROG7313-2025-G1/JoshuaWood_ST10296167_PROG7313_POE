@@ -141,4 +141,13 @@ class FirebaseRepository(
             }
         }
     }
+
+    suspend fun getAchievementData(userId: String): List<Number?>{
+        val expenseCount = transactionDao.getTransactionCount(userId)
+        val categoryCount = categoryDao.getCategoryCount(userId)
+        val goalCount = goalDao.getGoalCount(userId)
+        val totalExpenses = transactionDao.getTotalAmount(userId)
+
+        return listOf(expenseCount, categoryCount, goalCount, totalExpenses)
+    }
 }

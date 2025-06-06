@@ -36,6 +36,8 @@ import android.animation.ObjectAnimator
 // you can pick a category, date, amount, and attach a photo of the receipt
 class AddExpenseFragment : Fragment() {
     private val TAG = "AddExpenseFragment"
+    private var isSaveInProgress = false
+    private val expEXP = 20
 
     // binding to access all the views
     private var _binding: FragmentAddExpenseBinding? = null
@@ -358,6 +360,11 @@ class AddExpenseFragment : Fragment() {
 
             userViewModel.currentUser.value?.let { user ->
                 Log.d(TAG, "Saving expense for user: ${user.uid}")
+                // show loading spinner
+                isSaveInProgress = true
+                binding.saveButton.isEnabled = false
+                binding.expenseProgressBar.visibility = View.VISIBLE
+
                 expenseViewModel.saveExpense(user.uid, amount, description)
             } ?: run {
                 Log.w(TAG, "No user logged in")
@@ -413,15 +420,32 @@ class AddExpenseFragment : Fragment() {
 
     private fun observeViewModel() {
         expenseViewModel.saveSuccess.observe(viewLifecycleOwner) { success ->
-            if (success == true) {
-                Log.d(TAG, "✅ Expense saved successfully!")
-                Toast.makeText(requireContext(), "Expense saved successfully", Toast.LENGTH_SHORT).show()
-                // expenseViewModel.resetSaveStatus()
-                findNavController().navigateUp()
-            } else if (success == false) {
-                Log.e(TAG, "❌ Failed to save expense")
-                Toast.makeText(requireContext(), "Failed to save expense", Toast.LENGTH_SHORT).show()
-                // expenseViewModel.resetSaveStatus()
+            when (success) {
+                true -> {
+                    Log.d(TAG, "✅ Expense saved successfully!")
+                    Toast.makeText(requireContext(), "Expense saved successfully + ${expEXP}XP", Toast.LENGTH_SHORT).show()
+                    // give user xp
+                    userViewModel.updateUserProgress(expEXP)
+                    expenseViewModel.resetSaveStatus()
+
+                    isSaveInProgress = false
+                    binding.saveButton.isEnabled = true
+                    binding.expenseProgressBar.visibility = View.GONE
+
+                    findNavController().navigateUp()
+                }
+                false -> {
+                    Log.e(TAG, "❌ Failed to save expense")
+                    Toast.makeText(requireContext(), "Failed to save expense", Toast.LENGTH_SHORT).show()
+                     expenseViewModel.resetSaveStatus()
+
+                    isSaveInProgress = false
+                    binding.saveButton.isEnabled = true
+                    binding.expenseProgressBar.visibility = View.GONE
+                }
+                null-> {
+
+                }
             }
         }
     }

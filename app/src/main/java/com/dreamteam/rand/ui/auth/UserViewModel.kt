@@ -131,15 +131,33 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // update how far they've gotten in the app
-    fun updateUserProgress(level: Int, xp: Int) {
+    fun updateUserProgress(increasedXP: Int) {
         viewModelScope.launch {
             currentUser.value?.let { user ->
-                val result = userRepository.updateUserProgress(user.uid, level, xp)
+                val newXP = user.xp + increasedXP
+                val newLvl = calculateLevel(newXP);
+                val result = userRepository.updateUserProgress(user.uid, newLvl, newXP)
+                result.onSuccess {
+                    val updatedUser = user.copy(xp = newXP, level = newLvl)
+                    _currentUser.value = updatedUser
+                    Log.d("UserViewModel", "User progress updated: Level $newLvl, XP $newXP")
+                }
                 result.onFailure { exception ->
                     _error.value = exception.message
                 }
             }
         }
+    }
+
+    private fun calculateLevel(xp: Int): Int{
+        if(xp <= 0){
+            return 1
+        }
+        return (xp/100) + 1
+    }
+
+    suspend fun getAchievementData(userId: String): List<Number?>{
+        return firebaseRepository.getAchievementData(userId)
     }
 
     // change what the app looks like for them

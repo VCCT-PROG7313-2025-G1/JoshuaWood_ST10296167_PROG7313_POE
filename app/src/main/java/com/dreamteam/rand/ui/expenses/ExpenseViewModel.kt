@@ -31,8 +31,8 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
     val photoUri: LiveData<String> = _photoUri
 
     // let the UI know if saving was successful
-    private val _saveSuccess = MutableLiveData<Boolean>()
-    val saveSuccess: LiveData<Boolean> = _saveSuccess
+    private val _saveSuccess = MutableLiveData<Boolean?>()
+    val saveSuccess: LiveData<Boolean?> = _saveSuccess
 
     // keep track of how much was spent this month
     private val _totalMonthlyExpenses = MutableLiveData<Double>(0.0)
@@ -188,7 +188,7 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
             } else {
                 android.util.Log.e("ExpenseViewModel", "❌ Failed to save expense")
             }
-            
+
             // update monthly total
             fetchTotalMonthlyExpenses(userId)
             
@@ -229,7 +229,7 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
 
     // reset the save status after showing success/failure
     fun resetSaveStatus() {
-        _saveSuccess.value = false
+        _saveSuccess.value = null
     }
 
     // factory class to create the viewmodel with its dependencies
