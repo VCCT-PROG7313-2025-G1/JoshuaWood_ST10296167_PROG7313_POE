@@ -72,6 +72,12 @@ class ExpenseAnalysisFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        // Setup back button
+        binding.toolbar.setNavigationOnClickListener {
+            findNavController().navigateUp()
+        }
+        
         setupTimeFrameSpinner()
         setupCategoryFilter()
         setupChart()
@@ -487,6 +493,9 @@ class ExpenseAnalysisFragment : Fragment() {
             }
         }
         
+        // Apply theme-aware styling to limit lines
+        ChartUtils.applyThemeAwareStylingToLimitLines(requireContext(), leftAxis.limitLines)
+        
         // Set axis maximum to accommodate both data and goal limit lines
         val maxValue = entries.maxOfOrNull { it.y } ?: 0f
         leftAxis.axisMaximum = maxOf(maxValue * 1.2f, maxGoalLimit * 1.2f)
@@ -680,6 +689,9 @@ class ExpenseAnalysisFragment : Fragment() {
         maxLimitLine.textSize = 10f
         maxLimitLine.yOffset = 8f
         leftAxis.addLimitLine(maxLimitLine)
+        
+        // Apply theme-aware styling to limit lines
+        ChartUtils.applyThemeAwareStylingToLimitLines(requireContext(), leftAxis.limitLines)
         
         // Update axis to accommodate the limit lines
         val maxExpense = entries.maxOfOrNull { it.y } ?: 0f

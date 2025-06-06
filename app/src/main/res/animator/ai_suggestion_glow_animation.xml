@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+    <objectAnimator
+        android:propertyName="strokeColor"
+        android:valueFrom="#6200EE"
+        android:valueTo="#03DAC5"
+        android:valueType="colorType"
+        android:duration="1000"
+        android:repeatCount="infinite"
+        android:repeatMode="reverse" />
+    
+    <objectAnimator
+        android:propertyName="strokeWidth"
+        android:valueFrom="2"
+        android:valueTo="3"
+        android:valueType="floatType"
+        android:duration="1000"
+        android:repeatCount="infinite"
+        android:repeatMode="reverse" />
+</set> 

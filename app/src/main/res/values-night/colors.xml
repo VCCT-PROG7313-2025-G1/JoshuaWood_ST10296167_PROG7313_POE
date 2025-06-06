@@ -47,4 +47,7 @@
     <color name="accent">#FF5252</color>
     <color name="accent_light">#541C1C</color>
     <color name="accent_dark">#C50E29</color>
+    
+    <!-- AI Suggestion -->
+    <color name="ai_suggestion_text_color">#E0E0E0</color>
 </resources> 

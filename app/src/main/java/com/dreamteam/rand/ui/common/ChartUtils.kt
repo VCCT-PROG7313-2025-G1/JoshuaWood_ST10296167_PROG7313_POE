@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.graphics.Color
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.LimitLine
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.components.YAxis
 
@@ -33,6 +34,9 @@ object ChartUtils {
                 dataSet.valueTextColor = textColor
             }
         }
+        
+        // Apply theme-aware styling to limit lines
+        applyThemeAwareStylingToLimitLines(context, chart.axisLeft.limitLines)
     }
     
     /**
@@ -55,6 +59,9 @@ object ChartUtils {
                 dataSet.valueTextColor = textColor
             }
         }
+        
+        // Apply theme-aware styling to limit lines
+        applyThemeAwareStylingToLimitLines(context, chart.axisLeft.limitLines)
     }
     
     /**
@@ -66,6 +73,21 @@ object ChartUtils {
         
         xAxis.textColor = textColor
         yAxis.textColor = textColor
+        
+        // Apply theme-aware styling to limit lines
+        applyThemeAwareStylingToLimitLines(context, yAxis.limitLines)
+    }
+    
+    /**
+     * Apply theme-aware styling to limit lines
+     */
+    fun applyThemeAwareStylingToLimitLines(context: Context, limitLines: List<LimitLine>) {
+        val isDarkMode = isDarkModeActive(context)
+        val textColor = if (isDarkMode) Color.WHITE else Color.BLACK
+        
+        limitLines.forEach { limitLine ->
+            limitLine.textColor = textColor
+        }
     }
     
     /**

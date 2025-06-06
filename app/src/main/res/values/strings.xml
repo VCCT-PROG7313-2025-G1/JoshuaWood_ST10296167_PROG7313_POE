@@ -66,4 +66,12 @@
     <string name="no_data_for_period">No expense data for this period</string>
     <string name="expense_trends">Expense Trends</string>
     <string name="all_categories">All Categories</string>
+    
+    <!-- AI Insights -->
+    <string name="ai_spending_insights">Randy\'s Analysis</string>
+    <string name="generate_insights">Generate Insights</string>
+    <string name="analyzing_expenses">Analyzing expenses…</string>
+    <string name="no_expenses_for_analysis">No expenses available for AI analysis</string>
+    <string name="ai_connection_error">Could not connect to AI service</string>
+    <string name="ai_suggestion_placeholder">Hey I\'m Randy™ and I\'m here to help you with your finances, click the button above to pass in your expenses and I\'ll give you some advice</string>
 </resources>
