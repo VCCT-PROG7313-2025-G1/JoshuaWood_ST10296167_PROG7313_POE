@@ -357,7 +357,7 @@ class AddCategoryFragment : Fragment() {
             when (success) {
                 true -> {
                     Log.d(TAG, "✅ Category saved successfully!")
-                    Toast.makeText(requireContext(), "Category saved successfully", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Category saved successfully + ${catEXP}XP", Toast.LENGTH_SHORT).show()
                     // give user xp
                     userViewModel.updateUserProgress(catEXP)
                     categoryViewModel.resetSaveStatus()

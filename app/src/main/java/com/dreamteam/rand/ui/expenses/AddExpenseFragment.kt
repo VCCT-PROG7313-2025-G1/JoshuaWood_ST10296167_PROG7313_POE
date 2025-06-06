@@ -423,9 +423,9 @@ class AddExpenseFragment : Fragment() {
             when (success) {
                 true -> {
                     Log.d(TAG, "✅ Expense saved successfully!")
-                    Toast.makeText(requireContext(), "Expense saved successfully", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Expense saved successfully + ${expEXP}XP", Toast.LENGTH_SHORT).show()
                     // give user xp
-                    userViewModel.updateUserProgress(20)
+                    userViewModel.updateUserProgress(expEXP)
                     expenseViewModel.resetSaveStatus()
 
                     isSaveInProgress = false

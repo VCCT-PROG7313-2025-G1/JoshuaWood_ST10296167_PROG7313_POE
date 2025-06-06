@@ -91,4 +91,11 @@ interface TransactionDao {
     // Get count of transactions for a user
     @Query("SELECT COUNT(*) FROM transactions WHERE userId = :userId")
     suspend fun getTransactionCount(userId: String): Int
+
+    // Get all transactions amount
+    @Query("""
+        SELECT SUM(amount) FROM transactions 
+        WHERE userId = :userId
+    """)
+    suspend fun getTotalAmount(userId: String): Double?
 }

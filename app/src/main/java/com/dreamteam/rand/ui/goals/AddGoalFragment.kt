@@ -261,7 +261,7 @@ class AddGoalFragment : Fragment() {
             when (success) {
                 true -> {
                     Log.d(TAG, "✅ Goal saved successfully!")
-                    Toast.makeText(requireContext(), "Goal saved successfully", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Goal saved successfully + ${goalXP}XP", Toast.LENGTH_SHORT).show()
                     // give user xp
                     userViewModel.updateUserProgress(goalXP)
                     goalViewModel.resetSaveStatus()

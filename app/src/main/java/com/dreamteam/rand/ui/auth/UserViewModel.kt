@@ -156,6 +156,10 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         return (xp/100) + 1
     }
 
+    suspend fun getAchievementData(userId: String): List<Number?>{
+        return firebaseRepository.getAchievementData(userId)
+    }
+
     // change what the app looks like for them
     fun updateUserTheme(theme: String) {
         viewModelScope.launch {
