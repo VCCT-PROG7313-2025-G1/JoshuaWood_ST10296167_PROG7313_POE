@@ -33,6 +33,8 @@ import com.dreamteam.rand.data.firebase.CategoryFirebase
 // you can pick a name, color, and icon for your category
 class AddCategoryFragment : Fragment() {
     private val TAG = "AddCategoryFragment"
+    private var isSaveInProgress = false
+    private val catEXP = 10
 
     // binding to access the views
     private var _binding: FragmentAddCategoryBinding? = null
@@ -335,6 +337,11 @@ class AddCategoryFragment : Fragment() {
             // save the category if we have a user
             userViewModel.currentUser.value?.let { user ->
                 Log.d(TAG, "Saving category for user: ${user.uid}")
+                // show loading spinner
+                isSaveInProgress = true
+                binding.saveButton.isEnabled = false
+                binding.categoryProgressBar.visibility = View.VISIBLE
+
                 categoryViewModel.saveCategory(user.uid, categoryName)
             } ?: run {
                 Log.w(TAG, "Cannot save category: No user logged in")
@@ -352,14 +359,23 @@ class AddCategoryFragment : Fragment() {
                     Log.d(TAG, "✅ Category saved successfully!")
                     Toast.makeText(requireContext(), "Category saved successfully", Toast.LENGTH_SHORT).show()
                     // give user xp
-                    userViewModel.updateUserProgress(10)
-                    findNavController().navigateUp()
+                    userViewModel.updateUserProgress(catEXP)
                     categoryViewModel.resetSaveStatus()
+
+                    isSaveInProgress = false
+                    binding.saveButton.isEnabled = true
+                    binding.categoryProgressBar.visibility = View.GONE
+
+                    findNavController().navigateUp()
                 }
                 false -> {
                     Log.e(TAG, "❌ Failed to save category")
                     Toast.makeText(requireContext(), "Failed to save category", Toast.LENGTH_SHORT).show()
                     categoryViewModel.resetSaveStatus()
+
+                    isSaveInProgress = false
+                    binding.saveButton.isEnabled = true
+                    binding.categoryProgressBar.visibility = View.GONE
                 }
                 null -> {
                     // still saving, do nothing

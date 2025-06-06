@@ -27,6 +27,8 @@ import com.dreamteam.rand.data.firebase.GoalFirebase
 // you can set a name, amount range, month/year, and pick a color
 class AddGoalFragment : Fragment() {
     private val TAG = "AddGoalFragment"
+    private var isSaveInProgress = false
+    private val goalXP = 15
 
     // binding to access all the views
     private var _binding: FragmentAddGoalBinding? = null
@@ -228,6 +230,11 @@ class AddGoalFragment : Fragment() {
                 else -> {
                     userViewModel.currentUser.value?.let { user ->
                         Log.d(TAG, "All validation passed, saving goal for user: ${user.uid}")
+                        // show loading spinner
+                        isSaveInProgress = true
+                        binding.saveButton.isEnabled = false
+                        binding.goalProgressBar.visibility = View.VISIBLE
+
                         goalViewModel.saveGoal(
                             userId = user.uid,
                             name = goalName,
@@ -256,14 +263,23 @@ class AddGoalFragment : Fragment() {
                     Log.d(TAG, "✅ Goal saved successfully!")
                     Toast.makeText(requireContext(), "Goal saved successfully", Toast.LENGTH_SHORT).show()
                     // give user xp
-                    userViewModel.updateUserProgress(15)
+                    userViewModel.updateUserProgress(goalXP)
                     goalViewModel.resetSaveStatus()
+
+                    isSaveInProgress = false
+                    binding.saveButton.isEnabled = true
+                    binding.goalProgressBar.visibility = View.GONE
+
                     findNavController().navigateUp()
                 }
                 false -> {
                     Log.e(TAG, "❌ Failed to save goal")
                     Toast.makeText(requireContext(), "Failed to save goal", Toast.LENGTH_SHORT).show()
                     goalViewModel.resetSaveStatus()
+
+                    isSaveInProgress = false
+                    binding.saveButton.isEnabled = true
+                    binding.goalProgressBar.visibility = View.GONE
                 }
                 null -> {
                     // still saving, do nothing
