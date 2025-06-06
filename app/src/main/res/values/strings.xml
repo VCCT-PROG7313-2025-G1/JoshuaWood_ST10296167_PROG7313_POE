@@ -52,4 +52,18 @@
     <string name="add_expense">Add Expense</string>
     <string name="no_expenses">No expenses yet</string>
     <string name="recent_transactions">Recent Expenses</string>
+    
+    <!-- Expense Chart -->
+    <string name="monthly_expenses">Monthly Expenses</string>
+    <string name="view_details">View Details</string>
+    <string name="no_expense_data">No expense data available</string>
+    <string name="expense_analysis">Expense Analysis</string>
+    <string name="filter_options">Filter Options</string>
+    <string name="time_frame">Time Frame</string>
+    <string name="categories">Categories</string>
+    <string name="expenses_by_category">Expenses by Category</string>
+    <string name="budget_vs_spending">Budget vs. Spending</string>
+    <string name="no_data_for_period">No expense data for this period</string>
+    <string name="expense_trends">Expense Trends</string>
+    <string name="all_categories">All Categories</string>
 </resources>
