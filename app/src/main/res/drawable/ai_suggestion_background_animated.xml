@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/loading"
+          android:drawable="@drawable/ai_suggestion_glowing_background"
+          android:state_activated="true" />
+    <item android:id="@+id/normal"
+          android:drawable="@drawable/ai_suggestion_background" />
+</animated-selector> 

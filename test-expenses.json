@@ -1,0 +1,34 @@
+{
+  "expenses": [
+    {
+      "category": "Food",
+      "amount": 35.50,
+      "date": "2023-09-15",
+      "description": "Dinner at restaurant"
+    },
+    {
+      "category": "Transportation",
+      "amount": 25.00,
+      "date": "2023-09-14",
+      "description": "Uber ride"
+    },
+    {
+      "category": "Entertainment",
+      "amount": 50.00,
+      "date": "2023-09-13",
+      "description": "Movie tickets"
+    },
+    {
+      "category": "Food",
+      "amount": 12.99,
+      "date": "2023-09-12",
+      "description": "Lunch"
+    },
+    {
+      "category": "Shopping",
+      "amount": 89.99,
+      "date": "2023-09-10",
+      "description": "New shoes"
+    }
+  ]
+} 

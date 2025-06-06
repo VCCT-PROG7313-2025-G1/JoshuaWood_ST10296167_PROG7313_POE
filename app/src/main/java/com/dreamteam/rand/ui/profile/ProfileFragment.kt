@@ -64,7 +64,7 @@ class ProfileFragment : Fragment() {
                 Achievement("Goal Goblin", "Add 10 goals", minOf(goalCount, 10), 10, goalCount >= 10),
 
                 Achievement("Rookie", "Reach level 10", minOf(userLevel, 10), 10, userLevel >= 10),
-                Achievement("First Steps", "Reach level 25", minOf(userLevel, 25), 25, userLevel >= 25),
+                Achievement("Financial Wizard", "Reach level 25", minOf(userLevel, 25), 25, userLevel >= 25),
                 Achievement("Master Budgeter", "Reach level 50", minOf(userLevel, 50), 50, userLevel >= 50),
 
                 Achievement("Suspicious Spender", "Spend R1000", minOf(totalExpenses, 1000), 1000, userLevel >= 1000),
