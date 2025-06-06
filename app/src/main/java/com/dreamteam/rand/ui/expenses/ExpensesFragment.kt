@@ -35,6 +35,7 @@ import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import android.graphics.Color
+import com.dreamteam.rand.ui.common.ChartUtils
 
 // displays and manages the list of expenses with filtering capabilities
 class ExpensesFragment : Fragment() {
@@ -539,6 +540,9 @@ class ExpensesFragment : Fragment() {
         // Disable right axis
         chart.axisRight.isEnabled = false
         
+        // Apply theme-aware styling
+        ChartUtils.applyThemeAwareStyling(requireContext(), chart)
+        
         // Set empty data initially
         chart.data = BarData()
         chart.invalidate()
@@ -644,7 +648,6 @@ class ExpensesFragment : Fragment() {
         val dataSet = BarDataSet(entries, "Expenses by Category")
         dataSet.colors = categoryColors
         dataSet.valueTextSize = 10f
-        dataSet.valueTextColor = Color.DKGRAY
         dataSet.valueFormatter = object : com.github.mikephil.charting.formatter.ValueFormatter() {
             override fun getFormattedValue(value: Float): String {
                 return java.text.NumberFormat.getCurrencyInstance(Locale("en", "ZA"))
@@ -662,6 +665,9 @@ class ExpensesFragment : Fragment() {
         
         // Apply data to chart
         chart.data = data
+        
+        // Apply theme-aware styling
+        ChartUtils.applyThemeAwareStyling(requireContext(), chart)
         
         // Animate and refresh
         chart.animateY(500)
