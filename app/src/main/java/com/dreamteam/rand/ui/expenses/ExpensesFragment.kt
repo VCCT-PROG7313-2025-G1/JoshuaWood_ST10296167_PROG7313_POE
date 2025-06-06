@@ -28,6 +28,13 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.BarData
+import com.github.mikephil.charting.data.BarDataSet
+import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import android.graphics.Color
 
 // displays and manages the list of expenses with filtering capabilities
 class ExpensesFragment : Fragment() {
@@ -73,6 +80,7 @@ class ExpensesFragment : Fragment() {
         setupToolbar()
         setupRecyclerView()
         setupClickListeners()
+        setupSummaryChart()
 
         // Initialize with "All Categories" by default
         selectedCategoryId = null
@@ -194,6 +202,12 @@ class ExpensesFragment : Fragment() {
         clearAllButton?.setOnClickListener {
             Log.d(TAG, "Clearing all filters")
             clearAllFilters()
+        }
+        
+        // Handle view analysis button click
+        binding.viewAnalysisButton.setOnClickListener {
+            Log.d(TAG, "View analysis button clicked")
+            findNavController().navigate(R.id.action_expenses_to_expenseAnalysis)
         }
     }
 
@@ -487,6 +501,171 @@ class ExpensesFragment : Fragment() {
                 android.widget.Toast.LENGTH_SHORT
             ).show()
         }
+    }
+
+    // Set up the summary chart configuration
+    private fun setupSummaryChart() {
+        Log.d(TAG, "Setting up summary chart")
+        val chart = binding.expensesSummaryChart
+        
+        // Reset the chart
+        chart.clear()
+        chart.fitScreen()
+        
+        // Basic chart configuration
+        chart.description.isEnabled = false
+        chart.setDrawGridBackground(false)
+        chart.setDrawBarShadow(false)
+        chart.setDrawValueAboveBar(true)
+        chart.setPinchZoom(false)
+        chart.setScaleEnabled(false)
+        chart.setExtraOffsets(10f, 5f, 10f, 5f)
+        chart.legend.isEnabled = false
+        
+        // Configure X axis
+        val xAxis = chart.xAxis
+        xAxis.position = XAxis.XAxisPosition.BOTTOM
+        xAxis.granularity = 1f
+        xAxis.setCenterAxisLabels(false)
+        xAxis.setDrawGridLines(false)
+        
+        // Configure Y axis
+        val leftAxis = chart.axisLeft
+        leftAxis.setDrawGridLines(true)
+        leftAxis.setDrawZeroLine(true)
+        leftAxis.spaceTop = 35f
+        leftAxis.axisMinimum = 0f
+        
+        // Disable right axis
+        chart.axisRight.isEnabled = false
+        
+        // Set empty data initially
+        chart.data = BarData()
+        chart.invalidate()
+        
+        // Load chart data when user is available
+        userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
+            if (user != null) {
+                loadSummaryChartData(user.uid)
+            }
+        }
+    }
+    
+    // Load and update summary chart data
+    private fun loadSummaryChartData(userId: String) {
+        Log.d(TAG, "Loading summary chart data for user: $userId")
+        
+        // Use current month for initial data
+        val calendar = Calendar.getInstance()
+        val currentMonth = calendar.get(Calendar.MONTH) + 1
+        val currentYear = calendar.get(Calendar.YEAR)
+        
+        // Get first day of month
+        calendar.set(Calendar.DAY_OF_MONTH, 1)
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        val startOfMonth = calendar.timeInMillis
+        
+        // Get last day of month
+        calendar.add(Calendar.MONTH, 1)
+        calendar.add(Calendar.MILLISECOND, -1)
+        val endOfMonth = calendar.timeInMillis
+        
+        // Get expenses for the current month
+        expenseViewModel.getExpensesByDateRange(userId, startOfMonth, endOfMonth)
+            .observe(viewLifecycleOwner) { expenses ->
+                if (expenses.isNotEmpty()) {
+                    // Load categories to match with expenses
+                    categoryViewModel.getCategoriesByType(userId, TransactionType.EXPENSE)
+                        .observe(viewLifecycleOwner) { categories ->
+                            updateSummaryChart(expenses, categories)
+                        }
+                } else {
+                    // No expenses, hide chart
+                    binding.expenseSummaryCard.visibility = View.GONE
+                }
+            }
+    }
+    
+    // Update the summary chart with expense data
+    private fun updateSummaryChart(
+        expenses: List<com.dreamteam.rand.data.entity.Transaction>,
+        categories: List<Category>
+    ) {
+        Log.d(TAG, "Updating summary chart with ${expenses.size} expenses")
+        
+        if (expenses.isEmpty() || categories.isEmpty()) {
+            binding.expenseSummaryCard.visibility = View.GONE
+            return
+        }
+        
+        binding.expenseSummaryCard.visibility = View.VISIBLE
+        
+        // Group expenses by category
+        val expensesByCategory = expenses.groupBy { it.categoryId }
+        
+        // Create entries for top categories (limit to 5 for clarity)
+        val entries = ArrayList<BarEntry>()
+        val categoryLabels = ArrayList<String>()
+        val categoryColors = ArrayList<Int>()
+        
+        // Calculate total expenses by category and sort by amount
+        val categoryTotals = categories.mapNotNull { category ->
+            val categoryExpenses = expensesByCategory[category.id] ?: emptyList()
+            val totalAmount = categoryExpenses.sumOf { it.amount }
+            
+            if (totalAmount > 0) {
+                Triple(category, totalAmount, try {
+                    Color.parseColor(category.color)
+                } catch (e: Exception) {
+                    Color.parseColor("#FF5252") // Default color
+                })
+            } else null
+        }.sortedByDescending { it.second }.take(5) // Take top 5 categories
+        
+        // Add entries for each category
+        categoryTotals.forEachIndexed { index, (category, totalAmount, color) ->
+            entries.add(BarEntry(index.toFloat(), totalAmount.toFloat()))
+            categoryLabels.add(category.name)
+            categoryColors.add(color)
+        }
+        
+        if (entries.isEmpty()) {
+            binding.expenseSummaryCard.visibility = View.GONE
+            return
+        }
+        
+        // Get chart reference
+        val chart = binding.expensesSummaryChart
+        
+        // Create dataset
+        val dataSet = BarDataSet(entries, "Expenses by Category")
+        dataSet.colors = categoryColors
+        dataSet.valueTextSize = 10f
+        dataSet.valueTextColor = Color.DKGRAY
+        dataSet.valueFormatter = object : com.github.mikephil.charting.formatter.ValueFormatter() {
+            override fun getFormattedValue(value: Float): String {
+                return java.text.NumberFormat.getCurrencyInstance(Locale("en", "ZA"))
+                    .format(value).replace(".00", "")
+            }
+        }
+        
+        // Create and configure bar data
+        val data = BarData(dataSet)
+        data.barWidth = 0.7f
+        
+        // Configure X axis labels
+        chart.xAxis.valueFormatter = IndexAxisValueFormatter(categoryLabels)
+        chart.xAxis.labelCount = categoryLabels.size
+        
+        // Apply data to chart
+        chart.data = data
+        
+        // Animate and refresh
+        chart.animateY(500)
+        chart.invalidate()
     }
 
     override fun onDestroyView() {

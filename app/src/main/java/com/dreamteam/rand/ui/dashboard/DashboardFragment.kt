@@ -10,6 +10,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dreamteam.rand.R
 import com.dreamteam.rand.data.RandDatabase
+import com.dreamteam.rand.data.entity.Transaction
 import com.dreamteam.rand.data.entity.TransactionType
 import com.dreamteam.rand.data.repository.CategoryRepository
 import com.dreamteam.rand.data.repository.ExpenseRepository
@@ -26,6 +27,13 @@ import androidx.core.view.GravityCompat
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import kotlinx.coroutines.launch
+import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.data.BarData
+import com.github.mikephil.charting.data.BarDataSet
+import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.github.mikephil.charting.components.XAxis
+import java.util.Calendar
 
 class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -62,6 +70,7 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
         setupNavigationDrawer()
         setupClickListeners()
         setupExpensesList()
+        setupExpensesChart()
         observeUserData()
         setupStaggeredFadeInAnimation()
     }
@@ -152,6 +161,15 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
         binding.viewAllExpensesButton.setOnClickListener {
             findNavController().navigate(R.id.action_dashboard_to_transactions)
         }
+        
+        // Navigate to expense analysis screen when chart is clicked
+        binding.chartClickOverlay.setOnClickListener {
+            findNavController().navigate(R.id.action_dashboard_to_expenseAnalysis)
+        }
+        
+        binding.viewDetailsText.setOnClickListener {
+            findNavController().navigate(R.id.action_dashboard_to_expenseAnalysis)
+        }
     }
 
     private fun setupExpensesList() {
@@ -182,6 +200,128 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
                 android.widget.Toast.LENGTH_SHORT
             ).show()
         }
+    }
+
+    private fun setupExpensesChart() {
+        val chart = binding.expensesChart
+        
+        // Configure chart appearance
+        chart.description.isEnabled = false
+        chart.setDrawGridBackground(false)
+        chart.setDrawBarShadow(false)
+        chart.setDrawValueAboveBar(true)
+        chart.setPinchZoom(false)
+        chart.setScaleEnabled(false)
+        chart.legend.isEnabled = false
+        
+        // Configure axes
+        val xAxis = chart.xAxis
+        xAxis.position = XAxis.XAxisPosition.BOTTOM
+        xAxis.granularity = 1f
+        xAxis.setDrawGridLines(false)
+        
+        val leftAxis = chart.axisLeft
+        leftAxis.setDrawGridLines(true)
+        leftAxis.axisMinimum = 0f
+        
+        val rightAxis = chart.axisRight
+        rightAxis.isEnabled = false
+        
+        // Set empty data initially
+        chart.data = BarData()
+    }
+    
+    private fun loadExpensesChartData(userId: String) {
+        // Get the current month's start and end dates
+        val calendar = Calendar.getInstance()
+        
+        // End date is today
+        val endDate = calendar.timeInMillis
+        
+        // Start date is 30 days ago
+        calendar.add(Calendar.DAY_OF_YEAR, -30)
+        val startDate = calendar.timeInMillis
+        
+        // Get expenses for the last 30 days
+        expenseViewModel.getExpensesByDateRange(userId, startDate, endDate)
+            .observe(viewLifecycleOwner) { expenses ->
+                if (expenses.isEmpty()) {
+                    binding.noChartDataText.visibility = View.VISIBLE
+                    binding.expensesChart.visibility = View.GONE
+                    return@observe
+                }
+                
+                // Group expenses by category
+                val expensesByCategory = expenses.groupBy { it.categoryId }
+                
+                // Get all categories for this user
+                categoryViewModel.getCategoriesByType(userId, TransactionType.EXPENSE)
+                    .observe(viewLifecycleOwner) { categories ->
+                        updateExpensesChart(expensesByCategory, categories)
+                    }
+            }
+    }
+    
+    private fun updateExpensesChart(
+        expensesByCategory: Map<Long?, List<Transaction>>,
+        categories: List<com.dreamteam.rand.data.entity.Category>
+    ) {
+        if (expensesByCategory.isEmpty() || categories.isEmpty()) {
+            binding.noChartDataText.visibility = View.VISIBLE
+            binding.expensesChart.visibility = View.GONE
+            return
+        }
+        
+        binding.noChartDataText.visibility = View.GONE
+        binding.expensesChart.visibility = View.VISIBLE
+        
+        // Create bar entries and category labels for the chart
+        val entries = ArrayList<BarEntry>()
+        val categoryLabels = ArrayList<String>()
+        
+        // Filter to only the top 5 categories by amount
+        val topCategories = categories.filter { category ->
+            val categoryExpenses = expensesByCategory[category.id] ?: emptyList()
+            categoryExpenses.isNotEmpty()
+        }.sortedByDescending { category ->
+            val categoryExpenses = expensesByCategory[category.id] ?: emptyList()
+            categoryExpenses.sumOf { expense -> expense.amount }
+        }.take(5)
+        
+        // Create chart entries for each category
+        topCategories.forEachIndexed { index, category ->
+            val categoryExpenses = expensesByCategory[category.id] ?: emptyList()
+            val totalAmount = categoryExpenses.sumOf { expense -> expense.amount }
+            
+            if (totalAmount > 0) {
+                entries.add(BarEntry(index.toFloat(), totalAmount.toFloat()))
+                categoryLabels.add(category.name)
+            }
+        }
+        
+        // Create and customize the dataset
+        val dataSet = BarDataSet(entries, "Categories")
+        dataSet.colors = topCategories.map {
+            try {
+                android.graphics.Color.parseColor(it.color)
+            } catch (e: Exception) {
+                android.graphics.Color.parseColor("#FF5252") // Default color
+            }
+        }
+        dataSet.valueTextSize = 10f
+        
+        // Create bar data with the dataset
+        val data = BarData(dataSet)
+        data.barWidth = 0.6f
+        
+        // Update chart with new data
+        val chart = binding.expensesChart
+        chart.data = data
+        chart.xAxis.valueFormatter = IndexAxisValueFormatter(categoryLabels)
+        chart.xAxis.labelCount = categoryLabels.size
+        
+        // Refresh the chart
+        chart.invalidate()
     }
 
     private fun observeUserData() {
@@ -237,6 +377,9 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
             expenseViewModel.totalMonthlyExpenses.observe(viewLifecycleOwner) { total ->
                 updateBalance(total)
             }
+            
+            // Load chart data
+            loadExpensesChartData(user.uid)
         }
     }
 

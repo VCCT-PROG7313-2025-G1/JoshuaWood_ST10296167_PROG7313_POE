@@ -71,6 +71,9 @@
         <action
             android:id="@+id/action_dashboard_to_photo"
             app:destination="@id/photoFragment" />
+        <action
+            android:id="@+id/action_dashboard_to_expenseAnalysis"
+            app:destination="@id/expenseAnalysisFragment" />
     </fragment>
 
     <fragment
@@ -80,6 +83,9 @@
         <action
             android:id="@+id/action_expenses_to_addExpense"
             app:destination="@id/addExpenseFragment" />
+        <action
+            android:id="@+id/action_expenses_to_expenseAnalysis"
+            app:destination="@id/expenseAnalysisFragment" />
     </fragment>
 
     <fragment
@@ -145,5 +151,10 @@
         android:id="@+id/photoFragment"
         android:name="com.dreamteam.rand.ui.photo.PhotoFragment"
         android:label="PhotoFragment" />
+
+    <fragment
+        android:id="@+id/expenseAnalysisFragment"
+        android:name="com.dreamteam.rand.ui.expenses.ExpenseAnalysisFragment"
+        android:label="ExpenseAnalysisFragment" />
 
 </navigation> 

@@ -93,14 +93,65 @@
                     android:layout_height="200dp"
                     android:layout_marginBottom="16dp">
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:padding="24dp"
-                        android:gravity="center"
-                        android:text="Expenses graph will go here"
-                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"/>
+                        android:orientation="vertical"
+                        android:padding="16dp">
+                        
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+                            
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/monthly_expenses"
+                                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                                android:textStyle="bold" />
+                                
+                            <TextView
+                                android:id="@+id/viewDetailsText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/view_details"
+                                android:textColor="@color/primary"
+                                android:padding="4dp"
+                                android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
+                        </LinearLayout>
 
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+                            
+                            <com.github.mikephil.charting.charts.BarChart
+                                android:id="@+id/expensesChart"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent" />
+                                
+                            <TextView
+                                android:id="@+id/noChartDataText"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center"
+                                android:text="@string/no_expense_data"
+                                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+                                android:textColor="?android:textColorSecondary"
+                                android:visibility="gone" />
+                                
+                            <!-- Clickable overlay -->
+                            <View
+                                android:id="@+id/chartClickOverlay"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="?attr/selectableItemBackground"
+                                android:clickable="true"
+                                android:focusable="true" />
+                        </FrameLayout>
+                    </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
                 <!-- Recent Transactions Card -->
