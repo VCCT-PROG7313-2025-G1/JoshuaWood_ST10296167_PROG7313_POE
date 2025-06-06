@@ -19,6 +19,7 @@ import com.dreamteam.rand.ui.auth.UserViewModel
 import com.dreamteam.rand.ui.categories.CategoryViewModel
 import com.dreamteam.rand.ui.expenses.ExpenseAdapter
 import com.dreamteam.rand.ui.expenses.ExpenseViewModel
+import com.dreamteam.rand.ui.common.ChartUtils
 import com.google.android.material.navigation.NavigationView
 import java.text.NumberFormat
 import java.util.Locale
@@ -227,6 +228,9 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
         val rightAxis = chart.axisRight
         rightAxis.isEnabled = false
         
+        // Apply theme-aware styling
+        ChartUtils.applyThemeAwareStyling(requireContext(), chart)
+        
         // Set empty data initially
         chart.data = BarData()
     }
@@ -319,6 +323,9 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
         chart.data = data
         chart.xAxis.valueFormatter = IndexAxisValueFormatter(categoryLabels)
         chart.xAxis.labelCount = categoryLabels.size
+        
+        // Apply theme-aware styling
+        ChartUtils.applyThemeAwareStyling(requireContext(), chart)
         
         // Refresh the chart
         chart.invalidate()

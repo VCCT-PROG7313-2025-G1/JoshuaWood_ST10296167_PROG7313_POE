@@ -55,12 +55,30 @@
                         android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
                         android:textStyle="bold" />
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/darkModeSwitch"
+                    <RadioGroup
+                        android:id="@+id/themeRadioGroup"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Dark Mode" />
+                        android:layout_marginTop="8dp">
+
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/lightThemeRadio"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Light Mode" />
+
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/darkThemeRadio"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Dark Mode" />
+
+                        <com.google.android.material.radiobutton.MaterialRadioButton
+                            android:id="@+id/systemThemeRadio"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="System Default" />
+                    </RadioGroup>
 
                 </LinearLayout>
 

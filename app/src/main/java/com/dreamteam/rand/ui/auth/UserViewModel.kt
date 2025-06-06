@@ -3,6 +3,7 @@ package com.dreamteam.rand.ui.auth
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -33,6 +34,8 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     
     // store some stuff on the device so we remember who's logged in
     private val sharedPreferences = application.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+    // app preferences for theme settings
+    private val appPreferences = application.getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
 
     init {
         val db = RandDatabase.getDatabase(application)
@@ -165,10 +168,29 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             currentUser.value?.let { user ->
                 val result = userRepository.updateUserTheme(user.uid, theme)
+                result.onSuccess {
+                    // Update local app preferences
+                    appPreferences.edit().putString("theme_mode", theme).apply()
+                    
+                    // Apply the theme change immediately
+                    applyTheme(theme)
+                    
+                    // Update the current user object
+                    _currentUser.value = user.copy(theme = theme)
+                }
                 result.onFailure { exception ->
                     _error.value = exception.message
                 }
             }
+        }
+    }
+    
+    // Apply theme changes
+    private fun applyTheme(themeMode: String) {
+        when (themeMode) {
+            "dark" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            "light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            "system" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         }
     }
 

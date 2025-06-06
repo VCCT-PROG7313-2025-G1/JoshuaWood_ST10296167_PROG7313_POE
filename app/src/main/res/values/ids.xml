@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="lightThemeRadio" type="id" />
+    <item name="darkThemeRadio" type="id" />
+    <item name="systemThemeRadio" type="id" />
+    <item name="themeRadioGroup" type="id" />
+</resources> 

@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.dreamteam.rand.R
 import com.dreamteam.rand.data.RandDatabase
 import com.dreamteam.rand.data.entity.TransactionType
@@ -21,6 +22,7 @@ import com.dreamteam.rand.databinding.FragmentExpenseAnalysisBinding
 import com.dreamteam.rand.ui.auth.UserViewModel
 import com.dreamteam.rand.ui.categories.CategoryViewModel
 import com.dreamteam.rand.ui.goals.GoalViewModel
+import com.dreamteam.rand.ui.common.ChartUtils
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
@@ -202,6 +204,9 @@ class ExpenseAnalysisFragment : Fragment() {
         val rightAxis = chart.axisRight
         rightAxis.isEnabled = false
         
+        // Apply theme-aware styling
+        ChartUtils.applyThemeAwareStyling(requireContext(), chart)
+        
         // Set empty data initially
         chart.data = BarData()
         chart.setFitBars(true)
@@ -238,6 +243,9 @@ class ExpenseAnalysisFragment : Fragment() {
         // Customize right Y axis
         val rightAxis = chart.axisRight
         rightAxis.isEnabled = false
+        
+        // Apply theme-aware styling
+        ChartUtils.applyThemeAwareStyling(requireContext(), chart)
         
         // Set empty data initially
         chart.data = com.github.mikephil.charting.data.LineData()
@@ -424,14 +432,16 @@ class ExpenseAnalysisFragment : Fragment() {
         
         // Create and configure bar data
         val data = BarData(dataSet)
-        data.barWidth = 0.7f
+        data.barWidth = 0.6f
         
         // Apply data to chart
         chart.data = data
         
-        // Finalize chart rendering
-        chart.setFitBars(true)
-        chart.animateY(500)
+        // Apply theme-aware styling
+        ChartUtils.applyThemeAwareStyling(requireContext(), chart)
+        
+        // Refresh the chart
+        chart.notifyDataSetChanged()
         chart.invalidate()
     }
     
@@ -621,6 +631,9 @@ class ExpenseAnalysisFragment : Fragment() {
         
         // Set the data
         chart.data = lineData
+        
+        // Apply theme-aware styling
+        ChartUtils.applyThemeAwareStyling(requireContext(), chart)
         
         // Add animation and refresh
         chart.animateX(500)
