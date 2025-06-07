@@ -94,7 +94,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
             val result = userRepository.loginUser(email, password)
             result.onSuccess { user ->
-               // _currentUser.value = user
+
                 saveUserToPreferences(user)
 
                 try{
@@ -106,9 +106,6 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                     // Decide: do you want to proceed without sync or show error?
                     _error.value = "Data sync failed: ${e.message}"
                 }
-                // sync firebase data
-//                firebaseRepository.syncAllUserData(user.uid)
-//                _syncCompleted.postValue(true)
             }.onFailure { exception ->
                 _error.value = exception.message
             }

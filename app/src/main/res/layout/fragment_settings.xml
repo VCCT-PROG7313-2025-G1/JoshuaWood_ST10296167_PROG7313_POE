@@ -156,15 +156,6 @@
 
             </androidx.cardview.widget.CardView>
 
-            <!-- Work In Progress Text -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:gravity="center"
-                android:text="*Work In Progress*"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
-                android:textStyle="bold" />
 
         </LinearLayout>
 
