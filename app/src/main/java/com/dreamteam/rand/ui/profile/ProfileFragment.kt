@@ -67,9 +67,9 @@ class ProfileFragment : Fragment() {
                 Achievement("Financial Wizard", "Reach level 25", minOf(userLevel, 25), 25, userLevel >= 25),
                 Achievement("Master Budgeter", "Reach level 50", minOf(userLevel, 50), 50, userLevel >= 50),
 
-                Achievement("Suspicious Spender", "Spend R1000", minOf(totalExpenses, 1000), 1000, userLevel >= 1000),
-                Achievement("Money Manager", "Spend R10 000", minOf(totalExpenses, 10000), 10000, userLevel >= 10000),
-                Achievement("Bank Breaker", "Spend R100 000", minOf(totalExpenses, 100000), 100000, userLevel >= 100000),
+                Achievement("Suspicious Spender", "Spend R1000", minOf(totalExpenses, 1000), 1000, totalExpenses >= 1000),
+                Achievement("Money Manager", "Spend R10 000", minOf(totalExpenses, 10000), 10000, totalExpenses >= 10000),
+                Achievement("Bank Breaker", "Spend R100 000", minOf(totalExpenses, 100000), 100000, totalExpenses >= 100000),
             )
             setupAchievements(achievements)
         }

@@ -33,7 +33,6 @@ class SettingsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupToolbar()
         setupThemeSettings(view)
-        setupNotificationsSwitch()
         observeUserViewModel()
     }
 
@@ -80,12 +79,6 @@ class SettingsFragment : Fragment() {
             applyTheme(themeMode)
         }
     }
-    
-    private fun setupNotificationsSwitch() {
-        binding.notificationsSwitch.setOnCheckedChangeListener { _, isChecked ->
-            userViewModel.updateNotificationSettings(isChecked)
-        }
-    }
 
     private fun observeUserViewModel() {
         userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
@@ -93,9 +86,6 @@ class SettingsFragment : Fragment() {
                 // Navigation will be handled by the MainActivity observer
                 return@observe
             }
-            
-            // Update UI with user preferences
-            binding.notificationsSwitch.isChecked = user.notificationsEnabled
         }
     }
     

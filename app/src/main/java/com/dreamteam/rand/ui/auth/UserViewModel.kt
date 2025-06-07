@@ -94,7 +94,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
             val result = userRepository.loginUser(email, password)
             result.onSuccess { user ->
-               // _currentUser.value = user
+
                 saveUserToPreferences(user)
 
                 try{
@@ -106,9 +106,6 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                     // Decide: do you want to proceed without sync or show error?
                     _error.value = "Data sync failed: ${e.message}"
                 }
-                // sync firebase data
-//                firebaseRepository.syncAllUserData(user.uid)
-//                _syncCompleted.postValue(true)
             }.onFailure { exception ->
                 _error.value = exception.message
             }
@@ -191,30 +188,6 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             "dark" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             "light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
             "system" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-        }
-    }
-
-    // turn notifications on or off
-    fun updateNotificationSettings(enabled: Boolean) {
-        viewModelScope.launch {
-            currentUser.value?.let { user ->
-                val result = userRepository.updateNotificationSettings(user.uid, enabled)
-                result.onFailure { exception ->
-                    _error.value = exception.message
-                }
-            }
-        }
-    }
-
-    // change what kind of money they see
-    fun updateUserCurrency(currency: String) {
-        viewModelScope.launch {
-            currentUser.value?.let { user ->
-                val result = userRepository.updateUserCurrency(user.uid, currency)
-                result.onFailure { exception ->
-                    _error.value = exception.message
-                }
-            }
         }
     }
 

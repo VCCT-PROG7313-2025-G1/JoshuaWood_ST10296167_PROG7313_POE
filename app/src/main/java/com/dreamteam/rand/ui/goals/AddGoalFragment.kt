@@ -10,7 +10,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import com.dreamteam.rand.R
 import com.dreamteam.rand.data.RandDatabase
 import com.dreamteam.rand.data.repository.GoalRepository
 import com.dreamteam.rand.databinding.FragmentAddGoalBinding
