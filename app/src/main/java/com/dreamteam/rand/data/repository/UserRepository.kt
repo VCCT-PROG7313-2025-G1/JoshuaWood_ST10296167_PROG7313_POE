@@ -5,7 +5,6 @@ import com.dreamteam.rand.data.dao.UserDao
 import com.dreamteam.rand.data.entity.User
 import com.dreamteam.rand.data.firebase.UserFirebase
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
 // handles all user-related operations

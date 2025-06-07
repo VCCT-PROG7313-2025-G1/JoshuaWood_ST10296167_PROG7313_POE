@@ -10,7 +10,6 @@ import com.dreamteam.rand.data.firebase.GoalFirebase
 import com.dreamteam.rand.data.firebase.TransactionFirebase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.first
 import java.util.Calendar
 
@@ -238,31 +237,6 @@ class ExpenseRepository(
             android.util.Log.e("ExpenseRepository", "Error updating goals: ${e.message}", e)
         }
     }
-
-    // sync expenses from Firebase to Room - only called during initial sync or when cache is empty
-//    suspend fun syncExpenses(userId: String) {
-//        android.util.Log.d("ExpenseRepository", "Starting expenses sync for user: $userId")
-//
-//        try {
-//            // Only sync if cache is empty to avoid unnecessary network calls
-//            if (transactionDao.getTransactionCount(userId) == 0) {
-//                transactionFirebase.getAllTransactions().collect { transactions ->
-//                    val userTransactions = transactions.filter { it.userId == userId }
-//                    if (userTransactions.isNotEmpty()) {
-//                        android.util.Log.d("ExpenseRepository", "Syncing ${userTransactions.size} expenses for user $userId")
-//                        transactionDao.syncTransactions(userId, userTransactions)
-//                    } else {
-//                        android.util.Log.d("ExpenseRepository", "No expenses found for user $userId in Firebase")
-//                    }
-//                }
-//            } else {
-//                android.util.Log.d("ExpenseRepository", "Skipping sync - expenses already cached")
-//            }
-//        } catch (e: Exception) {
-//            android.util.Log.e("ExpenseRepository", "Error syncing expenses: ${e.message}", e)
-//            // Don't throw - let the app continue with cached data
-//        }
-//    }
 
     // update an existing expense
     suspend fun updateExpense(expense: Transaction) {

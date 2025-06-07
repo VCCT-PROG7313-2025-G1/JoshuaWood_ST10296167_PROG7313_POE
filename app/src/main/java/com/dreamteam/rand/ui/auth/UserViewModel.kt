@@ -191,30 +191,6 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // turn notifications on or off
-    fun updateNotificationSettings(enabled: Boolean) {
-        viewModelScope.launch {
-            currentUser.value?.let { user ->
-                val result = userRepository.updateNotificationSettings(user.uid, enabled)
-                result.onFailure { exception ->
-                    _error.value = exception.message
-                }
-            }
-        }
-    }
-
-    // change what kind of money they see
-    fun updateUserCurrency(currency: String) {
-        viewModelScope.launch {
-            currentUser.value?.let { user ->
-                val result = userRepository.updateUserCurrency(user.uid, currency)
-                result.onFailure { exception ->
-                    _error.value = exception.message
-                }
-            }
-        }
-    }
-
     // get the latest info about them
     fun refreshUser() {
         viewModelScope.launch {

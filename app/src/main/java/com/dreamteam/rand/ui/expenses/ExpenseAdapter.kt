@@ -1,7 +1,6 @@
 package com.dreamteam.rand.ui.expenses
 
 import android.graphics.Color
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
