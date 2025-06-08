@@ -29,6 +29,10 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.core.view.GravityCompat
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.net.Uri
+import android.widget.ImageView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.dreamteam.rand.ui.common.ViewUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -373,6 +377,31 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
             binding.navigationView.getHeaderView(0).apply {
                 findViewById<TextView>(R.id.navHeaderName).text = user.name
                 findViewById<TextView>(R.id.navHeaderEmail).text = user.email
+                
+                // Update profile picture in navigation header
+                val navHeaderImage = findViewById<ImageView>(R.id.navHeaderImage)
+                user.profilePictureUri?.let { uri ->
+                    try {
+                        Glide.with(this@DashboardFragment)
+                            .load(Uri.parse(uri))
+                            .transform(CircleCrop())
+                            .placeholder(R.drawable.ic_profile)
+                            .error(R.drawable.ic_profile)
+                            .into(navHeaderImage)
+                    } catch (e: Exception) {
+                        // If there's an error loading the custom image, fall back to default
+                        Glide.with(this@DashboardFragment)
+                            .load(R.drawable.ic_profile)
+                            .transform(CircleCrop())
+                            .into(navHeaderImage)
+                    }
+                } ?: run {
+                    // Load default profile image
+                    Glide.with(this@DashboardFragment)
+                        .load(R.drawable.ic_profile)
+                        .transform(CircleCrop())
+                        .into(navHeaderImage)
+                }
             }
 
             // Get expenses and sync with Firebase

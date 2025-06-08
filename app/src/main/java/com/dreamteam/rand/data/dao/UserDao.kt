@@ -56,4 +56,8 @@ interface UserDao {
     // change user's currency
     @Query("UPDATE users SET currency = :currency WHERE uid = :uid")
     suspend fun updateUserCurrency(uid: String, currency: String)
+    
+    // update user's profile picture
+    @Query("UPDATE users SET profilePictureUri = :profilePictureUri WHERE uid = :uid")
+    suspend fun updateUserProfilePicture(uid: String, profilePictureUri: String?)
 } 

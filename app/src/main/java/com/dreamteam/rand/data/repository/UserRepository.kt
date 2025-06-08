@@ -181,4 +181,24 @@ class UserRepository(
             }
         }
     }
+    
+    // update user's profile picture
+    suspend fun updateUserProfilePicture(uid: String, profilePictureUri: String?): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            try {
+                // Update local cache first
+                userDao.updateUserProfilePicture(uid, profilePictureUri)
+                
+                // Then update Firebase
+                val firestoreSuccess = userFirebase.updateUserProfilePicture(uid, profilePictureUri)
+                if (!firestoreSuccess) {
+                    Log.w(TAG, "Failed to update profile picture in Firebase")
+                }
+                
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
 }

@@ -23,6 +23,7 @@ data class User(
     val theme: String = "system",                   // ui theme preference
     val notificationsEnabled: Boolean = true,       // notification settings
     val currency: String = "USD",                   // preferred currency
+    val profilePictureUri: String? = null,          // custom profile picture path
     val createdAt: Long = System.currentTimeMillis() // account creation time
 ) {
     // No-argument constructor required for Firestore
@@ -36,6 +37,7 @@ data class User(
         theme = "system",
         notificationsEnabled = true,
         currency = "USD",
+        profilePictureUri = null,
         createdAt = System.currentTimeMillis()
     )
 }

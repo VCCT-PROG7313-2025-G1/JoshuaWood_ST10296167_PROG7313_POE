@@ -1,6 +1,10 @@
 package com.dreamteam.rand.ui.profile
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,21 +13,44 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.dreamteam.rand.R
 import com.dreamteam.rand.databinding.FragmentProfileBinding
 import com.dreamteam.rand.ui.auth.UserViewModel
 import com.dreamteam.rand.ui.common.ViewUtils
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.IOException
 
 class ProfileFragment : Fragment() {
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
     private val userViewModel: UserViewModel by activityViewModels()
+    
+    private var currentPhotoUri: Uri? = null
+    
+    // Image picker launcher
+    private val imagePickerLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val selectedImageUri = result.data?.data ?: currentPhotoUri
+            selectedImageUri?.let { uri ->
+                loadProfileImage(uri)
+                userViewModel.updateUserProfilePicture(uri.toString())
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,6 +65,7 @@ class ProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         //ViewUtils.setToolbarGradient(this, binding.toolbar) to add a dark mode gradient to the banner
         setupToolbar()
+        setupProfilePictureClick()
         observeUserData()
     }
 
@@ -45,6 +73,57 @@ class ProfileFragment : Fragment() {
         binding.toolbar.setNavigationOnClickListener {
             findNavController().navigateUp()
         }
+    }
+    
+    private fun setupProfilePictureClick() {
+        binding.profilePictureContainer.setOnClickListener {
+            showImagePickerDialog()
+        }
+    }
+    
+    private fun showImagePickerDialog() {
+        val options = arrayOf("Camera", "Gallery")
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Select Profile Picture")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> openCamera()
+                    1 -> openGallery()
+                }
+            }
+            .show()
+    }
+    
+    private fun openCamera() {
+        try {
+            val photoFile = File.createTempFile("profile_pic", ".jpg", requireContext().cacheDir)
+            currentPhotoUri = FileProvider.getUriForFile(
+                requireContext(),
+                "${requireContext().packageName}.fileprovider",
+                photoFile
+            )
+            
+            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+                putExtra(MediaStore.EXTRA_OUTPUT, currentPhotoUri)
+            }
+            imagePickerLauncher.launch(intent)
+        } catch (e: IOException) {
+            Toast.makeText(requireContext(), "Error creating camera file", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun openGallery() {
+        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        imagePickerLauncher.launch(intent)
+    }
+    
+    private fun loadProfileImage(uri: Uri) {
+        Glide.with(this)
+            .load(uri)
+            .transform(CircleCrop())
+            .placeholder(R.drawable.ic_profile)
+            .error(R.drawable.ic_profile)
+            .into(binding.profileImageView)
     }
 
     private fun loadAchievements(userId: String, userLevel: Int) {
@@ -132,6 +211,25 @@ class ProfileFragment : Fragment() {
             binding.progressText.text = HtmlCompat.fromHtml(formattedXpText, HtmlCompat.FROM_HTML_MODE_LEGACY)
 
             binding.xpProgressBar.progress = currentLevelXP
+
+            // Load profile picture if user has one
+            user.profilePictureUri?.let { uri ->
+                try {
+                    loadProfileImage(Uri.parse(uri))
+                } catch (e: Exception) {
+                    // If there's an error loading the custom image, fall back to default
+                    Glide.with(this@ProfileFragment)
+                        .load(R.drawable.ic_profile)
+                        .transform(CircleCrop())
+                        .into(binding.profileImageView)
+                }
+            } ?: run {
+                // Load default profile image
+                Glide.with(this@ProfileFragment)
+                    .load(R.drawable.ic_profile)
+                    .transform(CircleCrop())
+                    .into(binding.profileImageView)
+            }
 
             applyStaggeredFadeInAnimation()
 

@@ -39,4 +39,10 @@
         <item name="cardUseCompatPadding">true</item>
         <item name="contentPadding">0dp</item>
     </style>
+    
+    <!-- Circular ImageView style -->
+    <style name="CircleImageView">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
 </resources> 
