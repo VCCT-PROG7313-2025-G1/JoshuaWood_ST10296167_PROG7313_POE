@@ -371,6 +371,7 @@ class ExpensesFragment : Fragment() {
         Log.d(TAG, "Loading expenses with filters - Category: $selectedCategoryId, Date Range: $startDate - $endDate")
         userViewModel.currentUser.value?.let { user ->
             Log.d(TAG, "Loading expenses for user: ${user.uid}")
+            val adjustedEndDate = adjustEndDateToEndOfDay(endDate)
             if (selectedCategoryId != null) {
                 Log.d(TAG, "Filtering by category: $selectedCategoryId")
                 // Filter by category and date range if both are selected
@@ -378,7 +379,7 @@ class ExpensesFragment : Fragment() {
                     userId = user.uid,
                     categoryId = selectedCategoryId!!,
                     startDate = startDate,
-                    endDate = endDate
+                    endDate = adjustedEndDate
                 ).observe(viewLifecycleOwner) { expenses ->
                     Log.d(TAG, "Loaded ${expenses.size} expenses for category $selectedCategoryId")
                     if (expenses.isEmpty()) {
@@ -396,7 +397,7 @@ class ExpensesFragment : Fragment() {
                     userId = user.uid,
                     categoryId = selectedCategoryId!!,
                     startDate = startDate,
-                    endDate = endDate
+                    endDate = adjustedEndDate
                 )
             } else {
                 Log.d(TAG, "Loading all expenses (no category filter)")
@@ -404,7 +405,7 @@ class ExpensesFragment : Fragment() {
                 expenseViewModel.getExpensesByDateRange(
                     userId = user.uid,
                     startDate = startDate,
-                    endDate = endDate
+                    endDate = adjustedEndDate
                 ).observe(viewLifecycleOwner) { expenses ->
                     Log.d(TAG, "Loaded ${expenses.size} expenses for date range")
                     updateExpensesList(expenses)
@@ -412,7 +413,7 @@ class ExpensesFragment : Fragment() {
 
                 // Update total expenses for the selected date range
                 Log.d(TAG, "Fetching total expenses for date range")
-                expenseViewModel.fetchTotalExpensesByDateRange(user.uid, startDate, endDate)
+                expenseViewModel.fetchTotalExpensesByDateRange(user.uid, startDate, adjustedEndDate)
             }
         } ?: run {
             Log.w(TAG, "No user logged in, cannot load expenses")
@@ -482,6 +483,14 @@ class ExpensesFragment : Fragment() {
         expenseViewModel.totalExpenses.observe(viewLifecycleOwner) { total ->
             Log.d(TAG, "Total expenses updated: $total")
             binding.totalExpensesValue.text = total.toString()
+        }
+    }
+
+    // ai declaration: here we used claude to work out how to include the entire end date in our filter queries
+    private fun adjustEndDateToEndOfDay(endDate: Long?): Long? {
+        return endDate?.let {
+            // Add 24 hours minus 1 millisecond to include the entire end date
+            it + (24 * 60 * 60 * 1000) - 1
         }
     }
 
