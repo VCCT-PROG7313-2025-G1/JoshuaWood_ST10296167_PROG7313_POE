@@ -40,7 +40,6 @@ class SettingsFragment : Fragment() {
 
         setupToolbar()
         setupThemeSettings(view)
-        setupNotificationsSwitch()
         observeUserViewModel()
 
         // Apply staggered fade-in
@@ -92,6 +91,7 @@ class SettingsFragment : Fragment() {
         userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
             if (user == null) return@observe
             binding.notificationsSwitch.isChecked = user.notificationsEnabled
+
         }
     }
 

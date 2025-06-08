@@ -2,9 +2,7 @@ package com.dreamteam.rand.data
 
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+
 
 // handles database setup and initialization
 class RandDatabaseCallback : RoomDatabase.Callback() {

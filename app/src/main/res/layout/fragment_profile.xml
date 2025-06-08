@@ -134,7 +134,10 @@
                             android:layout_marginStart="12dp"
                             android:text="Lvl X"
                             android:textColor="@color/white"
-                            android:textSize="12sp"
+                            android:shadowDx="1"
+                            android:shadowDy="1"
+                            android:shadowRadius="1"
+                            android:textSize="16sp"
                             android:textStyle="bold" />
 
                         <TextView
@@ -145,7 +148,11 @@
                             android:layout_marginEnd="12dp"
                             android:text="Lvl Y"
                             android:textColor="@color/white"
-                            android:textSize="12sp"
+                            android:shadowColor="@color/black"
+                            android:shadowDx="1"
+                            android:shadowDy="1"
+                            android:shadowRadius="1"
+                            android:textSize="16sp"
                             android:textStyle="bold" />
 
                     </FrameLayout>

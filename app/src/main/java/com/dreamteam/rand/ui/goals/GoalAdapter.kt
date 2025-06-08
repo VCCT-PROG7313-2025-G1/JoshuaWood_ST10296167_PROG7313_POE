@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.dreamteam.rand.R
 import com.dreamteam.rand.data.entity.Goal
-import com.dreamteam.rand.data.entity.GoalSpendingStatus
 import com.dreamteam.rand.databinding.ItemGoalBinding
 import java.text.SimpleDateFormat
 import java.util.*

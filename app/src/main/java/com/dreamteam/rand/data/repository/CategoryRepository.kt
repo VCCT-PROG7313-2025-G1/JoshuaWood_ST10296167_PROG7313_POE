@@ -8,9 +8,7 @@ import com.dreamteam.rand.data.firebase.CategoryFirebase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.first
 
 // handles all category-related operations
 class CategoryRepository(

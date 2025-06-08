@@ -9,7 +9,6 @@ import androidx.lifecycle.viewModelScope
 import com.dreamteam.rand.data.entity.Category
 import com.dreamteam.rand.data.entity.TransactionType
 import com.dreamteam.rand.data.repository.CategoryRepository
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.util.Date
 
@@ -126,11 +125,6 @@ class CategoryViewModel(private val repository: CategoryRepository) : ViewModel(
         viewModelScope.launch {
             repository.deleteCategory(category)
         }
-    }
-
-    // mark initial sync as complete
-    fun markInitialSyncComplete() {
-        _initialSyncComplete.value = true
     }
 
     // reset the save status after showing success/failure

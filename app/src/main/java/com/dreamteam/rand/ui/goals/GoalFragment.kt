@@ -18,7 +18,6 @@ import com.dreamteam.rand.databinding.FragmentGoalBinding
 import com.dreamteam.rand.ui.auth.UserViewModel
 import com.dreamteam.rand.ui.expenses.ExpenseViewModel
 import com.dreamteam.rand.data.repository.ExpenseRepository
-import java.util.Calendar
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import com.dreamteam.rand.data.firebase.GoalFirebase
