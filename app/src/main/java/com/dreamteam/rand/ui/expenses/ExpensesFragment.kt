@@ -36,6 +36,7 @@ import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import android.graphics.Color
 import com.dreamteam.rand.ui.common.ChartUtils
+import com.dreamteam.rand.ui.common.ViewUtils
 
 // displays and manages the list of expenses with filtering capabilities
 class ExpensesFragment : Fragment() {
@@ -77,6 +78,7 @@ class ExpensesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        //ViewUtils.setToolbarGradient(this, binding.toolbar) to add a dark mode gradient to the toolbar
         Log.d(TAG, "Setting up expenses view with savedInstanceState: ${savedInstanceState != null}")
         setupToolbar()
         setupRecyclerView()
@@ -121,16 +123,16 @@ class ExpensesFragment : Fragment() {
             // Used chat to help structure the animation for the fade in
             // Create fade-in animator
             val fadeAnimator = ObjectAnimator.ofFloat(view, View.ALPHA, 0f, 1f)
-            fadeAnimator.duration = 600 // Duration of the fade-in effect (in milliseconds)
+            fadeAnimator.duration = 500 // Duration of the fade-in effect (in milliseconds)
 
             // Create slide-up animator
             val slideAnimator = ObjectAnimator.ofFloat(view, View.TRANSLATION_Y, 50f, 0f)
-            slideAnimator.duration = 500 // Duration of the slide-up effect (in milliseconds)
+            slideAnimator.duration = 400 // Duration of the slide-up effect (in milliseconds)
 
             // Combine fade and slide for each view
             AnimatorSet().apply {
                 playTogether(fadeAnimator, slideAnimator)
-                startDelay = (index * 290).toLong() // Stagger by 150ms per view
+                startDelay = (index *300).toLong() // Stagger by 300ms per view
             }
         }
 

@@ -8,7 +8,7 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/gradient_background">
+        android:background="@drawable/gradient_light">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
@@ -49,11 +49,37 @@
                     android:padding="16dp"
                     android:gravity="center_horizontal">
 
-                    <ImageView
+                    <FrameLayout
+                        android:id="@+id/profilePictureContainer"
                         android:layout_width="96dp"
                         android:layout_height="96dp"
-                        android:contentDescription="Profile picture"
-                        android:src="@drawable/ic_profile" />
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/profileImageView"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:contentDescription="Profile picture"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/ic_profile"
+                            app:shapeAppearanceOverlay="@style/CircleImageView" />
+
+                        <ImageView
+                            android:id="@+id/editProfileIcon"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="bottom|end"
+                            android:layout_margin="4dp"
+                            android:background="@drawable/circle_background"
+                            android:backgroundTint="@color/primary"
+                            android:contentDescription="Edit profile picture"
+                            android:padding="4dp"
+                            android:src="@drawable/ic_camera"
+                            app:tint="@color/white" />
+
+                    </FrameLayout>
 
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="wrap_content"

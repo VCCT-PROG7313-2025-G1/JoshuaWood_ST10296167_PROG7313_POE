@@ -29,6 +29,11 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.core.view.GravityCompat
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.net.Uri
+import android.widget.ImageView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CircleCrop
+import com.dreamteam.rand.ui.common.ViewUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -79,6 +84,8 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+       // ViewUtils.setToolbarGradient(this, binding.toolbar) used to set gradient background to dark tone
+
         setupToolbar()
         setupNavigationDrawer()
         setupClickListeners()
@@ -87,6 +94,8 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
         setupAiCard()
         observeUserData()
         setupStaggeredFadeInAnimation()
+
+
     }
     
     private fun setupAiCard() {
@@ -114,16 +123,16 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
 
             // Create fade-in animator
             val fadeAnimator = ObjectAnimator.ofFloat(view, View.ALPHA, 0f, 1f) // Fade in
-            fadeAnimator.duration = 600
+            fadeAnimator.duration = 500
 
             // Create slide-up animator
             val slideAnimator = ObjectAnimator.ofFloat(view, View.TRANSLATION_Y, 50f, 0f) //
-            slideAnimator.duration = 500
+            slideAnimator.duration = 400
 
             // Combine fade and slide for each view
             AnimatorSet().apply {
                 playTogether(fadeAnimator, slideAnimator)
-                startDelay = (index * 290).toLong() // Stagger by 290ms per view
+                startDelay = (index * 300).toLong() // Stagger by 300ms per view
             }
         }
 
@@ -368,6 +377,31 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
             binding.navigationView.getHeaderView(0).apply {
                 findViewById<TextView>(R.id.navHeaderName).text = user.name
                 findViewById<TextView>(R.id.navHeaderEmail).text = user.email
+                
+                // Update profile picture in navigation header
+                val navHeaderImage = findViewById<ImageView>(R.id.navHeaderImage)
+                user.profilePictureUri?.let { uri ->
+                    try {
+                        Glide.with(this@DashboardFragment)
+                            .load(Uri.parse(uri))
+                            .transform(CircleCrop())
+                            .placeholder(R.drawable.ic_profile)
+                            .error(R.drawable.ic_profile)
+                            .into(navHeaderImage)
+                    } catch (e: Exception) {
+                        // If there's an error loading the custom image, fall back to default
+                        Glide.with(this@DashboardFragment)
+                            .load(R.drawable.ic_profile)
+                            .transform(CircleCrop())
+                            .into(navHeaderImage)
+                    }
+                } ?: run {
+                    // Load default profile image
+                    Glide.with(this@DashboardFragment)
+                        .load(R.drawable.ic_profile)
+                        .transform(CircleCrop())
+                        .into(navHeaderImage)
+                }
             }
 
             // Get expenses and sync with Firebase

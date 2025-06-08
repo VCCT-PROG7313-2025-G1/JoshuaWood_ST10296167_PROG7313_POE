@@ -181,6 +181,38 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+    // update notification settings for the user
+    fun updateNotificationSettings(enabled: Boolean) {
+        viewModelScope.launch {
+            currentUser.value?.let { user ->
+                val result = userRepository.updateNotificationSettings(user.uid, enabled)
+                result.onSuccess {
+                    // Update the current user object
+                    _currentUser.value = user.copy(notificationsEnabled = enabled)
+                }
+                result.onFailure { exception ->
+                    _error.value = exception.message
+                }
+            }
+        }
+    }
+    
+    // update user's profile picture
+    fun updateUserProfilePicture(profilePictureUri: String?) {
+        viewModelScope.launch {
+            currentUser.value?.let { user ->
+                val result = userRepository.updateUserProfilePicture(user.uid, profilePictureUri)
+                result.onSuccess {
+                    // Update the current user object
+                    _currentUser.value = user.copy(profilePictureUri = profilePictureUri)
+                }
+                result.onFailure { exception ->
+                    _error.value = exception.message
+                }
+            }
+        }
+    }
     
     // Apply theme changes
     private fun applyTheme(themeMode: String) {

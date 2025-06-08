@@ -25,6 +25,7 @@ import java.util.*
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import com.dreamteam.rand.data.firebase.CategoryFirebase
+import com.dreamteam.rand.ui.common.ViewUtils
 
 // this fragment shows all the categories and how much was spent in each one
 // you can filter by date range and see spending stats
@@ -74,6 +75,7 @@ class CategoriesFragment : Fragment() {
     // setup everything after the view is created
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        //ViewUtils.setToolbarGradient(this, binding.toolbar) to add a dark mode gradient to the toolbar
         Log.d(TAG, "Setting up categories view")
         setupToolbar()
         setupRecyclerView()
@@ -110,16 +112,16 @@ class CategoriesFragment : Fragment() {
             // Used chat to help structure the animation for the fade in
             // Create fade-in animator
             val fadeAnimator = ObjectAnimator.ofFloat(view, View.ALPHA, 0f, 1f)
-            fadeAnimator.duration = 600 // Duration for fade-in
+            fadeAnimator.duration = 500 // Duration for fade-in
 
             // Create slide-up animator
             val slideAnimator = ObjectAnimator.ofFloat(view, View.TRANSLATION_Y, 50f, 0f)
-            slideAnimator.duration = 500 // Duration for slide-up
+            slideAnimator.duration = 400 // Duration for slide-up
 
             // Combine fade and slide for each view
             AnimatorSet().apply {
                 playTogether(fadeAnimator, slideAnimator)
-                startDelay = (index * 290).toLong() // Stagger by 290ms per view
+                startDelay = (index * 300).toLong() // Stagger by 300ms per view
             }
         }
 

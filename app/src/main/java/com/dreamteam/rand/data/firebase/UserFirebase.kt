@@ -143,4 +143,13 @@ class UserFirebase {
             false
         }
     }
+    
+    suspend fun updateUserProfilePicture(uid: String, profilePictureUri: String?): Boolean {
+        return try {
+            usersCollection.document(uid).update("profilePictureUri", profilePictureUri).await()
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
 }

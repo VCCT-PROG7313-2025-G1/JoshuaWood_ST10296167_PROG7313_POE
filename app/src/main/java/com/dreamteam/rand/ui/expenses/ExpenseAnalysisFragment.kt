@@ -23,6 +23,7 @@ import com.dreamteam.rand.ui.auth.UserViewModel
 import com.dreamteam.rand.ui.categories.CategoryViewModel
 import com.dreamteam.rand.ui.goals.GoalViewModel
 import com.dreamteam.rand.ui.common.ChartUtils
+import com.dreamteam.rand.ui.common.ViewUtils
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
@@ -72,6 +73,7 @@ class ExpenseAnalysisFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        //ViewUtils.setToolbarGradient(this, binding.toolbar) to add a dark mode gradient to the toolbar
         
         // Setup back button
         binding.toolbar.setNavigationOnClickListener {

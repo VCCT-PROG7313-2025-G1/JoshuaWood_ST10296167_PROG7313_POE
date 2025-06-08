@@ -1,28 +1,56 @@
 package com.dreamteam.rand.ui.profile
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
-import com.dreamteam.rand.R
-import com.dreamteam.rand.databinding.FragmentProfileBinding
-import com.dreamteam.rand.ui.auth.UserViewModel
 import android.view.animation.AlphaAnimation
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
 import androidx.core.text.HtmlCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CircleCrop
+import com.dreamteam.rand.R
+import com.dreamteam.rand.databinding.FragmentProfileBinding
+import com.dreamteam.rand.ui.auth.UserViewModel
+import com.dreamteam.rand.ui.common.ViewUtils
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.IOException
 
 class ProfileFragment : Fragment() {
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
     private val userViewModel: UserViewModel by activityViewModels()
+    
+    private var currentPhotoUri: Uri? = null
+    
+    // Image picker launcher
+    private val imagePickerLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val selectedImageUri = result.data?.data ?: currentPhotoUri
+            selectedImageUri?.let { uri ->
+                loadProfileImage(uri)
+                userViewModel.updateUserProfilePicture(uri.toString())
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,7 +63,9 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        //ViewUtils.setToolbarGradient(this, binding.toolbar) to add a dark mode gradient to the banner
         setupToolbar()
+        setupProfilePictureClick()
         observeUserData()
     }
 
@@ -44,8 +74,59 @@ class ProfileFragment : Fragment() {
             findNavController().navigateUp()
         }
     }
+    
+    private fun setupProfilePictureClick() {
+        binding.profilePictureContainer.setOnClickListener {
+            showImagePickerDialog()
+        }
+    }
+    
+    private fun showImagePickerDialog() {
+        val options = arrayOf("Camera", "Gallery")
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Select Profile Picture")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> openCamera()
+                    1 -> openGallery()
+                }
+            }
+            .show()
+    }
+    
+    private fun openCamera() {
+        try {
+            val photoFile = File.createTempFile("profile_pic", ".jpg", requireContext().cacheDir)
+            currentPhotoUri = FileProvider.getUriForFile(
+                requireContext(),
+                "${requireContext().packageName}.fileprovider",
+                photoFile
+            )
+            
+            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+                putExtra(MediaStore.EXTRA_OUTPUT, currentPhotoUri)
+            }
+            imagePickerLauncher.launch(intent)
+        } catch (e: IOException) {
+            Toast.makeText(requireContext(), "Error creating camera file", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun openGallery() {
+        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        imagePickerLauncher.launch(intent)
+    }
+    
+    private fun loadProfileImage(uri: Uri) {
+        Glide.with(this)
+            .load(uri)
+            .transform(CircleCrop())
+            .placeholder(R.drawable.ic_profile)
+            .error(R.drawable.ic_profile)
+            .into(binding.profileImageView)
+    }
 
-    private fun loadAchievements(userId: String, userLevel: Int){
+    private fun loadAchievements(userId: String, userLevel: Int) {
         viewLifecycleOwner.lifecycleScope.launch {
             val data = userViewModel.getAchievementData(userId)
 
@@ -78,8 +159,18 @@ class ProfileFragment : Fragment() {
     private fun setupAchievements(achievements: List<Achievement>) {
         val achievementsContainer = view?.findViewById<LinearLayout>(R.id.achievementsContainer)
         achievementsContainer?.removeAllViews()
-        achievements.forEach { achievement ->
+
+        achievements.forEachIndexed { index, achievement ->
             val achievementView = createAchievementView(achievement)
+
+            // Apply staggered fade-in animation
+            val fadeIn = AlphaAnimation(0f, 1f).apply {
+                duration = 500
+                startOffset = (index * 300).toLong()
+                fillAfter = true
+            }
+            achievementView.startAnimation(fadeIn)
+
             achievementsContainer?.addView(achievementView)
         }
     }
@@ -105,38 +196,48 @@ class ProfileFragment : Fragment() {
     private fun observeUserData() {
         userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
             if (user == null) {
-                // Navigation will be handled by the MainActivity observer
                 return@observe
             }
 
-            val currentLevelXP = user.xp % 100  // XP progress within current level (0-99)
+            val currentLevelXP = user.xp % 100
             val currentLevel = user.level
 
-            // Set user data
             binding.levelBadgeText.text = "Lvl.$currentLevel"
             binding.nameText.text = user.name
             binding.emailText.text = user.email
             binding.currentLevelText.text = "Lvl.$currentLevel"
             binding.nextLevelText.text = "Lvl.${currentLevel + 1}"
-            binding.progressText.text = "$currentLevelXP/100 XP"
-
-            // used chatgpt to help work out how to make certain text bold
             val formattedXpText = "<b>$currentLevelXP</b>/100 XP"
             binding.progressText.text = HtmlCompat.fromHtml(formattedXpText, HtmlCompat.FROM_HTML_MODE_LEGACY)
 
-            // Update progress bar
             binding.xpProgressBar.progress = currentLevelXP
 
-            // Apply staggered fade-in animation to text views
+            // Load profile picture if user has one
+            user.profilePictureUri?.let { uri ->
+                try {
+                    loadProfileImage(Uri.parse(uri))
+                } catch (e: Exception) {
+                    // If there's an error loading the custom image, fall back to default
+                    Glide.with(this@ProfileFragment)
+                        .load(R.drawable.ic_profile)
+                        .transform(CircleCrop())
+                        .into(binding.profileImageView)
+                }
+            } ?: run {
+                // Load default profile image
+                Glide.with(this@ProfileFragment)
+                    .load(R.drawable.ic_profile)
+                    .transform(CircleCrop())
+                    .into(binding.profileImageView)
+            }
+
             applyStaggeredFadeInAnimation()
 
             loadAchievements(user.uid, currentLevel)
         }
     }
 
-    // made use of ChatGPT and Grok to help make the fade in animation for the Profile screen.
     private fun applyStaggeredFadeInAnimation() {
-        // List of views to animate
         val viewsToAnimate = listOf(
             binding.nameText,
             binding.emailText,
@@ -146,9 +247,9 @@ class ProfileFragment : Fragment() {
 
         viewsToAnimate.forEachIndexed { index, view ->
             val fadeIn = AlphaAnimation(0f, 1f).apply {
-                duration = 600 // Duration of the fade-in effect (in milliseconds)
-                startOffset = (index * 290).toLong() // Stagger delay (290ms per view)
-                fillAfter = true // Keep the view visible after animation
+                duration = 500
+                startOffset = (index * 300).toLong()
+                fillAfter = true
             }
             view.startAnimation(fadeIn)
         }
@@ -160,7 +261,6 @@ class ProfileFragment : Fragment() {
     }
 }
 
-// data class for displaying achievements
 data class Achievement(
     val name: String,
     val description: String,
