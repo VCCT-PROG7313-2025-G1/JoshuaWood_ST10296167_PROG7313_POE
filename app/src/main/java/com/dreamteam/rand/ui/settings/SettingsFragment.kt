@@ -40,6 +40,7 @@ class SettingsFragment : Fragment() {
 
         setupToolbar()
         setupThemeSettings(view)
+        setupNotificationsSwitch()
         observeUserViewModel()
 
         // Apply staggered fade-in
