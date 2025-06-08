@@ -22,6 +22,7 @@ import java.util.*
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import com.dreamteam.rand.data.firebase.GoalFirebase
+import com.dreamteam.rand.ui.common.ViewUtils
 
 // this fragment lets you add a new spending goal
 // you can set a name, amount range, month/year, and pick a color
@@ -63,6 +64,7 @@ class AddGoalFragment : Fragment() {
     // setup all the UI components after the view is created
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        //ViewUtils.setToolbarGradient(this, binding.toolbar) to add a dark mode gradient to the banner
         Log.d(TAG, "Setting up add goal view")
         setupToolbar()
         setupColorSelection()
@@ -91,16 +93,16 @@ class AddGoalFragment : Fragment() {
             // Used chat to help structure the animation for the fade in
             // Create fade-in animator
             val fadeAnimator = ObjectAnimator.ofFloat(view, View.ALPHA, 0f, 1f)
-            fadeAnimator.duration = 600 // Duration of the fade-in effect (in milliseconds)
+            fadeAnimator.duration = 500 // Duration of the fade-in effect (in milliseconds)
 
             // Create slide-up animator
             val slideAnimator = ObjectAnimator.ofFloat(view, View.TRANSLATION_Y, 50f, 0f)
-            slideAnimator.duration = 500 // Duration of the slide-up effect (in milliseconds)
+            slideAnimator.duration = 400 // Duration of the slide-up effect (in milliseconds)
 
             // Combine fade and slide for each view
             AnimatorSet().apply {
                 playTogether(fadeAnimator, slideAnimator)
-                startDelay = (index * 290).toLong() // Stagger by 150ms per view
+                startDelay = (index * 300).toLong() // Stagger by 300ms per view
             }
         }
 

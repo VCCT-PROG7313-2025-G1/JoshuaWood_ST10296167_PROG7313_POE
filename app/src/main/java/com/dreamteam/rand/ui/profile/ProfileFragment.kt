@@ -4,19 +4,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
-import com.dreamteam.rand.R
-import com.dreamteam.rand.databinding.FragmentProfileBinding
-import com.dreamteam.rand.ui.auth.UserViewModel
 import android.view.animation.AlphaAnimation
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import com.dreamteam.rand.R
+import com.dreamteam.rand.databinding.FragmentProfileBinding
+import com.dreamteam.rand.ui.auth.UserViewModel
+import com.dreamteam.rand.ui.common.ViewUtils
 import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment() {
@@ -35,6 +36,7 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        //ViewUtils.setToolbarGradient(this, binding.toolbar) to add a dark mode gradient to the banner
         setupToolbar()
         observeUserData()
     }
@@ -45,7 +47,7 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    private fun loadAchievements(userId: String, userLevel: Int){
+    private fun loadAchievements(userId: String, userLevel: Int) {
         viewLifecycleOwner.lifecycleScope.launch {
             val data = userViewModel.getAchievementData(userId)
 
@@ -67,9 +69,9 @@ class ProfileFragment : Fragment() {
                 Achievement("Financial Wizard", "Reach level 25", minOf(userLevel, 25), 25, userLevel >= 25),
                 Achievement("Master Budgeter", "Reach level 50", minOf(userLevel, 50), 50, userLevel >= 50),
 
-                Achievement("Suspicious Spender", "Spend R1000", minOf(totalExpenses, 1000), 1000, userLevel >= 1000),
-                Achievement("Money Manager", "Spend R10 000", minOf(totalExpenses, 10000), 10000, userLevel >= 10000),
-                Achievement("Bank Breaker", "Spend R100 000", minOf(totalExpenses, 100000), 100000, userLevel >= 100000),
+                Achievement("Suspicious Spender", "Spend R1000", minOf(totalExpenses, 1000), 1000, totalExpenses >= 1000),
+                Achievement("Money Manager", "Spend R10 000", minOf(totalExpenses, 10000), 10000, totalExpenses >= 10000),
+                Achievement("Bank Breaker", "Spend R100 000", minOf(totalExpenses, 100000), 100000, totalExpenses >= 100000),
             )
             setupAchievements(achievements)
         }
@@ -78,8 +80,18 @@ class ProfileFragment : Fragment() {
     private fun setupAchievements(achievements: List<Achievement>) {
         val achievementsContainer = view?.findViewById<LinearLayout>(R.id.achievementsContainer)
         achievementsContainer?.removeAllViews()
-        achievements.forEach { achievement ->
+
+        achievements.forEachIndexed { index, achievement ->
             val achievementView = createAchievementView(achievement)
+
+            // Apply staggered fade-in animation
+            val fadeIn = AlphaAnimation(0f, 1f).apply {
+                duration = 500
+                startOffset = (index * 300).toLong()
+                fillAfter = true
+            }
+            achievementView.startAnimation(fadeIn)
+
             achievementsContainer?.addView(achievementView)
         }
     }
@@ -105,38 +117,29 @@ class ProfileFragment : Fragment() {
     private fun observeUserData() {
         userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
             if (user == null) {
-                // Navigation will be handled by the MainActivity observer
                 return@observe
             }
 
-            val currentLevelXP = user.xp % 100  // XP progress within current level (0-99)
+            val currentLevelXP = user.xp % 100
             val currentLevel = user.level
 
-            // Set user data
             binding.levelBadgeText.text = "Lvl.$currentLevel"
             binding.nameText.text = user.name
             binding.emailText.text = user.email
             binding.currentLevelText.text = "Lvl.$currentLevel"
             binding.nextLevelText.text = "Lvl.${currentLevel + 1}"
-            binding.progressText.text = "$currentLevelXP/100 XP"
-
-            // used chatgpt to help work out how to make certain text bold
             val formattedXpText = "<b>$currentLevelXP</b>/100 XP"
             binding.progressText.text = HtmlCompat.fromHtml(formattedXpText, HtmlCompat.FROM_HTML_MODE_LEGACY)
 
-            // Update progress bar
             binding.xpProgressBar.progress = currentLevelXP
 
-            // Apply staggered fade-in animation to text views
             applyStaggeredFadeInAnimation()
 
             loadAchievements(user.uid, currentLevel)
         }
     }
 
-    // made use of ChatGPT and Grok to help make the fade in animation for the Profile screen.
     private fun applyStaggeredFadeInAnimation() {
-        // List of views to animate
         val viewsToAnimate = listOf(
             binding.nameText,
             binding.emailText,
@@ -146,9 +149,9 @@ class ProfileFragment : Fragment() {
 
         viewsToAnimate.forEachIndexed { index, view ->
             val fadeIn = AlphaAnimation(0f, 1f).apply {
-                duration = 600 // Duration of the fade-in effect (in milliseconds)
-                startOffset = (index * 290).toLong() // Stagger delay (290ms per view)
-                fillAfter = true // Keep the view visible after animation
+                duration = 500
+                startOffset = (index * 300).toLong()
+                fillAfter = true
             }
             view.startAnimation(fadeIn)
         }
@@ -160,7 +163,6 @@ class ProfileFragment : Fragment() {
     }
 }
 
-// data class for displaying achievements
 data class Achievement(
     val name: String,
     val description: String,

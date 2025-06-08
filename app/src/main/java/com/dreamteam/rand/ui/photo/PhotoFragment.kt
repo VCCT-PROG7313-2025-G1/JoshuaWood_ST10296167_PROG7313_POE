@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.navigation.fragment.findNavController
 import com.dreamteam.rand.databinding.FragmentPhotoBinding
+import com.dreamteam.rand.ui.common.ViewUtils
 import com.google.common.util.concurrent.ListenableFuture
 import java.io.File
 import java.util.concurrent.ExecutorService
@@ -102,6 +103,7 @@ class PhotoFragment : Fragment() {
     // setup the view after it's created
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        //ViewUtils.setToolbarGradient(this, binding.toolbar) to add a dark mode gradient to the banner
         Log.d(TAG, "Setting up photo view")
         setupToolbar()
     }

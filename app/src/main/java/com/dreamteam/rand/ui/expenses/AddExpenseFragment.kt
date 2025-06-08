@@ -31,6 +31,7 @@ import java.util.Date
 import java.util.Locale
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import com.dreamteam.rand.ui.common.ViewUtils
 
 // this fragment lets you add a new expense with all its details
 // you can pick a category, date, amount, and attach a photo of the receipt
@@ -77,6 +78,7 @@ class AddExpenseFragment : Fragment() {
     // setup all the UI components after the view is created
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        //ViewUtils.setToolbarGradient(this, binding.toolbar) to allow the banner to change with dark mode
         Log.d(TAG, "Setting up add expense view")
         setupToolbar()
         setupDatePicker()
@@ -113,16 +115,16 @@ class AddExpenseFragment : Fragment() {
             // Used chat to help structure the animation for the fade in
             // Create fade-in animator
             val fadeAnimator = ObjectAnimator.ofFloat(view, View.ALPHA, 0f, 1f)
-            fadeAnimator.duration = 600 // Duration of the fade-in effect (in milliseconds)
+            fadeAnimator.duration = 500 // Duration of the fade-in effect (in milliseconds)
 
             // Create slide-up animator
             val slideAnimator = ObjectAnimator.ofFloat(view, View.TRANSLATION_Y, 50f, 0f)
-            slideAnimator.duration = 500 // Duration of the slide-up effect (in milliseconds)
+            slideAnimator.duration = 400 // Duration of the slide-up effect (in milliseconds)
 
             // Combine fade and slide for each view
             AnimatorSet().apply {
                 playTogether(fadeAnimator, slideAnimator)
-                startDelay = (index * 290).toLong() // Stagger by 290ms per view
+                startDelay = (index * 300).toLong() // Stagger by 300ms per view
             }
         }
 

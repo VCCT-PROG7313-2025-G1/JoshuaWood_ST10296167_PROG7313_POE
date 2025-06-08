@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import androidx.appcompat.app.AppCompatDelegate
@@ -14,6 +16,7 @@ import androidx.navigation.fragment.findNavController
 import com.dreamteam.rand.R
 import com.dreamteam.rand.databinding.FragmentSettingsBinding
 import com.dreamteam.rand.ui.auth.UserViewModel
+import com.dreamteam.rand.ui.common.ViewUtils
 
 class SettingsFragment : Fragment() {
     private var _binding: FragmentSettingsBinding? = null
@@ -31,10 +34,17 @@ class SettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Apply dynamic gradient to toolbar
+       // ViewUtils.setToolbarGradient(this, binding.toolbar)
+
         setupToolbar()
         setupThemeSettings(view)
         setupNotificationsSwitch()
         observeUserViewModel()
+
+        // Apply staggered fade-in
+        setupStaggeredFadeInAnimation()
     }
 
     private fun setupToolbar() {
@@ -44,24 +54,20 @@ class SettingsFragment : Fragment() {
     }
 
     private fun setupThemeSettings(view: View) {
-        // Get current theme setting from SharedPreferences
         val sharedPrefs = requireActivity().getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
         val currentTheme = sharedPrefs.getString("theme_mode", "system")
-        
-        // Find all the radio buttons
+
         val lightRadio = view.findViewById<RadioButton>(R.id.lightThemeRadio)
         val darkRadio = view.findViewById<RadioButton>(R.id.darkThemeRadio)
         val systemRadio = view.findViewById<RadioButton>(R.id.systemThemeRadio)
         val radioGroup = view.findViewById<RadioGroup>(R.id.themeRadioGroup)
-        
-        // Set the appropriate radio button based on the current theme
+
         when (currentTheme) {
             "light" -> lightRadio.isChecked = true
             "dark" -> darkRadio.isChecked = true
             "system" -> systemRadio.isChecked = true
         }
-        
-        // Set up radio group listener
+
         radioGroup.setOnCheckedChangeListener { _, checkedId ->
             val themeMode = when (checkedId) {
                 R.id.lightThemeRadio -> "light"
@@ -69,18 +75,13 @@ class SettingsFragment : Fragment() {
                 R.id.systemThemeRadio -> "system"
                 else -> "system"
             }
-            
-            // Save preference to SharedPreferences
+
             sharedPrefs.edit().putString("theme_mode", themeMode).apply()
-            
-            // Update theme in the ViewModel (for Firebase/Room)
             userViewModel.updateUserTheme(themeMode)
-            
-            // Apply the theme change
             applyTheme(themeMode)
         }
     }
-    
+
     private fun setupNotificationsSwitch() {
         binding.notificationsSwitch.setOnCheckedChangeListener { _, isChecked ->
             userViewModel.updateNotificationSettings(isChecked)
@@ -89,21 +90,35 @@ class SettingsFragment : Fragment() {
 
     private fun observeUserViewModel() {
         userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
-            if (user == null) {
-                // Navigation will be handled by the MainActivity observer
-                return@observe
-            }
-            
-            // Update UI with user preferences
+            if (user == null) return@observe
             binding.notificationsSwitch.isChecked = user.notificationsEnabled
         }
     }
-    
+
     private fun applyTheme(themeMode: String) {
         when (themeMode) {
             "dark" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             "light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
             "system" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        }
+
+        // Re-apply toolbar gradient after theme change
+        ViewUtils.setToolbarGradient(this, binding.toolbar)
+    }
+
+    private fun setupStaggeredFadeInAnimation() {
+        val rootViewGroup = binding.root as ViewGroup
+        val animationDuration = 500L
+        val delayBetweenItems = 400L
+
+        for (i in 0 until rootViewGroup.childCount) {
+            val child = rootViewGroup.getChildAt(i)
+            child.alpha = 0f
+            child.animate()
+                .alpha(1f)
+                .setStartDelay(i * delayBetweenItems)
+                .setDuration(animationDuration)
+                .start()
         }
     }
 
@@ -111,4 +126,4 @@ class SettingsFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-} 
+}

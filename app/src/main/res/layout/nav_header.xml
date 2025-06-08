@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="176dp"
-    android:background="@drawable/gradient_background"
+    android:background="@drawable/nav_header_background"
     android:gravity="bottom"
     android:orientation="vertical"
     android:padding="16dp"
@@ -13,7 +13,8 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:contentDescription="Profile picture"
-        android:src="@drawable/ic_profile" />
+        android:src="@drawable/ic_profile"/>
+
 
     <TextView
         android:id="@+id/navHeaderName"
@@ -31,4 +32,4 @@
         android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
         android:text="user@email.com" />
 
-</LinearLayout> 
+</LinearLayout>
