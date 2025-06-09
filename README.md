@@ -17,6 +17,10 @@ Check out our Youtube video here:
 
 [![Play](https://img.youtube.com/vi/hqsQ-MpwyQk/0.jpg)](https://www.youtube.com/watch?v=hqsQ-MpwyQk)
 
+Also, feel free to sign in to this test account which we have pre-populated with data:  
+Email: randy@email.com  
+Password: Randy123!
+
 ## Overview
 
 Rand is a budget tracking application designed for sane people. It allows users to easily add, track, and analyze expenses, set monthly budget goals, and add categories. We want users of Rand to feel secure in their financial decisions, that's why our app gives users detailed expense graphs so that users can easily analyze and manage their current expenses. If that all seems like too much for you then don't sweat\! Ask Randy, your personal AI budget assistant, to analyze your recent expenses for you and receive advice on how to better optimize your spending. 
