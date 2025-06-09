@@ -17,8 +17,8 @@ Check out our Youtube video here:
 
 [![Play](https://img.youtube.com/vi/hqsQ-MpwyQk/0.jpg)](https://www.youtube.com/watch?v=hqsQ-MpwyQk)
 
-Also, feel free to sign in to this test account which we have pre-populated with data:
-Email: randy@email.com
+Also, feel free to sign in to this test account which we have pre-populated with data:  
+Email: randy@email.com  
 Password: Randy123!
 
 ## Overview
