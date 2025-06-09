@@ -446,6 +446,8 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
         binding.balanceText.text = formattedAmount
     }
 
+    // ai declaration: here we used claude and gpt to implement the AI insights generation
+    // with cloudflare worker integration and glowing animation effects
     private fun generateAiInsights() {
         if (recentExpenses.isEmpty()) {
             Toast.makeText(requireContext(), "No expenses available for AI analysis", Toast.LENGTH_SHORT).show()
@@ -509,6 +511,8 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
         }
     }
     
+    // ai declaration: here we used claude to create the apple-style glowing animation
+    // with theme-aware styling and smooth color transitions
     private fun startGlowingAnimation() {
         // Show and animate the glow background behind the card
         startCardGlowAnimation()
@@ -517,6 +521,8 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
         startBorderAnimation()
     }
     
+    // ai declaration: here we used gpt to implement the rainbow glow background animation
+    // with dynamic color generation and frame-based animation
     private fun startCardGlowAnimation() {
         // Get reference to the glow background
         val glowBackground = binding.root.findViewById<View>(com.dreamteam.rand.R.id.cardGlowBackground)
@@ -556,6 +562,8 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
         glowAnimation = animation
     }
     
+    // ai declaration: here we used claude to create the gradient glow drawables
+    // with theme-aware color adjustments for dark/light mode
     private fun createGlowDrawable(colorString: String): android.graphics.drawable.GradientDrawable {
         return android.graphics.drawable.GradientDrawable().apply {
             shape = android.graphics.drawable.GradientDrawable.RECTANGLE
@@ -590,6 +598,8 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
         }
     }
     
+    // ai declaration: here we used gpt to implement the border animation
+    // with color cycling and smooth transitions between rainbow colors
     private fun startBorderAnimation() {
         // Get a reference to the text container
         val textContainer = binding.aiSuggestionText
@@ -707,6 +717,8 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
         )
     }
     
+    // ai declaration: here we used claude to create the typewriter-style text streaming
+    // with natural typing delays and sentence pause timing
     private fun streamTextResponse(text: String) {
         // Clear previous animation
         stopGlowingAnimation()

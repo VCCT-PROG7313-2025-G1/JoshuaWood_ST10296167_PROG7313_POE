@@ -317,6 +317,8 @@ class ExpenseAnalysisFragment : Fragment() {
         }
     }
     
+    // ai declaration: here we used claude and gpt to implement the dynamic expense chart analysis
+    // with category-based filtering and goal reference line integration
     private fun updateChart(expenses: List<com.dreamteam.rand.data.entity.Transaction>, 
                            categories: List<com.dreamteam.rand.data.entity.Category>) {
         
@@ -534,6 +536,8 @@ class ExpenseAnalysisFragment : Fragment() {
         return calendar.timeInMillis
     }
     
+    // ai declaration: here we used claude and gpt to implement the expense trends visualization
+    // with cubic bezier smoothing and daily spending pattern analysis
     private fun updateTrendChart(expenses: List<com.dreamteam.rand.data.entity.Transaction>) {
         if (expenses.isEmpty()) {
             binding.trendChart.visibility = View.GONE

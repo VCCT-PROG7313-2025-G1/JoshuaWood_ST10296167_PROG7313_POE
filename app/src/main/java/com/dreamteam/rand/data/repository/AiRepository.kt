@@ -18,6 +18,8 @@ class AiRepository {
         private const val BASE_URL = "https://rand-api.abdulbaaridavids04.workers.dev"
     }
 
+    // ai declaration: here we used claude and gpt to implement the AI insights API integration
+    // with cloudflare worker communication and expense data formatting
     /**
      * Get AI insights based on the most recent expenses
      */

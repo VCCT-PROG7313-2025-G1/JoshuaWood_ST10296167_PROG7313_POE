@@ -148,6 +148,8 @@ class PhotoFragment : Fragment() {
             }, ContextCompat.getMainExecutor(requireContext()))
     }
 
+    // ai declaration: here we used claude to implement the photo capture functionality
+    // with local storage integration and receipt image handling for expenses
     // used Claude to help modify the takePhoto() function from the module manual to
     // save the photo to local emulator storage and then use the file path to retrieve the image
     // take a picture and save it

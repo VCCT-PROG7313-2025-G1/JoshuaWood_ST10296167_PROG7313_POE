@@ -72,6 +72,8 @@ class ProfileFragment : Fragment() {
         }
     }
     
+    // ai declaration: here we used claude and gpt to implement the profile picture functionality
+    // with camera/gallery picker integration and glide image loading
     private fun setupProfilePictureClick() {
         binding.profilePictureContainer.setOnClickListener {
             showImagePickerDialog()
@@ -114,6 +116,8 @@ class ProfileFragment : Fragment() {
         imagePickerLauncher.launch(intent)
     }
     
+    // ai declaration: here we used claude to implement glide image loading
+    // with circular transformation and fallback handling
     private fun loadProfileImage(uri: Uri) {
         Glide.with(this)
             .load(uri)

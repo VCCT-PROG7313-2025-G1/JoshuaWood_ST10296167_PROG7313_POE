@@ -1,4 +1,6 @@
 export default {
+    // ai declaration: here we used claude and gpt to implement the cloudflare worker AI endpoint
+    // with llama 3 model integration and expense analysis prompt engineering
     async fetch(request, env) {
       // Log incoming request
       console.log(`[Request] ${request.method} ${new URL(request.url).pathname}`);
@@ -32,6 +34,8 @@ export default {
             `- ${expense.category}: ${expense.amount} on ${expense.date} for '${expense.description}'`
           ).join("\n");
           
+          // ai declaration: here we used claude and gpt to design the AI prompt for financial analysis
+          // with gen Z tone and ZAR currency context for better user engagement
           // Create the prompt for expense analysis
           const prompt = `
             Based on these recent expenses:
