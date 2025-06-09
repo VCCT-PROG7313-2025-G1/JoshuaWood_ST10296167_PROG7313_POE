@@ -24,6 +24,7 @@ interface GoalDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertGoal(goal: Goal): Long
 
+    // add a new goal or replace if exists
     @Upsert
     suspend fun upsertGoal(goal: Goal)
 
@@ -47,15 +48,15 @@ interface GoalDao {
     @Query("SELECT * FROM goals WHERE id = :goalId")
     fun getGoalById(goalId: Long): LiveData<Goal>
 
-    // Clear all goals for a user (used during sync)
+    // clear all goals for a user
     @Query("DELETE FROM goals WHERE userId = :userId")
     suspend fun deleteAllUserGoals(userId: String)
 
-    // Get goal count for a user (used to check if sync needed)
+    // get goal count for a user
     @Query("SELECT COUNT(*) FROM goals WHERE userId = :userId")
     suspend fun getGoalCount(userId: String): Int
 
-    // Transaction to sync goals from Firebase to Room
+    // sync goals local cache with firebase data
     @Transaction
     suspend fun syncGoals(userId: String, goals: List<Goal>) {
         deleteAllUserGoals(userId)

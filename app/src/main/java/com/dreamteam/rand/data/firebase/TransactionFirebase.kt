@@ -13,9 +13,14 @@ import kotlinx.coroutines.flow.flow
 class TransactionFirebase {
     private val TAG = "TransactionFirebase"
     private val db = FirebaseFirestore.getInstance()
+    // get firestore transactions collection
     private val transactionsCollection = db.collection("transactions")
 
-    // Get all transactions for syncing
+    // AI DECLARATION:
+    // used Claude to provide some assistance in constructing the methods
+    // and how to interact wih firebase
+
+    // get all transactions for a user to use for syncing
     fun getAllTransactions(userId: String): Flow<List<Transaction>> = flow {
         Log.d(TAG, "Getting transactions for userId=$userId from Firestore")
         val snapshot = transactionsCollection
@@ -29,14 +34,13 @@ class TransactionFirebase {
         emit(transactions)
         }.catch { e ->
         Log.e(TAG, "Error getting transactions: ${e.message}", e)
-        // Try cache if server fails
+        // try the local cache if firestore can't be reached
         try {
             val cacheSnapshot = transactionsCollection
                 .whereEqualTo("userId", userId)
                 .orderBy("id", Query.Direction.ASCENDING)
                 .get(Source.CACHE)
                 .await()
-
 
             val transactions = cacheSnapshot.documents.mapNotNull {
                 it.toObject(Transaction::class.java)
@@ -62,19 +66,20 @@ class TransactionFirebase {
                 .get()
                 .await()
 
+            // use this ID to determine the next ID to use
             val nextId = if (!maxIdDoc.isEmpty) {
                 val maxTransaction = maxIdDoc.documents[0].toObject(Transaction::class.java)
                 (maxTransaction?.id ?: 0) + 1
             } else {
-                1L // Start with 1 if no transactions exist
+                1L // start with and ID of 1 if no categories exist
             }
 
             Log.d(TAG, "Generated next ID: $nextId")
             
-            // Create transaction with new ID
+            // create expense with the new ID
             val transactionWithId = transaction.copy(id = nextId)
-            
-            // Save to Firebase
+
+            // save the expense to Firebase
             Log.d(TAG, "Saving transaction to Firebase: $transactionWithId")
             val docRef = transactionsCollection.document()
             docRef.set(transactionWithId).await()

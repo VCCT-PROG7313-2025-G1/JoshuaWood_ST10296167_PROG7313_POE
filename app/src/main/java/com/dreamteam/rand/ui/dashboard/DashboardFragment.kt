@@ -25,7 +25,6 @@ import com.dreamteam.rand.ui.common.ChartUtils
 import com.google.android.material.navigation.NavigationView
 import java.text.NumberFormat
 import java.util.Locale
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.core.view.GravityCompat
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
@@ -33,11 +32,9 @@ import android.net.Uri
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
-import com.dreamteam.rand.ui.common.ViewUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
@@ -84,8 +81,6 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-       // ViewUtils.setToolbarGradient(this, binding.toolbar) used to set gradient background to dark tone
-
         setupToolbar()
         setupNavigationDrawer()
         setupClickListeners()
@@ -94,8 +89,6 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
         setupAiCard()
         observeUserData()
         setupStaggeredFadeInAnimation()
-
-
     }
     
     private fun setupAiCard() {

@@ -25,7 +25,6 @@ import java.util.*
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import com.dreamteam.rand.data.firebase.CategoryFirebase
-import com.dreamteam.rand.ui.common.ViewUtils
 
 // this fragment shows all the categories and how much was spent in each one
 // you can filter by date range and see spending stats
@@ -75,7 +74,6 @@ class CategoriesFragment : Fragment() {
     // setup everything after the view is created
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //ViewUtils.setToolbarGradient(this, binding.toolbar) to add a dark mode gradient to the toolbar
         Log.d(TAG, "Setting up categories view")
         setupToolbar()
         setupRecyclerView()

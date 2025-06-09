@@ -16,8 +16,7 @@ class GoalRepository(
     private val goalFirebase: GoalFirebase = GoalFirebase()
 ) {
     private val TAG = "GoalRepository"
-    
-    // Allow setting the coroutineScope from ViewModel
+    // allow setting the coroutineScope from ViewModel
     lateinit var coroutineScope: CoroutineScope
 
     // get all goals for a user - use local cache first
@@ -99,18 +98,18 @@ class GoalRepository(
         }
     }
 
-    // remove a goal - from Firebase and cache
+    // remove a goal
     suspend fun deleteGoal(goal: Goal) = withContext(Dispatchers.IO) {
         try {
             Log.d(TAG, "Deleting goal: ${goal.id}")
             
-            // Delete from Firebase first
+            // delete from Firebase first
             val firestoreSuccess = goalFirebase.deleteGoal(goal)
             if (!firestoreSuccess) {
                 Log.w(TAG, "Failed to delete goal from Firebase")
             }
             
-            // Delete from local cache
+            // then delete from local cache
             goalDao.deleteGoal(goal)
             
         } catch (e: Exception) {

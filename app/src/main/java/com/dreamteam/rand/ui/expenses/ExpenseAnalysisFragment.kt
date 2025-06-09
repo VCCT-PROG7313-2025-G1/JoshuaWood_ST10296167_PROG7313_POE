@@ -14,7 +14,6 @@ import com.dreamteam.rand.R
 import com.dreamteam.rand.data.RandDatabase
 import com.dreamteam.rand.data.entity.TransactionType
 import com.dreamteam.rand.data.entity.Goal
-import com.dreamteam.rand.data.entity.GoalSpendingStatus
 import com.dreamteam.rand.data.repository.CategoryRepository
 import com.dreamteam.rand.data.repository.ExpenseRepository
 import com.dreamteam.rand.data.repository.GoalRepository
@@ -23,7 +22,6 @@ import com.dreamteam.rand.ui.auth.UserViewModel
 import com.dreamteam.rand.ui.categories.CategoryViewModel
 import com.dreamteam.rand.ui.goals.GoalViewModel
 import com.dreamteam.rand.ui.common.ChartUtils
-import com.dreamteam.rand.ui.common.ViewUtils
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
@@ -32,7 +30,6 @@ import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.utils.ColorTemplate
 import java.util.Calendar
-import java.util.Date
 
 class ExpenseAnalysisFragment : Fragment() {
 
@@ -73,8 +70,6 @@ class ExpenseAnalysisFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //ViewUtils.setToolbarGradient(this, binding.toolbar) to add a dark mode gradient to the toolbar
-        
         // Setup back button
         binding.toolbar.setNavigationOnClickListener {
             findNavController().navigateUp()

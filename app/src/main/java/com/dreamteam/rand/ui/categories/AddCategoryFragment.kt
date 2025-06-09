@@ -26,7 +26,6 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.graphics.drawable.GradientDrawable
 import com.dreamteam.rand.data.firebase.CategoryFirebase
-import com.dreamteam.rand.ui.common.ViewUtils
 
 // this fragment lets you create a new category
 // you can pick a name, color, and icon for your category
@@ -76,7 +75,6 @@ class AddCategoryFragment : Fragment() {
     // setup everything after the view is created
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //ViewUtils.setToolbarGradient(this, binding.toolbar) to add a dark mode gradient to the toolbar
         Log.d(TAG, "Setting up add category view")
         // set up all the ui stuff
         setupToolbar()

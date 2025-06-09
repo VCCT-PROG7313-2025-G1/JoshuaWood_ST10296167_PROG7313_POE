@@ -13,39 +13,14 @@ import kotlinx.coroutines.flow.flow
 class GoalFirebase {
     private val TAG = "GoalFirebase"
     private val db = FirebaseFirestore.getInstance()
+    // get firestore goals collection
     val goalsCollection = db.collection("goals")
 
-    suspend fun getGoalById(id: Long): Goal? {
-        return try {
-            Log.d(TAG, "Getting goal by ID: $id")
-            val documents = goalsCollection
-                .whereEqualTo("id", id)
-                .get(Source.SERVER)
-                .await()
-            
-            val goal = documents.documents.firstOrNull()?.toObject(Goal::class.java)
-            if (goal != null) {
-                Log.d(TAG, "Found goal: ${goal.name}")
-            } else {
-                Log.d(TAG, "No goal found with ID: $id")
-            }
-            goal
-        } catch (e: Exception) {
-            Log.e(TAG, "Error getting goal by ID: ${e.message}", e)
-            try {
-                Log.d(TAG, "Trying cache for goal ID: $id")
-                val documents = goalsCollection
-                    .whereEqualTo("id", id)
-                    .get(Source.CACHE)
-                    .await()
-                documents.documents.firstOrNull()?.toObject(Goal::class.java)
-            } catch (e2: Exception) {
-                Log.e(TAG, "Cache attempt also failed: ${e2.message}", e2)
-                null
-            }
-        }
-    }
+    // AI DECLARATION:
+    // used Claude to provide some assistance in constructing the methods
+    // and how to interact wih firebase
 
+    // get all goals for a specific user from firestore
     fun getAllGoals(userId: String): Flow<List<Goal>> = flow {
         Log.d(TAG, "Getting goals for userId=$userId from Firestore")
         val snapshot = goalsCollection
@@ -59,7 +34,7 @@ class GoalFirebase {
         emit(goals)
     }.catch { e ->
         Log.e(TAG, "Error getting goals: ${e.message}", e)
-        // Try cache if server fails
+        // if retrieving from firestore fails, try the local cache
         try {
             val cacheSnapshot = goalsCollection
                 .whereEqualTo("userId", userId)
@@ -79,30 +54,32 @@ class GoalFirebase {
         }
     }
 
+    // insert a category into firestore
     suspend fun insertGoal(goal: Goal): Long {
         return try {
             Log.d(TAG, "Inserting goal in Firebase: $goal")
-            
-            // Get the current maximum ID
+
+            // get the latest ID used for a category
             val maxIdDoc = goalsCollection
                 .orderBy("id", Query.Direction.DESCENDING)
                 .limit(1)
                 .get()
                 .await()
 
+            // use this ID to determine the next ID to use
             val nextId = if (!maxIdDoc.isEmpty) {
                 val maxGoal = maxIdDoc.documents[0].toObject(Goal::class.java)
                 (maxGoal?.id ?: 0) + 1
             } else {
-                1L // Start with 1 if no goals exist
+                1L // start with and ID of 1 if no categories exist
             }
 
             Log.d(TAG, "Generated next ID: $nextId")
             
-            // Create a new goal with the next ID
+            // create a new goal with the next ID
             val goalWithId = goal.copy(id = nextId)
-            
-            // Save to Firebase
+
+            // save the goal to Firebase
             Log.d(TAG, "Saving goal to Firebase: $goalWithId")
             val docRef = goalsCollection.document()
             docRef.set(goalWithId).await()
@@ -115,6 +92,7 @@ class GoalFirebase {
         }
     }
 
+    // update a goal with new information on firestore
     suspend fun updateGoal(goal: Goal): Boolean {
         return try {
             Log.d(TAG, "Updating goal: ${goal.id}")
@@ -137,6 +115,7 @@ class GoalFirebase {
         }
     }
 
+    // delete a goal from firestore
     suspend fun deleteGoal(goal: Goal): Boolean {
         return try {
             Log.d(TAG, "Deleting goal: ${goal.id}")

@@ -26,7 +26,6 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.dreamteam.rand.R
 import com.dreamteam.rand.databinding.FragmentProfileBinding
 import com.dreamteam.rand.ui.auth.UserViewModel
-import com.dreamteam.rand.ui.common.ViewUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import java.io.File
@@ -36,7 +35,6 @@ class ProfileFragment : Fragment() {
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
     private val userViewModel: UserViewModel by activityViewModels()
-    
     private var currentPhotoUri: Uri? = null
     
     // Image picker launcher
@@ -63,7 +61,6 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //ViewUtils.setToolbarGradient(this, binding.toolbar) to add a dark mode gradient to the banner
         setupToolbar()
         setupProfilePictureClick()
         observeUserData()
@@ -126,6 +123,7 @@ class ProfileFragment : Fragment() {
             .into(binding.profileImageView)
     }
 
+    // get required user data and load updated achievements
     private fun loadAchievements(userId: String, userLevel: Int) {
         viewLifecycleOwner.lifecycleScope.launch {
             val data = userViewModel.getAchievementData(userId)
@@ -163,7 +161,7 @@ class ProfileFragment : Fragment() {
         achievements.forEachIndexed { index, achievement ->
             val achievementView = createAchievementView(achievement)
 
-            // Apply staggered fade-in animation
+            // apply staggered fade-in animation
             val fadeIn = AlphaAnimation(0f, 1f).apply {
                 duration = 500
                 startOffset = (index * 300).toLong()
@@ -175,6 +173,7 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    // create and configure the view for displaying each achievement
     private fun createAchievementView(achievement: Achievement): View {
         val inflater = LayoutInflater.from(requireContext())
         val view = inflater.inflate(R.layout.item_achievement, null)

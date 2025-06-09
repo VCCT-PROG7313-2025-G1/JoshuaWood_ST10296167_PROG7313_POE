@@ -31,7 +31,6 @@ import java.util.Date
 import java.util.Locale
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
-import com.dreamteam.rand.ui.common.ViewUtils
 
 // this fragment lets you add a new expense with all its details
 // you can pick a category, date, amount, and attach a photo of the receipt
@@ -78,7 +77,6 @@ class AddExpenseFragment : Fragment() {
     // setup all the UI components after the view is created
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //ViewUtils.setToolbarGradient(this, binding.toolbar) to allow the banner to change with dark mode
         Log.d(TAG, "Setting up add expense view")
         setupToolbar()
         setupDatePicker()

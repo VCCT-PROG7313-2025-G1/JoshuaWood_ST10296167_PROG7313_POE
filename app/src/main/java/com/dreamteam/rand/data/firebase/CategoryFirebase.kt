@@ -13,40 +13,14 @@ import kotlinx.coroutines.flow.flow
 class CategoryFirebase {
     private val TAG = "CategoryFirebase"
     private val db = FirebaseFirestore.getInstance()
-    val categoriesCollection = db.collection("categories") // Made public for repository access
+    // get firestore categories collection
+    val categoriesCollection = db.collection("categories")
 
-    suspend fun getCategoryById(id: Long): Category? {
-        return try {
-            Log.d(TAG, "Getting category by ID: $id")
-            val documents = categoriesCollection
-                .whereEqualTo("id", id)
-                .get(Source.SERVER) // Explicitly try server first
-                .await()
-            
-            val category = documents.documents.firstOrNull()?.toObject(Category::class.java)
-            if (category != null) {
-                Log.d(TAG, "Found category: ${category.name}")
-            } else {
-                Log.d(TAG, "No category found with ID: $id")
-            }
-            category
-        } catch (e: Exception) {
-            Log.e(TAG, "Error getting category by ID: ${e.message}", e)
-            // Try cache if server fails
-            try {
-                Log.d(TAG, "Trying cache for category ID: $id")
-                val documents = categoriesCollection
-                    .whereEqualTo("id", id)
-                    .get(Source.CACHE)
-                    .await()
-                documents.documents.firstOrNull()?.toObject(Category::class.java)
-            } catch (e2: Exception) {
-                Log.e(TAG, "Cache attempt also failed: ${e2.message}", e2)
-                null
-            }
-        }
-    }
+    // AI DECLARATION:
+    // used Claude to provide some assistance in constructing the methods
+    // and how to interact wih firebase
 
+    // get all categories for a specific user from firestore
     fun getAllCategories(userId: String): Flow<List<Category>> = flow {
         Log.d(TAG, "Getting categories for userId=$userId from Firestore")
         val snapshot = categoriesCollection
@@ -60,7 +34,7 @@ class CategoryFirebase {
         emit(categories)
     }.catch { e ->
         Log.e(TAG, "Error getting categories: ${e.message}", e)
-        // Try cache if server fails
+        // if retrieving from firestore fails, try the local cache
         try {
             val cacheSnapshot = categoriesCollection
                 .whereEqualTo("userId", userId)
@@ -80,30 +54,32 @@ class CategoryFirebase {
         }
     }
 
+    // insert a category into firestore
     suspend fun insertCategory(category: Category): Long {
         return try {
             Log.d(TAG, "Inserting category in Firebase: $category")
             
-            // Get the current maximum ID
+            // get the latest ID used for a category
             val maxIdDoc = categoriesCollection
                 .orderBy("id", Query.Direction.DESCENDING)
                 .limit(1)
                 .get()
                 .await()
 
+            // use this ID to determine the next ID to use
             val nextId = if (!maxIdDoc.isEmpty) {
                 val maxCategory = maxIdDoc.documents[0].toObject(Category::class.java)
                 (maxCategory?.id ?: 0) + 1
             } else {
-                1L // Start with 1 if no categories exist
+                1L // start with and ID of 1 if no categories exist
             }
 
             Log.d(TAG, "Generated next ID: $nextId")
             
-            // Create a new category with the next ID
+            // create a new category with the next ID
             val categoryWithId = category.copy(id = nextId)
             
-            // Save to Firebase
+            // save the category to Firebase
             Log.d(TAG, "Saving category to Firebase: $categoryWithId")
             val docRef = categoriesCollection.document()
             docRef.set(categoryWithId).await()
@@ -116,6 +92,7 @@ class CategoryFirebase {
         }
     }
 
+    // update a category with new information on firestore
     suspend fun updateCategory(category: Category): Boolean {
         return try {
             Log.d(TAG, "Updating category: ${category.id}")
@@ -138,6 +115,7 @@ class CategoryFirebase {
         }
     }
 
+    // delete a category from firestore
     suspend fun deleteCategory(category: Category): Boolean {
         return try {
             Log.d(TAG, "Deleting category: ${category.id}")

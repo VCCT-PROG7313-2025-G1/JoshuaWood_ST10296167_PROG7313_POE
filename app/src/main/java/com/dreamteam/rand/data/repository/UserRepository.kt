@@ -14,11 +14,11 @@ class UserRepository(
 ) {
     private val TAG = "UserRepository"
 
-    // register a new user in both Firestore and Room
+    // register a new user in both firestore and local cache
     suspend fun registerUser(name: String, email: String, password: String): Result<User> {
         return withContext(Dispatchers.IO) {
             try {
-                // First check Firebase since it's our source of truth
+                // first check if the user exists in firestore
                 val existingFirestoreUser = userFirebase.getUserByEmail(email)
                 if (existingFirestoreUser != null) {
                     return@withContext Result.failure(Exception("User with this email already exists"))
@@ -30,13 +30,13 @@ class UserRepository(
                     password = password
                 )
                 
-                // Save to Firebase first
+                // save user to firestore first
                 val firestoreSuccess = userFirebase.insertUser(user)
                 if (!firestoreSuccess) {
                     return@withContext Result.failure(Exception("Failed to register user in Firebase"))
                 }
                 
-                // Then cache in Room
+                // then cache the user in room
                 userDao.upsertUser(user)
                 
                 Result.success(user)
@@ -53,7 +53,7 @@ class UserRepository(
             try {
                 Log.d(TAG, "Starting login process for email: $email")
                 
-                // Try local cache first
+                // try local cache first
                 Log.d(TAG, "Checking local cache...")
                 val localUser = userDao.authenticateUser(email, password)
                 if (localUser != null) {
@@ -61,7 +61,7 @@ class UserRepository(
                     return@withContext Result.success(localUser)
                 }
 
-                // If not in cache, try Firebase
+                // ff not in cache, try firestore
                 Log.d(TAG, "Checking Firebase...")
                 val firestoreUser = userFirebase.authenticateUser(email, password)
                 if (firestoreUser != null) {
@@ -83,13 +83,13 @@ class UserRepository(
     suspend fun getUserByUid(uid: String): Result<User> {
         return withContext(Dispatchers.IO) {
             try {
-                // Check local cache first
+                // check local cache first
                 val localUser = userDao.getUserByUid(uid)
                 if (localUser != null) {
                     return@withContext Result.success(localUser)
                 }
 
-                // If not in cache, get from Firebase and cache it
+                // if not in cache, get from firestore and cache it
                 val firestoreUser = userFirebase.getUserByUid(uid)
                 if (firestoreUser != null) {
                     userDao.insertUser(firestoreUser)
@@ -103,16 +103,16 @@ class UserRepository(
         }
     }
 
-    // update user's level and xp
+    // update a users level and xp
     suspend fun updateUserProgress(uid: String, level: Int, xp: Int): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
-                // update Firebase
+                // update firestore data
                 val firestoreSuccess = userFirebase.updateUserProgress(uid, level, xp)
                 if (!firestoreSuccess) {
                     Log.w(TAG, "Failed to update progress in Firebase")
                 }
-                // then local cache
+                // then update local cache
                 userDao.updateUserProgress(uid, level, xp)
 
                 Result.success(Unit)
@@ -126,10 +126,10 @@ class UserRepository(
     suspend fun updateUserTheme(uid: String, theme: String): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
-                // Update local cache first
+                // update local cache first
                 userDao.updateUserTheme(uid, theme)
                 
-                // Then update Firebase
+                // then update Firebase
                 val firestoreSuccess = userFirebase.updateUserTheme(uid, theme)
                 if (!firestoreSuccess) {
                     Log.w(TAG, "Failed to update theme in Firebase")
@@ -146,33 +146,13 @@ class UserRepository(
     suspend fun updateNotificationSettings(uid: String, enabled: Boolean): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
-                // Update local cache first
+                // update local cache first
                 userDao.updateNotificationSettings(uid, enabled)
                 
-                // Then update Firebase
+                // then update Firebase
                 val firestoreSuccess = userFirebase.updateNotificationSettings(uid, enabled)
                 if (!firestoreSuccess) {
                     Log.w(TAG, "Failed to update notification settings in Firebase")
-                }
-                
-                Result.success(Unit)
-            } catch (e: Exception) {
-                Result.failure(e)
-            }
-        }
-    }
-
-    // change user's currency
-    suspend fun updateUserCurrency(uid: String, currency: String): Result<Unit> {
-        return withContext(Dispatchers.IO) {
-            try {
-                // Update local cache first
-                userDao.updateUserCurrency(uid, currency)
-                
-                // Then update Firebase
-                val firestoreSuccess = userFirebase.updateUserCurrency(uid, currency)
-                if (!firestoreSuccess) {
-                    Log.w(TAG, "Failed to update currency in Firebase")
                 }
                 
                 Result.success(Unit)
@@ -186,10 +166,10 @@ class UserRepository(
     suspend fun updateUserProfilePicture(uid: String, profilePictureUri: String?): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
-                // Update local cache first
+                // update local cache first
                 userDao.updateUserProfilePicture(uid, profilePictureUri)
                 
-                // Then update Firebase
+                // then update Firebase
                 val firestoreSuccess = userFirebase.updateUserProfilePicture(uid, profilePictureUri)
                 if (!firestoreSuccess) {
                     Log.w(TAG, "Failed to update profile picture in Firebase")

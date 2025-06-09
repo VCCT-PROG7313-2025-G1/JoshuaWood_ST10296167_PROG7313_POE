@@ -73,26 +73,26 @@ interface TransactionDao {
     """)
     fun getExpensesByMonthAndYear(userId: String, month: String, year: String): Flow<List<Transaction>>
 
-    // Bulk insert transactions
+    // bulk insert transactions
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTransactions(transactions: List<Transaction>)
 
-    // Delete all transactions for a user
+    // delete all transactions for a user
     @Query("DELETE FROM transactions WHERE userId = :userId")
     suspend fun deleteTransactionsForUser(userId: String)
 
-    // sync transactions from Firebase - using bulk operations
+    // sync expenses local cache with firebase data
     @androidx.room.Transaction
     suspend fun syncTransactions(userId: String, transactions: List<Transaction>) {
         deleteTransactionsForUser(userId)
         insertTransactions(transactions)
     }
 
-    // Get count of transactions for a user
+    // get count of transactions for a user
     @Query("SELECT COUNT(*) FROM transactions WHERE userId = :userId")
     suspend fun getTransactionCount(userId: String): Int
 
-    // Get all transactions amount
+    // get all transactions amount
     @Query("""
         SELECT SUM(amount) FROM transactions 
         WHERE userId = :userId

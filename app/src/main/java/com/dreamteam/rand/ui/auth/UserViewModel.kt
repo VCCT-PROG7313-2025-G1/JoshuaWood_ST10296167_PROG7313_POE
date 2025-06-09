@@ -98,12 +98,12 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                 saveUserToPreferences(user)
 
                 try{
+                    // try sync user data from firestore
                     firebaseRepository.syncAllUserData(user.uid)
                     _currentUser.value = user
                     _syncCompleted.postValue(true)
                 } catch (e: Exception){
                     Log.e("UserViewModel", "Sync failed: ${e.message}")
-                    // Decide: do you want to proceed without sync or show error?
                     _error.value = "Data sync failed: ${e.message}"
                 }
             }.onFailure { exception ->
@@ -130,14 +130,19 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // update how far they've gotten in the app
+    // update a users xp and calculate their level
     fun updateUserProgress(increasedXP: Int) {
         viewModelScope.launch {
+            // get current user
             currentUser.value?.let { user ->
+                // add new xp
                 val newXP = user.xp + increasedXP
+                // calculate new level
                 val newLvl = calculateLevel(newXP);
+                // update the users data
                 val result = userRepository.updateUserProgress(user.uid, newLvl, newXP)
                 result.onSuccess {
+                    // update current user object
                     val updatedUser = user.copy(xp = newXP, level = newLvl)
                     _currentUser.value = updatedUser
                     Log.d("UserViewModel", "User progress updated: Level $newLvl, XP $newXP")
@@ -149,6 +154,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // calculate current user level based on xp
     private fun calculateLevel(xp: Int): Int{
         if(xp <= 0){
             return 1
@@ -166,13 +172,13 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             currentUser.value?.let { user ->
                 val result = userRepository.updateUserTheme(user.uid, theme)
                 result.onSuccess {
-                    // Update local app preferences
+                    // update local app preferences
                     appPreferences.edit().putString("theme_mode", theme).apply()
                     
-                    // Apply the theme change immediately
+                    // apply the theme change immediately
                     applyTheme(theme)
                     
-                    // Update the current user object
+                    // update the current user object
                     _currentUser.value = user.copy(theme = theme)
                 }
                 result.onFailure { exception ->
@@ -188,7 +194,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             currentUser.value?.let { user ->
                 val result = userRepository.updateNotificationSettings(user.uid, enabled)
                 result.onSuccess {
-                    // Update the current user object
+                    // update the current user object
                     _currentUser.value = user.copy(notificationsEnabled = enabled)
                 }
                 result.onFailure { exception ->
@@ -204,7 +210,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             currentUser.value?.let { user ->
                 val result = userRepository.updateUserProfilePicture(user.uid, profilePictureUri)
                 result.onSuccess {
-                    // Update the current user object
+                    // update the current user object
                     _currentUser.value = user.copy(profilePictureUri = profilePictureUri)
                 }
                 result.onFailure { exception ->

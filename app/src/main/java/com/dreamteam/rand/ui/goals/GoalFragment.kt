@@ -21,7 +21,6 @@ import com.dreamteam.rand.data.repository.ExpenseRepository
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import com.dreamteam.rand.data.firebase.GoalFirebase
-import com.dreamteam.rand.ui.common.ViewUtils
 
 // this fragment shows all your spending goals
 // you can see how much you've spent compared to your goals and add new ones
@@ -64,7 +63,6 @@ class GoalFragment : Fragment() {
     // setup all the UI components after the view is created
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //ViewUtils.setToolbarGradient(this, binding.toolbar) to add a dark mode gradient to the banner
         Log.d(TAG, "Setting up goals view")
         setupToolbar()
         setupRecyclerView()

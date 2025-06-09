@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AlphaAnimation
-import android.view.animation.Animation
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import androidx.appcompat.app.AppCompatDelegate
@@ -34,15 +32,11 @@ class SettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         // Apply dynamic gradient to toolbar
-       // ViewUtils.setToolbarGradient(this, binding.toolbar)
-
         setupToolbar()
         setupThemeSettings(view)
-        setupNotificationsSwitch()
+       // setupNotificationsSwitch()
         observeUserViewModel()
-
         // Apply staggered fade-in
         setupStaggeredFadeInAnimation()
     }
@@ -82,17 +76,9 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    private fun setupNotificationsSwitch() {
-        binding.notificationsSwitch.setOnCheckedChangeListener { _, isChecked ->
-            userViewModel.updateNotificationSettings(isChecked)
-        }
-    }
-
     private fun observeUserViewModel() {
         userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
             if (user == null) return@observe
-            binding.notificationsSwitch.isChecked = user.notificationsEnabled
-
         }
     }
 
