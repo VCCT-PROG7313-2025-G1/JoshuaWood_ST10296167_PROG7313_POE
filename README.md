@@ -125,7 +125,7 @@ With our new **User Level and Achievements** system, every action you take, whet
 - **Minimum SDK**: 24 (Android 7.0)
 - **Target SDK**: 35
 - **Architecture**: MVVM (Model-View-ViewModel)
-- **Database**: Room
+- **Database**: Firebase/Room
 - **UI Components**: Material Components
 
 
@@ -197,46 +197,6 @@ This way, we can work on multiple features at the same time without breaking the
 We have a workflow that automatically builds and tests the app every time someone wants to merge code into the main branch. The tests have to pass before GitHub will let the code get merged. This prevents broken code from reaching users. You can see the workflow in the `.github/workflows/android.yml` file.
 
 ---
-
-
-## Project Structure
-
-```
-app/
-├── src/
-│   ├── main/
-│   │   ├── java/
-│   │   │   └── com/
-│   │   │       └── dreamteam/
-│   │   │           └── rand/
-│   │   │               ├── data/
-│   │   │               │   ├── dao/            # Data Access Objects
-│   │   │               │   ├── entity/         # Database entities
-│   │   │               │   ├── repository/     # Repositories
-│   │   │               │   ├── AppDatabase.kt  # Database configuration
-│   │   │               │   └── RandDatabase.kt # Main database class
-│   │   │               ├── ui/
-│   │   │               │   ├── auth/           # Login and Register screens
-│   │   │               │   ├── categories/     # Budget categories features
-│   │   │               │   ├── common/         # Shared UI components
-│   │   │               │   ├── dashboard/      # Main dashboard
-│   │   │               │   ├── expenses/       # Expense tracking features
-│   │   │               │   ├── goals/          # Financial goals features
-│   │   │               │   ├── photo/          # Photo-related functionality
-│   │   │               │   ├── profile/        # User profile
-│   │   │               │   ├── settings/       # App settings
-│   │   │               │   └── MainActivity.kt # Entry point activity
-│   │   │               └── RandApplication.kt  # Application class
-│   │   ├── res # Resource files
-│   │   └── AndroidManifest.xml
-│   └── test/               # Unit tests
-└── build.gradle.kts        # App-level build configuration
-```
-
-The project follows the MVVM (Model-View-ViewModel) architecture pattern:
-- **Model**: Data layer with Room database, entities, and repositories
-- **View**: UI components, activities, and fragments
-- **ViewModel**: Manages UI-related data, handles business logic
 
 ## User Flow
 
