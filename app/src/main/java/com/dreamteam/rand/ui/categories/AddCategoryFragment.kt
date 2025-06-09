@@ -26,7 +26,6 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.graphics.drawable.GradientDrawable
 import com.dreamteam.rand.data.firebase.CategoryFirebase
-import com.dreamteam.rand.ui.common.ViewUtils
 
 // this fragment lets you create a new category
 // you can pick a name, color, and icon for your category

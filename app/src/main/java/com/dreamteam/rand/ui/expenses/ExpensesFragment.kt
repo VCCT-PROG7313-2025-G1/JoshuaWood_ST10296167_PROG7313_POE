@@ -28,7 +28,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
-import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
@@ -36,7 +35,6 @@ import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import android.graphics.Color
 import com.dreamteam.rand.ui.common.ChartUtils
-import com.dreamteam.rand.ui.common.ViewUtils
 
 // displays and manages the list of expenses with filtering capabilities
 class ExpensesFragment : Fragment() {

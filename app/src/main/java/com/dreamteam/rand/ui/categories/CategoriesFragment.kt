@@ -25,7 +25,6 @@ import java.util.*
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import com.dreamteam.rand.data.firebase.CategoryFirebase
-import com.dreamteam.rand.ui.common.ViewUtils
 
 // this fragment shows all the categories and how much was spent in each one
 // you can filter by date range and see spending stats

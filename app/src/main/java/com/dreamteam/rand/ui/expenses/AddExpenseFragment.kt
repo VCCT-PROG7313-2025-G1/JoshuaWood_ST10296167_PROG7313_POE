@@ -31,7 +31,6 @@ import java.util.Date
 import java.util.Locale
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
-import com.dreamteam.rand.ui.common.ViewUtils
 
 // this fragment lets you add a new expense with all its details
 // you can pick a category, date, amount, and attach a photo of the receipt

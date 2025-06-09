@@ -26,7 +26,6 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.dreamteam.rand.R
 import com.dreamteam.rand.databinding.FragmentProfileBinding
 import com.dreamteam.rand.ui.auth.UserViewModel
-import com.dreamteam.rand.ui.common.ViewUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import java.io.File

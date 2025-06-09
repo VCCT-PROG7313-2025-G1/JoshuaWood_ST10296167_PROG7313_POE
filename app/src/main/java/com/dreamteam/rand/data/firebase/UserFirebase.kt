@@ -4,9 +4,6 @@ import android.util.Log
 import com.dreamteam.rand.data.entity.User
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.channels.awaitClose
 
 class UserFirebase {
     private val TAG = "UserFirebase"
