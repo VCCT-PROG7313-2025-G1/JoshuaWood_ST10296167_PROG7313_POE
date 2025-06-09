@@ -63,7 +63,6 @@ class AddGoalFragment : Fragment() {
     // setup all the UI components after the view is created
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //ViewUtils.setToolbarGradient(this, binding.toolbar) to add a dark mode gradient to the banner
         Log.d(TAG, "Setting up add goal view")
         setupToolbar()
         setupColorSelection()

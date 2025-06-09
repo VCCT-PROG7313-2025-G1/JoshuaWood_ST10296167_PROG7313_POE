@@ -26,12 +26,12 @@ data class Category(
     val name: String = "",             // category name
     val type: TransactionType = TransactionType.EXPENSE,    // income or expense
     val budget: Double? = null,          // budget limit (optional)
-    val color: String = "#FF5252",            // ui color
-    val icon: String = "ic_shopping",             // category icon
+    val color: String = "#FF5252",       // ui color
+    val icon: String = "ic_shopping",    // category icon
     @get:PropertyName("default")
     @set:PropertyName("default")
-    var isDefault: Boolean = false,       // is it a system category
-    val createdAt: Long = System.currentTimeMillis()           // when category was created
+    var isDefault: Boolean = false,      // is it a system category
+    val createdAt: Long = System.currentTimeMillis()    // when category was created
 ) {
     // No-argument constructor required for Firestore
     constructor() : this(

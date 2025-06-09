@@ -78,7 +78,6 @@ class ExpensesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //ViewUtils.setToolbarGradient(this, binding.toolbar) to add a dark mode gradient to the toolbar
         Log.d(TAG, "Setting up expenses view with savedInstanceState: ${savedInstanceState != null}")
         setupToolbar()
         setupRecyclerView()

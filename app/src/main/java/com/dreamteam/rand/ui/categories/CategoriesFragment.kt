@@ -75,7 +75,6 @@ class CategoriesFragment : Fragment() {
     // setup everything after the view is created
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //ViewUtils.setToolbarGradient(this, binding.toolbar) to add a dark mode gradient to the toolbar
         Log.d(TAG, "Setting up categories view")
         setupToolbar()
         setupRecyclerView()

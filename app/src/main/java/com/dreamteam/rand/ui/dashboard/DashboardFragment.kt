@@ -31,6 +31,7 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.net.Uri
 import android.widget.ImageView
+import androidx.core.view.forEach
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.dreamteam.rand.ui.common.ViewUtils
@@ -84,8 +85,6 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-       // ViewUtils.setToolbarGradient(this, binding.toolbar) used to set gradient background to dark tone
-
         setupToolbar()
         setupNavigationDrawer()
         setupClickListeners()
@@ -94,8 +93,6 @@ class DashboardFragment : Fragment(), NavigationView.OnNavigationItemSelectedLis
         setupAiCard()
         observeUserData()
         setupStaggeredFadeInAnimation()
-
-
     }
     
     private fun setupAiCard() {

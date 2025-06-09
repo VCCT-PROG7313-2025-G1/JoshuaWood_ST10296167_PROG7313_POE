@@ -73,8 +73,6 @@ class ExpenseAnalysisFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //ViewUtils.setToolbarGradient(this, binding.toolbar) to add a dark mode gradient to the toolbar
-        
         // Setup back button
         binding.toolbar.setNavigationOnClickListener {
             findNavController().navigateUp()

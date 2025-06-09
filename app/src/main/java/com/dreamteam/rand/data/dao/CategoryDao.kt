@@ -24,6 +24,7 @@ interface CategoryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCategory(category: Category): Long
 
+    // add a new category or replace if exists
     @Upsert
     suspend fun upsertCategory(category: Category)
 
@@ -47,10 +48,12 @@ interface CategoryDao {
     """)
     fun getDefaultCategories(userId: String): Flow<List<Category>>
 
+    // delete a user
     @Transaction
     @Query("DELETE FROM categories WHERE userId = :userId")
     suspend fun deleteAllUserCategories(userId: String)
 
+    // sync categories local cache with firebase data
     @Transaction
     suspend fun syncCategories(userId: String, categories: List<Category>) {
         Log.d("CategoryDao", "Starting category sync for user $userId with ${categories.size} categories")
@@ -62,6 +65,7 @@ interface CategoryDao {
         Log.d("CategoryDao", "Final category count for user $userId: $count")
     }
 
+    // get total count of categories for a user
     @Query("SELECT COUNT(*) FROM categories WHERE userId = :userId")
     suspend fun getCategoryCount(userId: String): Int
 }

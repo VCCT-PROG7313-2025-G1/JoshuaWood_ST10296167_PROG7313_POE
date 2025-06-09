@@ -184,27 +184,6 @@ class ExpenseViewModel(private val repository: ExpenseRepository) : ViewModel() 
         }
     }
 
-    // update an existing expense
-    fun updateExpense(expense: Transaction) {
-        viewModelScope.launch {
-            repository.updateExpense(expense)
-            _saveSuccess.postValue(true)
-            
-            // update monthly total
-            fetchTotalMonthlyExpenses(expense.userId)
-        }
-    }
-
-    // delete an expense
-    fun deleteExpense(expense: Transaction) {
-        viewModelScope.launch {
-            repository.deleteExpense(expense)
-            
-            // update monthly total
-            fetchTotalMonthlyExpenses(expense.userId)
-        }
-    }
-
     // ai declaration: here we used chatgpt to implement date filtering for transactions
     // using coroutines and flow transformation
     fun fetchTotalMonthlyExpenses(userId: String) {

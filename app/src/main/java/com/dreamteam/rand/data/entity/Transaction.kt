@@ -40,7 +40,7 @@ enum class TransactionType {
 data class Transaction(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val userId: String = "", // Empty string for no-arg constructor
+    val userId: String = "",
     val amount: Double = 0.0,
     val type: TransactionType = TransactionType.EXPENSE,
     val categoryId: Long? = null,
@@ -49,7 +49,7 @@ data class Transaction(
     val receiptUri: String? = null,
     val createdAt: Long = 0
 ) {
-    // No-argument constructor for Firebase
+    // No-argument constructor required for Firestore
     constructor() : this(
         id = 0,
         userId = "",

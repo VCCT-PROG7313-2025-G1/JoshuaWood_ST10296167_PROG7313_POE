@@ -11,8 +11,14 @@ import kotlinx.coroutines.channels.awaitClose
 class UserFirebase {
     private val TAG = "UserFirebase"
     private val db = FirebaseFirestore.getInstance()
+    // get firestore users collection
     private val usersCollection = db.collection("users")
 
+    // AI DECLARATION:
+    // used Claude to provide some assistance in constructing the methods
+    // and how to interact wih firebase
+
+    // get a specific user by ID from firestore
     suspend fun getUserByUid(uid: String): User? {
         return try {
             val document = usersCollection.document(uid).get().await()
@@ -22,6 +28,7 @@ class UserFirebase {
         }
     }
 
+    // get a specific user by email from firestore
     suspend fun getUserByEmail(email: String): User? {
         return try {
             val documents = usersCollection.whereEqualTo("email", email).get().await()
@@ -31,6 +38,7 @@ class UserFirebase {
         }
     }
 
+    // authenticate a user by checking if a user exists in firestore with the same email and password
     suspend fun authenticateUser(email: String, password: String): User? {
         return try {
             Log.d(TAG, "Attempting to authenticate user with email: $email")
@@ -60,22 +68,7 @@ class UserFirebase {
         }
     }
 
-    fun getAllUsers(): Flow<List<User>> = callbackFlow {
-        val registration = usersCollection.addSnapshotListener { snapshot, error ->
-            if (error != null) {
-                return@addSnapshotListener
-            }
-            
-            val users = snapshot?.documents?.mapNotNull { 
-                it.toObject(User::class.java) 
-            } ?: emptyList()
-            
-            trySend(users)
-        }
-        
-        awaitClose { registration.remove() }
-    }
-
+    // add a user to firestore
     suspend fun insertUser(user: User): Boolean {
         return try {
             usersCollection.document(user.uid).set(user).await()
@@ -85,6 +78,7 @@ class UserFirebase {
         }
     }
 
+    // update a user on firestore
     suspend fun updateUser(user: User): Boolean {
         return try {
             usersCollection.document(user.uid).set(user).await()
@@ -94,6 +88,7 @@ class UserFirebase {
         }
     }
 
+    // delete a user from firestore
     suspend fun deleteUser(user: User): Boolean {
         return try {
             usersCollection.document(user.uid).delete().await()
@@ -103,6 +98,7 @@ class UserFirebase {
         }
     }
 
+    // update the xp and level of a user on firestore
     suspend fun updateUserProgress(uid: String, level: Int, xp: Int): Boolean {
         return try {
             usersCollection.document(uid).update(
@@ -117,6 +113,7 @@ class UserFirebase {
         }
     }
 
+    // change the theme of the app for a specific user
     suspend fun updateUserTheme(uid: String, theme: String): Boolean {
         return try {
             usersCollection.document(uid).update("theme", theme).await()
@@ -143,7 +140,8 @@ class UserFirebase {
             false
         }
     }
-    
+
+    // change the profile picture for an account
     suspend fun updateUserProfilePicture(uid: String, profilePictureUri: String?): Boolean {
         return try {
             usersCollection.document(uid).update("profilePictureUri", profilePictureUri).await()

@@ -16,43 +16,42 @@ class CategoryRepository(
     private val categoryFirebase: CategoryFirebase = CategoryFirebase()
 ) {
     private val TAG = "CategoryRepository"
-    
-    // Allow setting the coroutineScope from ViewModel
+    // allow setting the coroutineScope from ViewModel
     lateinit var coroutineScope: CoroutineScope
 
-    // Get all categories for a user - use local cache first
+    // get all categories for a user
     fun getCategories(userId: String): Flow<List<Category>> {
         Log.d(TAG, "Getting categories for user: $userId from local cache")
         return categoryDao.getCategories(userId)
     }
     
-    // Get categories by type - use local cache first
+    // get categories by type
     fun getCategoriesByType(userId: String, type: TransactionType): Flow<List<Category>> {
         Log.d(TAG, "Getting categories for user: $userId, type: $type from local cache")
         return categoryDao.getCategoriesByType(userId, type.toString())
     }
     
-    // Get a specific category - use local cache first
+    // get a specific category
     suspend fun getCategory(id: Long): Category? {
         return categoryDao.getCategory(id)
     }
     
-    // Insert a new category into both Firebase and local cache
+    // insert a new category into firestore and then local cache
     suspend fun insertCategory(category: Category): Long = withContext(Dispatchers.IO) {
         try {
             Log.d(TAG, "Inserting new category: ${category.name}")
             
-            // Insert into Firebase first to get the ID
+            // insert into firestore and get the ID
             val firestoreId = categoryFirebase.insertCategory(category)
             if (firestoreId <= 0) {
                 Log.e(TAG, "Failed to insert category in Firebase")
                 return@withContext -1L
             }
             
-            // Create category with Firebase ID
+            // create a copy of the category
             val categoryWithId = category.copy(id = firestoreId)
             
-            // Cache in Room
+            // insert into local cache
             try {
                 categoryDao.insertCategory(categoryWithId)
                 Log.d(TAG, "Category cached successfully with ID: $firestoreId")
@@ -68,16 +67,16 @@ class CategoryRepository(
         }
     }
     
-    // Update both Firebase and local cache
+    // update category information in both firestore and local cache
     suspend fun updateCategory(category: Category) = withContext(Dispatchers.IO) {
         try {
-            // Update Firebase first
+            // update firestore first
             val firestoreSuccess = categoryFirebase.updateCategory(category)
             if (!firestoreSuccess) {
                 Log.w(TAG, "Failed to update category in Firebase")
             }
             
-            // Update local cache
+            // then update local cache
             categoryDao.updateCategory(category)
             
         } catch (e: Exception) {
@@ -86,16 +85,16 @@ class CategoryRepository(
         }
     }
     
-    // Delete from both Firebase and local cache
+    // delete category from both firestore and local cache
     suspend fun deleteCategory(category: Category) = withContext(Dispatchers.IO) {
         try {
-            // Delete from Firebase first
+            // delete from firestore first
             val firestoreSuccess = categoryFirebase.deleteCategory(category)
             if (!firestoreSuccess) {
                 Log.w(TAG, "Failed to delete category from Firebase")
             }
             
-            // Delete from local cache
+            // then delete from local cache
             categoryDao.deleteCategory(category)
             
         } catch (e: Exception) {
@@ -104,7 +103,7 @@ class CategoryRepository(
         }
     }
     
-    // Get system default categories from local cache
+    // get system default categories from local cache
     fun getDefaultCategories(userId: String): Flow<List<Category>> {
         return categoryDao.getDefaultCategories(userId)
     }

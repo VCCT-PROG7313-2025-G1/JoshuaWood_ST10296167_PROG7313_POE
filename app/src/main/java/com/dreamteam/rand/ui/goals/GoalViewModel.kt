@@ -111,7 +111,6 @@ class GoalViewModel(private val repository: GoalRepository) : ViewModel() {
         viewModelScope.launch {
             try {
                 repository.updateSpentAmount(goalId, newAmount)
-                // Note: total saved will be updated via observer
             } catch (e: Exception) {
                 Log.e("GoalViewModel", "Error updating goal spending", e)
             }
