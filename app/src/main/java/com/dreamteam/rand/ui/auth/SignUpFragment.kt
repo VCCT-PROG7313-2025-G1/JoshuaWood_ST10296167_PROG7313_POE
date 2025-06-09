@@ -150,7 +150,6 @@ class SignUpFragment : Fragment() {
                     findNavController().navigate(R.id.action_signUp_to_dashboard)
                 } catch (e: Exception) {
                     Log.e(TAG, "Navigation failed after registration: ${e.message}")
-                    Snackbar.make(binding.root, "Registration successful but navigation failed", Snackbar.LENGTH_LONG).show()
                 }
             }
         }
