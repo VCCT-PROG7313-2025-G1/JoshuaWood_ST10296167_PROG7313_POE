@@ -25,6 +25,90 @@ When using Rand, we want your experience to be as convenient as possible, that's
 
 So if you're looking to start tracking and managing your expenses and budget in a way that's smart, simple, and actually enjoyable, Rand is the app for you.
 
+## New Features in Part 3
+
+> [!NOTE]
+> With Part 3, we've added a TON of new features to the app.
+
+When it came to integrating new features into our app we had to make some changes from the features initially outlined in our design document. We decided to stick with **real-time dynamic analytics**, but altered how we went about providing this, deciding to implement **personalized AI insights** onto the dashboard where users can easily receive financial advice personalized to their spending habits. Additionally we also implemented an **expense trends graph** where users can easily view and analyze their daily expenses. We also decided to make changes to our rewards feature outlined in the design document, deciding to instead implement a **user** **level and achievement system** feature for each user which provides a much needed gamification element to the app. Finally, we implemented **dark mode**, an additional feature not included in our design document, which allows users to choose between light and dark themes based on their personal preference.
+
+## **AI Spending Insights**
+
+---
+
+With **AI Spending Insights**, your finances drastically improve. This feature uses AI to analyze your spending habits, detect trends, and highlight unusual spikes, all to give you easy-to-understand, personalized advice that feels like it came from a financial coach.
+
+**Why It's Useful**
+
+* **Smarter recommendations, less effort**  
+  You’ll get helpful, specific suggestions based on *your* habits. Providing a personalised experience. 
+
+* **Feels like a financial coach**  
+  Insights are personalized and human, not robotic. You’re nudged, not nagged.
+
+* **Builds trust with transparency**  
+  When users see the app recognizing real patterns in their behavior and offering real value, it builds confidence and loyalty.
+
+* **Clear, not cluttered**  
+  No more digging through graphs or charts. You get straightforward advice in natural language, so you always know where you stand.
+
+# **Expense Trends**
+
+---
+
+**Visualize your spending at a glance.**  
+Our new **Expense Trends** graph helps users to stay on top of their daily spending by turning raw data into easy-to-read visuals. With just a glance, you can see how your expenses change day to day, track your habits, and spot unusual spikes.
+
+**Why It's Useful** 
+
+* **Patterns made simple**  
+  Instead of scrolling through endless lists, users can quickly identify trends in their spending.
+
+* **Better decisions, faster**  
+  Seeing your habits visually helps you understand where your money goes, so you can make changes with confidence 
+
+* **Stay consistent**  
+  Daily trends encourage users to keep an eye on their habits, leading to better long-term financial behavior.
+
+# **User Level and Achievements**
+
+---
+
+**Finance just got a whole lot more fun.**  
+With our new **User Level and Achievements** system, every action you take, whether it’s logging an expense, setting a goal, or organizing your categories, helps you earn experience points (XP) and level up. It’s like leveling up in a game. Grow from a rookie to a master budgeter\!
+
+**Why It's Useful**
+
+* **Progress with purpose**  
+  Users love seeing visible progress. That’s why we give you a level, XP bar, and unlockable achievements to keep you motivated.
+
+* **Positive feedback loop**  
+  Rewarding users with XP, gives users regular motivation to keep going.
+
+* **Discover more of the app**  
+  Achievements push users to explore things like budgeting or goal-setting they might’ve skipped.
+
+# **Dark Mode**
+
+---
+
+**Comfort and customization, your way.**  
+**Dark Mode** gives users the freedom to choose between light or dark themes based on their preferences and environment.
+
+**Why It's Useful**
+
+* **Reduces eye strain**  
+  Perfect for low-light environments and night time use 
+
+* **Modern and sleek**  
+  Adds a polished, professional look that users appreciate
+
+* **User-friendly**   
+  A visually comfortable experience tailored to your viewing preference.
+
+
+
+
 ## Features
 
 - Expense tracking
@@ -62,6 +146,57 @@ So if you're looking to start tracking and managing your expenses and budget in 
 2. Open the project in Android Studio
 3. Sync Gradle files
 4. Build and run the application
+
+## Design Choices and How We Use GitHub
+
+### **How the App is Built**
+
+**App Structure (MVVM)**
+The app uses a simple pattern where each screen has three parts: what you see (the UI), what manages the data (ViewModel), and where the data comes from (Repository). This makes it easier to test and change things later without breaking everything else.
+
+The flow looks like this: Screen → ViewModel → Repository → Database/Firebase
+
+**Data Storage**
+We use two places to store data. The main storage is a local database on your phone (Room), which means the app works even without internet. We also backup everything to Firebase in the cloud, so you don't lose your data if something happens to your phone.
+
+The database is set up so each user has their own expenses, categories, and goals. Categories connect to expenses, so you can see how much you spend in each area.
+
+### **Design Choices**
+
+**Look and Feel**
+The app follows Google's Material Design, which means it looks familiar and works well with other Android apps. It supports both light and dark themes, and we made sure buttons and text are big enough for everyone to use easily.
+
+**Getting Around**
+The main sections (like Dashboard, Expenses, Goals) are easy to reach. The profile and settings are in a side menu that slides out. This keeps the main screen clean while still giving you quick access to everything.
+
+**Profile Pictures**
+When you add a profile picture, we don't store the actual image in the database (that would make it slow). Instead, we save where the image is stored on your phone and use a library called Glide to load it quickly. If something goes wrong, it just shows a default picture.
+
+### **Keeping Your Data Safe**
+
+**Local First, Cloud Backup**
+Your data lives on your phone first, so the app is always fast. Everything gets backed up to Firebase automatically when you have internet. This means you can use the app on the subway, and it will sync when you get back online.
+
+**Security**
+We only ask for the minimum information we need. Your data is encrypted and we use Firebase's built-in security. For profile pictures, we use Android's secure file system so other apps can't access them.
+
+---
+
+## 🐙 **How We Use GitHub**
+
+### **Project Organization**
+The code is organized in a clear folder structure. The main app code lives in the `app` folder, while GitHub Actions (our automation) goes in `.github/workflows`. We also have folders for documentation and build scripts. The `cloudflare-worker.js` file contains a script for generating the AI suggestions for the app.
+
+### **Working with Code Changes**
+We use different branches for different purposes. The `main` branch has the live app code that users see. We work on new features in separate `feat-` branches, then open a pull request to merge them into the `main` branch.
+
+This way, we can work on multiple features at the same time without breaking the main app. We also have rules that require at least one other person to review code changes before they get merged.
+
+### **Automation (GitHub Actions)**
+
+We have a workflow that automatically builds and tests the app every time someone wants to merge code into the main branch. The tests have to pass before GitHub will let the code get merged. This prevents broken code from reaching users. You can see the workflow in the `.github/workflows/android.yml` file.
+
+---
 
 
 ## Project Structure
@@ -406,143 +541,9 @@ This screen contains **one interactive card view**:
 
 These settings help ensure the application is tailored to the user’s personal style.
 
-## Design Choices and How We Use GitHub
-
-### **How the App is Built**
-
-**App Structure (MVVM)**
-The app uses a simple pattern where each screen has three parts: what you see (the UI), what manages the data (ViewModel), and where the data comes from (Repository). This makes it easier to test and change things later without breaking everything else.
-
-The flow looks like this: Screen → ViewModel → Repository → Database/Firebase
-
-**Data Storage**
-We use two places to store data. The main storage is a local database on your phone (Room), which means the app works even without internet. We also backup everything to Firebase in the cloud, so you don't lose your data if something happens to your phone.
-
-The database is set up so each user has their own expenses, categories, and goals. Categories connect to expenses, so you can see how much you spend in each area.
-
-### **Design Choices**
-
-**Look and Feel**
-The app follows Google's Material Design, which means it looks familiar and works well with other Android apps. It supports both light and dark themes, and we made sure buttons and text are big enough for everyone to use easily.
-
-**Getting Around**
-The main sections (like Dashboard, Expenses, Goals) are easy to reach. The profile and settings are in a side menu that slides out. This keeps the main screen clean while still giving you quick access to everything.
-
-**Profile Pictures**
-When you add a profile picture, we don't store the actual image in the database (that would make it slow). Instead, we save where the image is stored on your phone and use a library called Glide to load it quickly. If something goes wrong, it just shows a default picture.
-
-### **Keeping Your Data Safe**
-
-**Local First, Cloud Backup**
-Your data lives on your phone first, so the app is always fast. Everything gets backed up to Firebase automatically when you have internet. This means you can use the app on the subway, and it will sync when you get back online.
-
-**Security**
-We only ask for the minimum information we need. Your data is encrypted and we use Firebase's built-in security. For profile pictures, we use Android's secure file system so other apps can't access them.
-
----
-
-## 🐙 **How We Use GitHub**
-
-### **Project Organization**
-The code is organized in a clear folder structure. The main app code lives in the `app` folder, while GitHub Actions (our automation) goes in `.github/workflows`. We also have folders for documentation and build scripts. The `cloudflare-worker.js` file contains a script for generating the AI suggestions for the app.
-
-### **Working with Code Changes**
-We use different branches for different purposes. The `main` branch has the live app code that users see. We work on new features in separate `feat-` branches, then open a pull request to merge them into the `main` branch.
-
-This way, we can work on multiple features at the same time without breaking the main app. We also have rules that require at least one other person to review code changes before they get merged.
-
-### **Automation (GitHub Actions)**
-
-We have a workflow that automatically builds and tests the app every time someone wants to merge code into the main branch. The tests have to pass before GitHub will let the code get merged. This prevents broken code from reaching users. You can see the workflow in the `.github/workflows/android.yml` file.
-
----
-
 
 ## License
 
 This project is licensed under the terms of the [LICENSE](LICENSE) file included in the repository.
-
---- 
-
-# Part 3
-
-# New Features
-
-When it came to integrating new features into our app we had to make some changes from the features initially outlined in our design document. We decided to stick with **real-time dynamic analytics**, but altered how we went about providing this, deciding to implement **personalized AI insights** onto the dashboard where users can easily receive financial advice personalized to their spending habits. Additionally we also implemented an **expense trends graph** where users can easily view and analyze their daily expenses. We also decided to make changes to our rewards feature outlined in the design document, deciding to instead implement a **user** **level and achievement system** feature for each user which provides a much needed gamification element to the app. Finally, we implemented **dark mode**, an additional feature not included in our design document, which allows users to choose between light and dark themes based on their personal preference.
-
-## **AI Spending Insights**
-
----
-
-With **AI Spending Insights**, your finances drastically improve. This feature uses AI to analyze your spending habits, detect trends, and highlight unusual spikes, all to give you easy-to-understand, personalized advice that feels like it came from a financial coach.
-
-**Why It's Useful**
-
-* **Smarter recommendations, less effort**  
-  You’ll get helpful, specific suggestions based on *your* habits. Providing a personalised experience. 
-
-* **Feels like a financial coach**  
-  Insights are personalized and human, not robotic. You’re nudged, not nagged.
-
-* **Builds trust with transparency**  
-  When users see the app recognizing real patterns in their behavior and offering real value, it builds confidence and loyalty.
-
-* **Clear, not cluttered**  
-  No more digging through graphs or charts. You get straightforward advice in natural language, so you always know where you stand.
-
-# **Expense Trends**
-
----
-
-**Visualize your spending at a glance.**  
-Our new **Expense Trends** graph helps users to stay on top of their daily spending by turning raw data into easy-to-read visuals. With just a glance, you can see how your expenses change day to day, track your habits, and spot unusual spikes.
-
-**Why It's Useful** 
-
-* **Patterns made simple**  
-  Instead of scrolling through endless lists, users can quickly identify trends in their spending.
-
-* **Better decisions, faster**  
-  Seeing your habits visually helps you understand where your money goes, so you can make changes with confidence 
-
-* **Stay consistent**  
-  Daily trends encourage users to keep an eye on their habits, leading to better long-term financial behavior.
-
-# **User Level and Achievements**
-
----
-
-**Finance just got a whole lot more fun.**  
-With our new **User Level and Achievements** system, every action you take, whether it’s logging an expense, setting a goal, or organizing your categories, helps you earn experience points (XP) and level up. It’s like leveling up in a game. Grow from a rookie to a master budgeter\!
-
-**Why It's Useful**
-
-* **Progress with purpose**  
-  Users love seeing visible progress. That’s why we give you a level, XP bar, and unlockable achievements to keep you motivated.
-
-* **Positive feedback loop**  
-  Rewarding users with XP, gives users regular motivation to keep going.
-
-* **Discover more of the app**  
-  Achievements push users to explore things like budgeting or goal-setting they might’ve skipped.
-
-# **Dark Mode**
-
----
-
-**Comfort and customization, your way.**  
-**Dark Mode** gives users the freedom to choose between light or dark themes based on their preferences and environment.
-
-**Why It's Useful**
-
-* **Reduces eye strain**  
-  Perfect for low-light environments and night time use 
-
-* **Modern and sleek**  
-  Adds a polished, professional look that users appreciate
-
-* **User-friendly**   
-  A visually comfortable experience tailored to your viewing preference.
-
 
 
